@@ -1,6 +1,17 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
+
+const links = [
+  { title: 'Home', name: '/' },
+  { title: 'Login', name: 'login' },
+  { title: 'Shop', name: 'shop' },
+  { title: 'Inventory', name: 'inventory' },
+  { title: 'Profile', name: 'profile' },
+  { title: 'About', name: 'about' },
+]
+
+
 </script>
 
 <template>
@@ -11,12 +22,7 @@ import HelloWorld from './components/HelloWorld.vue'
       <HelloWorld msg="Neat Nest" />
 
       <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/login">Login</RouterLink>
-        <RouterLink to="/shop">Shop</RouterLink>
-        <RouterLink to="/inventory">Inventory</RouterLink>
-        <RouterLink to="/profile">Profile</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+        <RouterLink v-for="(link, i) in links" :key=link.title :to=link.name>{{link.title}}</RouterLink>
       </nav>
     </div>
   </header>
