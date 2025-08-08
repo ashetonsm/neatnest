@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <main>
-    <h3>Welcome to Neat Nest! Log in or sign up and start nesting today!</h3>
-  </main>
+    <div class="page" id="homePage">
+      <h3>Welcome to Neat Nest! Log in or sign up and start nesting today!</h3>
+    </div>
 </template>
