@@ -8,11 +8,9 @@ defineProps<{
   <div class="pet-container">
 
     <div class="pet-image">
-        <img :src="'/src/assets/testPets/' + pet.image + '.jpg'">
+        <img :src="'/src/assets/testPets/' + pet.image + '.jpg'" :alt="'an image of ' + pet.name"/>
         <!-- <img src="@/assets/testPets/1.jpg"> -->
          <!-- For some reason, we can't use a "@" alias here for our string literal -->
-        {{ "an image of " + pet.name }}
-    </img>
 </div>
 
     <div class="pet-info">
