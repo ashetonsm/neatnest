@@ -29,3 +29,6 @@ coverage
 
 *.tsbuildinfo
 /src/assets/testPets
+/src/assets/testItems
+/src/components/testMethods
+
