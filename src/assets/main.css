@@ -15,58 +15,118 @@ a,
   padding: 3px;
 }
 
+
 @media (hover: hover) {
   a:hover {
     background-color: hsla(160, 100%, 37%, 0.2);
   }
 }
 
+body {
+  display: flex;
+  place-items: center;
+}
+
+h1 {
+  font-weight: 500;
+  font-size: 2.6rem;
+}
+
+h3 {
+  font-size: 1.2rem;
+}
+
+.greetings h1,
+.greetings h3 {
+  text-align: center;
+}
+
+#inventoryPage {
+  display: flex;
+  flex-direction: row;
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  align-content: space-between;
+  border: 2px solid rgb(96 139 168);
+  margin: 1em;
+  background-color: rgb(96 139 168 / 0.2);
+
+}
+
+.box div {
+  height: auto;
+  text-align: center;
+}
+
+header {
+  align-self: stretch;
+  display: flex;
+}
+
+.pet-image img {
+  max-width: 250px;
+}
+
+.item-image {
+  object-fit: cover;
+  width: 150px;
+  height: 150px;
+}
+
+.logo {
+  max-width: 50px;
+}
+
+nav {
+  width: 100%;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+nav a.router-link-exact-active {
+  color: var(--color-text);
+}
+
+nav a.router-link-exact-active:hover {
+  background-color: transparent;
+}
+
+nav a {
+  display: inline-block;
+  padding: 0 1rem;
+  border-left: 1px solid var(--color-border);
+}
+
+nav a:first-of-type {
+  border: 0;
+}
+
+.item-container {
+  cursor: pointer;
+}
+
 @media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
+
+  nav {
+    font-size: 1rem;
+    padding: 1rem 0;
+    margin-top: 1rem;
   }
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
+}
 
-  h1 {
-    font-weight: 500;
-    font-size: 2.6rem;
-    position: relative;
-    top: -10px;
-  }
-
-  h3 {
-    font-size: 1.2rem;
-  }
-
-  .greetings h1,
-  .greetings h3 {
-    text-align: center;
-  }
-
-  @media (min-width: 1024px) {
-
-    .greetings h1,
-    .greetings h3 {
-      text-align: left;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .page {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-    }
-  }
-
+@media (max-width: 1023px) {
   .pet-image img {
-    max-width: 250px;
+    max-width: 50vw;
   }
 
+  .item-image {
+    object-fit: cover;
+    max-width: 25vw;
+    max-height: 25vw;
+  }
 }
