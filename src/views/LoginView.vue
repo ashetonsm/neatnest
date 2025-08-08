@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import Login from '@/components/Login.vue';
+
 </script>
 
 <template>
   <div class="page" id="loginPage">
-    <h1>This is a login page</h1>
+    <Login/>
   </div>
 </template>
