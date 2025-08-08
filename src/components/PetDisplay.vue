@@ -17,6 +17,7 @@ const pets = [
     <h1>No pets found</h1>
   </template>
   <template v-else>
+    <h1>Your pets</h1>
     <Pet v-for="(pet, i) in pets" :key=pet.name :pet=pet />
   </template>
 </template>
