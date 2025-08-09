@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import ItemDisplay from '@/components/ItemDisplay.vue';
+import InventoryDisplay from '@/components/InventoryDisplay.vue';
 
 </script>
 
 <template>
   <h1>Your Inventory</h1>
   <div class="page" id="inventoryPage">
-    <ItemDisplay/>
+    <InventoryDisplay/>
   </div>
 </template>
