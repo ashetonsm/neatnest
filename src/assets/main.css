@@ -41,7 +41,7 @@ h3 {
   text-align: center;
 }
 
-#inventoryPage {
+#inventoryPage, #shopPage {
   display: flex;
   flex-direction: row;
 }
