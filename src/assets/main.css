@@ -2,7 +2,7 @@
 
 #app {
   max-width: 1280px;
-  margin: 0 auto;
+  margin: auto;
   padding: 2rem;
   font-weight: normal;
 }
@@ -41,9 +41,13 @@ h3 {
   text-align: center;
 }
 
-#inventoryPage, #shopPage {
+#inventoryPage,
+#shopPage,
+#petsPage {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
+  width: inherit;
 }
 
 .box {
@@ -53,7 +57,6 @@ h3 {
   border: 2px solid rgb(96 139 168);
   margin: 1em;
   background-color: rgb(96 139 168 / 0.2);
-
 }
 
 .box div {
@@ -67,7 +70,9 @@ header {
 }
 
 .pet-image img {
+  object-fit: cover;
   max-width: 250px;
+  max-height: 250px;
 }
 
 .item-image {
@@ -105,7 +110,8 @@ nav a:first-of-type {
   border: 0;
 }
 
-.item-container {
+.item-image,
+.pet-image {
   cursor: pointer;
 }
 
@@ -121,12 +127,37 @@ nav a:first-of-type {
 
 @media (max-width: 1023px) {
   .pet-image img {
+    object-fit: cover;
+    min-width: 200px;
+    min-height: 200px;
     max-width: 50vw;
+    max-height: 50vw;
   }
 
   .item-image {
     object-fit: cover;
+    min-width: 100px;
+    min-height: 100px;
     max-width: 25vw;
     max-height: 25vw;
+  }
+
+  #inventoryPage,
+  #shopPage,
+  #petsPage {
+    border: 2px dotted rgb(96 139 168);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: inherit;
+  }
+
+  .box {
+    margin: 0.1em;
+    width: min-content;
+  }
+
+  .box>* {
+    align-self: stretch;
   }
 }
