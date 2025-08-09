@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { testPets } from '@/assets/testData/petObjectList';
 import Pet from './Pet.vue'
+import type { PetType } from '@/assets/PetExports';
 
-const pets = [
-  { name: 'samia', hunger: 'full', mood: 'content', image: '1' },
-  { name: 'brae', hunger: 'starving', mood: 'happy', image: '2' }
-]
+var pets = testPets.filter(function (pet: PetType) {
+  return pet.owner == 'nnneato'
+});
 
 </script>
 
@@ -17,7 +18,6 @@ const pets = [
     <h1>No pets found</h1>
   </template>
   <template v-else>
-    <h1>Your pets</h1>
     <Pet v-for="(pet, i) in pets" :key=pet.name :pet=pet />
   </template>
 </template>
