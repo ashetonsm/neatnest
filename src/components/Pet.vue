@@ -1,25 +1,35 @@
 <script setup lang="ts">
 import type { PetType } from '@/assets/PetExports';
+import Modal from './Modal.vue'
+import { ref } from 'vue'
+
+const open = ref(false)
 
 defineProps<{
   pet: PetType
 }>()
 
-function openModal(i : PetType) {
-  return console.log("clicked " + i.name)
-}
+const toggleModal = (n:boolean) => {
+  console.log('Modal toggled');
+  open.value = n
+  console.log(open)
+  return open
+};
+
 
 </script>
 
 <template>
-  <div class="pet-container box">
 
+<div v-if="open == true">
+  <Modal :pet="pet" @open="toggleModal(false)"/>
+</div>
+
+  <div class="pet-container box">
     <div class="pet-image">
         <img :src="'/src/assets/testPets/' + pet.image + '.jpg'" 
         :alt="'an image of ' + pet.name"
-        @click="openModal(pet)"/>
-        <!-- <img src="@/assets/testPets/1.jpg"> -->
-         <!-- For some reason, we can't use a "@" alias here for our string literal -->
+        @click="toggleModal(true)"/>
 </div>
 
     <div class="pet-info">
