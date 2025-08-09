@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import ShopDisplay from '@/components/ShopDisplay.vue';
+
 </script>
 
 <template>
+  <h1>General Store</h1>
   <div class="page" id="shopPage">
-    <h1>This is a shop page</h1>
+    <ShopDisplay/>
   </div>
 </template>
