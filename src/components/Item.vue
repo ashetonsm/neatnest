@@ -5,8 +5,24 @@ defineProps<{
   item: ItemType
 }>()
 
-function log(i : string) {
-  return console.log("clicked " + i)
+function buyFlow(i : ItemType) {
+  const choice = confirm('Buy ' + i.name + ' for ' + i.price + '?')
+  if (choice) {
+    // Do buy logic, remove item from available and add to player's inventory.
+    return console.log(choice)
+  } else {
+    return console.log(choice)
+  }
+}
+
+function useFlow(i : ItemType) {
+  const choice = confirm('Use ' + i.name + '?')
+  if (choice) {
+    // Do use logic
+    return console.log(choice)
+  } else {
+    return console.log(choice)
+  }
 }
 </script>
 
@@ -15,7 +31,7 @@ function log(i : string) {
     <div class="item-info">
         <img :src="'/src/assets/testItems/' + item.image + '.jpg'" 
         :alt="'an image of ' + item.name" class="item-image"
-        @click="log(item.name)"/>
+        @click="item.owner == '' ? buyFlow(item) : useFlow(item)"/>
 
         <h2 class="green">{{ item.name }}</h2>
         <h2>Price:</h2>
