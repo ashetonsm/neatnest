@@ -26,10 +26,13 @@ const entertainmentOptions = ref([
 
 </script>
 <template>
-  
+  <Teleport to="body">
   <div class="modal">
     <button class="closeButton" @click="emit('open', false)">Cancel</button>
+    <div class="info">
       <h1>What would you like to do with {{ pet.name }}?</h1>
+    </div>
+    <div class="select-input-container">
       <h2>Feed</h2>
       <select v-model="food">
         <option disabled value="">Please select one</option>
@@ -38,8 +41,9 @@ const entertainmentOptions = ref([
         </option>
       </select>
       <button @click="emit('open', false)">Do it!</button>
+    </div>
 
-
+    <div class="select-input-container">
       <h2>Entertain</h2>
       <select v-model="entertainment">
         <option disabled value="">Please select one</option>
@@ -47,8 +51,10 @@ const entertainmentOptions = ref([
           {{ entertainment.text }}
         </option>
       </select>
+    </div>
 
     <button @click="emit('open', false)">Do it!</button>
     </div>
   <div id="modal-block" @scroll.prevent @touchmove.prevent @wheel.prevent>You can't click on anything else</div>
+  </Teleport>
 </template>
