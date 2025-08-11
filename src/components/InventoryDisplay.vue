@@ -11,14 +11,19 @@ var items = testItems.filter(function (item: ItemType) {
 </script>
 
 <template>
-
-  <template v-if="!items">
-    <h1>Loading!</h1>
-  </template>
-  <template v-else-if="!items.length">
-    <h1>Your inventory is empty</h1>
-  </template>
-  <template v-else>
-    <Item v-for="(item, i) in items" :key=item.name :item=item />
-  </template>
+    <div class="page-header">
+      <h1>Your Inventory</h1>
+      <p>This is where you view your inventory.</p>
+    </div>
+  <div class="page" id="inventoryPage">
+    <template v-if="!items">
+      <h1>Loading!</h1>
+    </template>
+    <template v-else-if="!items.length">
+      <h1>Your inventory is empty</h1>
+    </template>
+    <template v-else>
+      <Item v-for="(item, i) in items" :key=item.name :item=item />
+    </template>
+  </div>
 </template>
