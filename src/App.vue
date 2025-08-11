@@ -4,12 +4,13 @@ import Header from './components/Header.vue';
 
 const links = [
   { title: 'Home', name: '/' },
-  { title: 'Login', name: 'login' },
-  { title: 'Shop', name: 'shop' },
-  { title: 'Inventory', name: 'inventory' },
-  { title: 'Profile', name: 'profile' },
-  { title: 'Pets', name: 'pets' },
-  { title: 'About', name: 'about' },
+  { title: 'Login', name: '/login' },
+  { title: 'Shop 1', name: '/shop/1' },
+  { title: 'Shop 2', name: '/shop/2' },
+  { title: 'Inventory', name: '/inventory' },
+  { title: 'Profile', name: '/profile' },
+  { title: 'Pets', name: '/pets' },
+  { title: 'About', name: '/about' },
 ]
 
 
@@ -29,6 +30,6 @@ const links = [
   </header>
 
   <main>
-    <RouterView />
+    <RouterView :key="$route.fullPath"/>
   </main>
 </template>
