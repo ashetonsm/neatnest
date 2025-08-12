@@ -32,3 +32,10 @@ coverage
 /src/assets/testItems
 /src/components/testMethods
 
+
+
+# amplify
+node_modules
+.amplify
+amplify_outputs*
+amplifyconfiguration*
