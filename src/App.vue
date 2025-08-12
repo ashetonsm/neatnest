@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import Header from './components/Header.vue';
+import { Authenticator } from '@aws-amplify/ui-vue';
+import "@aws-amplify/ui-vue/styles.css";
+import { Amplify } from 'aws-amplify';
+import amplifyconfiguration from './amplifyconfiguration.json'
+
+Amplify.configure(amplifyconfiguration)
 
 const links = [
   { title: 'Home', name: '/' },
@@ -30,6 +36,8 @@ const links = [
   </header>
 
   <main>
-    <RouterView :key="$route.fullPath"/>
+    <Authenticator>
+      <RouterView :key="$route.fullPath"/>
+    </Authenticator>
   </main>
 </template>
