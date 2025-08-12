@@ -89,6 +89,40 @@
       "service": "Lambda"
     }
   },
+  "parameters": {
+    "AMPLIFY_function_neatnestLambda_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "neatnestLambda"
+        }
+      ]
+    },
+    "AMPLIFY_function_neatnestLambda_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "neatnestLambda"
+        }
+      ]
+    },
+    "AMPLIFY_function_neatnestPetsLambda_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "neatnestPetsLambda"
+        }
+      ]
+    },
+    "AMPLIFY_function_neatnestPetsLambda_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "neatnestPetsLambda"
+        }
+      ]
+    }
+  },
   "storage": {
     "items": {
       "providerPlugin": "awscloudformation",
