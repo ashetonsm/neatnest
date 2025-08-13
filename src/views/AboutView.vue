@@ -1,6 +1,10 @@
+<script setup lang="ts">
+import TodoList from '@/components/TodoList.vue';
+</script>
+
 <template>
   <div class="page" id="aboutPage">
-    <h1>This is an about page</h1>
+    <TodoList/>
   </div>
 </template>
 
