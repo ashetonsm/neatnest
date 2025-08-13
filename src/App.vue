@@ -23,19 +23,21 @@ const links = [
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <Header msg="Neat Nest" />
-
+  <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <Authenticator>
+    <template v-slot="{user, signOut}">
+      <header>
+        <div class="wrapper">
+        <Header :user=user.username />
       <Navigation/>
     </div>
   </header>
 
-  <main>
-    <Authenticator>
-      <RouterView :key="$route.fullPath"/>
-    </Authenticator>
-  </main>
+      
+      <main>
+        <RouterView :key="$route.fullPath"/>
+        <button @click="signOut">Sign Out</button>
+      </main>
+    </template>
+  </Authenticator>
 </template>

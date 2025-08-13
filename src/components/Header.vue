@@ -1,19 +1,14 @@
 <script setup lang="ts">
-import { useAuthStore } from '@/stores/auth.store';
-
-
-const auth = useAuthStore();
-const user = auth.user
 
 </script>
 
 <template>
   <div class="greetings">
     <h1 class="green">
-      <span v-if="auth.user">
-        Hello, {{ auth.user.username }}
+      <span v-if="user">
+        Hello, {{ user }}
       </span>
-      <span v-else="!auth.user">
+      <span v-else="!user">
         Hello!
       </span>
     </h1>

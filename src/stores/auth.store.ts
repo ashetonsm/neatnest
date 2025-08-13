@@ -4,33 +4,48 @@ import { defineStore } from "pinia";
 export const useAuthStore = defineStore('authStore', {
     state: (): State => ({
         user: null,
-        accessToken: undefined,
-        idToken: undefined
+        username: null,
+        session: {},
     }),
     getters: {
         getUser(): null | AuthUser {
             return this.user
+        },
+        getUsername(): null | String {
+            return this.user.username
+        },
+        getSession(): {} | { accessToken, idToken } {
+            return this.session
         }
     },
     actions: {
-        async currentUser() {
-            this.user = await getCurrentUser();
-            return console.log(this.user)
+        async setUser() {
+            try {
+                const { username, userId, signInDetails } = await getCurrentUser();
+                this.user = { username, userId, signInDetails }
+            } catch (err) {
+                console.log(err);
+            }
         },
-        async currentSession() {
+        async setSession() {
             try {
                 const { accessToken, idToken } = (await fetchAuthSession()).tokens ?? {};
                 console.log('accessToken: ' + accessToken)
                 console.log('idToken: ' + idToken)
+                this.session = { accessToken, idToken }
             } catch (err) {
                 console.log(err);
             }
         },
         async signOut() {
-            await signOut();
-            this.user = null;
-            console.log('Signed out')
-
+            try {
+                await signOut();
+                this.user = null;
+                this.session = {};
+                console.log('Signed out')
+            } catch (err) {
+                console.log(err);
+            }
         }
 
     }
@@ -38,6 +53,6 @@ export const useAuthStore = defineStore('authStore', {
 
 type State = {
   user: null | AuthUser,
-  accessToken: JWT | undefined,
-  idToken: JWT | undefined
+  username: null | String,
+  session: {} | { accessToken, idToken },
 }
