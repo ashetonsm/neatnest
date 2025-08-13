@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterView } from 'vue-router'
 import Header from './components/Header.vue';
 import { Authenticator } from '@aws-amplify/ui-vue';
 import "@aws-amplify/ui-vue/styles.css";
 import { Amplify } from 'aws-amplify';
 import amplifyconfiguration from './amplifyconfiguration.json'
+import Navigation from './components/Navigation.vue';
 
 Amplify.configure(amplifyconfiguration)
 
@@ -19,7 +20,6 @@ const links = [
   { title: 'About', name: '/about' },
 ]
 
-
 </script>
 
 <template>
@@ -29,9 +29,7 @@ const links = [
     <div class="wrapper">
       <Header msg="Neat Nest" />
 
-      <nav>
-        <RouterLink v-for="(link, i) in links" :key=link.title :to=link.name>{{link.title}}</RouterLink>
-      </nav>
+      <Navigation/>
     </div>
   </header>
 
