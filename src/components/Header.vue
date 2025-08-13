@@ -1,5 +1,7 @@
 <script setup lang="ts">
-
+defineProps<{
+  user: String
+}>()
 </script>
 
 <template>
