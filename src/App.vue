@@ -4,10 +4,7 @@ import Header from './components/Header.vue';
 import { Authenticator } from '@aws-amplify/ui-vue';
 import "@aws-amplify/ui-vue/styles.css";
 import { Amplify } from 'aws-amplify';
-import amplifyconfiguration from './amplifyconfiguration.json'
 import Navigation from './components/Navigation.vue';
-
-Amplify.configure(amplifyconfiguration)
 
 const links = [
   { title: 'Home', name: '/' },
@@ -24,7 +21,9 @@ const links = [
 
 <template>
   <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-  <Authenticator>
+          <RouterView :key="$route.fullPath"/>
+
+  <!-- <Authenticator>
     <template v-slot="{user, signOut}">
       <header>
         <div class="wrapper">
@@ -39,5 +38,5 @@ const links = [
         <button @click="signOut">Sign Out</button>
       </main>
     </template>
-  </Authenticator>
+  </Authenticator> -->
 </template>
