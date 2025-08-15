@@ -2,11 +2,14 @@
 import type { PetType } from '@/assets/PetExports';
 import Modal from './Modal.vue'
 import { ref } from 'vue'
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '../../amplify/data/resource';
 
+const client = generateClient<Schema>() // use this Data client for CRUDL requests
 const open = ref(false)
 
 defineProps<{
-  pet: PetType
+  pet: Schema['Pet']['type']
 }>()
 
 const toggleModal = (n:boolean) => {

@@ -1,11 +1,24 @@
 <script setup lang="ts">
-import { testPets } from '@/assets/testData/petObjectList';
 import Pet from './Pet.vue'
-import type { PetType } from '@/assets/PetExports';
+import { onMounted, ref } from 'vue';
+import type { Schema } from '../../amplify/data/resource';
+import { generateClient } from 'aws-amplify/api';
 
-var pets = testPets.filter(function (pet: PetType) {
-  return pet.owner == 'nnneato'
-});
+const client = generateClient<Schema>()
+
+const fetchedPets = ref<Array<Schema['Item']['type']>>([]);
+
+async function fetchPets() {
+  const { data: pets, errors } = await client.models.Pet.list(  
+  {
+    authMode: 'userPool',
+  });
+  fetchedPets.value = pets
+}
+
+onMounted(() => {
+  fetchPets()
+})
 
 </script>
 
@@ -15,14 +28,14 @@ var pets = testPets.filter(function (pet: PetType) {
       <p>This is where you view your pets.</p>
   </div>
   <div class="page" id="petsPage">
-    <template v-if="!pets">
+    <template v-if="!fetchedPets">
       <h1>Loading!</h1>
     </template>
-    <template v-else-if="!pets.length">
+    <template v-else-if="!fetchedPets.length">
       <h1>No pets found</h1>
     </template>
     <template v-else>
-      <Pet v-for="(pet, i) in pets" :key=pet.name :pet=pet />
+      <Pet v-for="(pet, i) in fetchedPets" :key="pet.name ?? i" :pet=pet />
     </template>
   </div>
 
