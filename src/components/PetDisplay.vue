@@ -6,14 +6,23 @@ import { generateClient } from 'aws-amplify/api';
 
 const client = generateClient<Schema>()
 
-const fetchedPets = ref<Array<Schema['Item']['type']>>([]);
+const fetchedPets = ref<Array<Schema['Pet']['type']>>([]);
 
 async function fetchPets() {
-  const { data: pets, errors } = await client.models.Pet.list(  
-  {
-    authMode: 'userPool',
-  });
-  fetchedPets.value = pets
+  const cachedPets = localStorage.getItem('pets')
+  if (cachedPets) {
+    console.log("Cached pets found.")
+    fetchedPets.value = JSON.parse(cachedPets)
+  } else {
+    console.log("No cached pets found, querying database.")
+    const { data: pets, errors } = await client.models.Pet.list(
+      {
+        filter: { owner: { eq: 'nnneato' } },
+        authMode: 'userPool',
+      });
+    localStorage.setItem('pets', JSON.stringify(pets))
+    fetchedPets.value = pets
+  }
 }
 
 onMounted(() => {

@@ -16,12 +16,21 @@ const client = generateClient<Schema>()
 // create a reactive reference to Item[]
 const fetchedItems = ref<Array<Schema['Item']['type']>>([]);
 
-async function fetchItems() {
-  const { data: items, errors } = await client.models.Item.list(  
-  {
-    authMode: 'userPool',
-  });
-  fetchedItems.value = items
+async function fetchItems() { 
+  const cachedItems = localStorage.getItem(shopFrontName + ' Items')
+  if (cachedItems) {
+    console.log("Cached shop items found.")
+    fetchedItems.value = JSON.parse(cachedItems)
+  } else {
+    console.log("No cached shop items found, querying database.")
+    const { data: items, errors } = await client.models.Item.list(
+      {
+        filter: { shopfront: { eq: shopFrontName } },
+        authMode: 'userPool',
+      });
+    localStorage.setItem(shopFrontName + ' Items', JSON.stringify(items))
+    fetchedItems.value = items
+  }
 }
 
 onMounted(() => {
