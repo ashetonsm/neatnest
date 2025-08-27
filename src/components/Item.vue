@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import type { ItemType } from '@/assets/ItemExports';
+// import type { ItemType } from '@/assets/ItemExports';
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '../../amplify/data/resource';
+
+const client = generateClient<Schema>() // use this Data client for CRUDL requests
 
 defineProps<{
-  item: ItemType
+  item: Schema['Item']['type']
 }>()
 
-function buyFlow(i : ItemType) {
+function buyFlow(i : Schema['Item']['type']) {
   const choice = confirm('Buy ' + i.name + ' for ' + i.price + '?')
   if (choice) {
     // Do buy logic, remove item from available and add to player's inventory.
@@ -15,7 +19,7 @@ function buyFlow(i : ItemType) {
   }
 }
 
-function useFlow(i : ItemType) {
+function useFlow(i : Schema['Item']['type']) {
   const choice = confirm('Use ' + i.name + '?')
   if (choice) {
     // Do use logic

@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import HomeDisplay from '@/components/HomeDisplay.vue';
+
 </script>
 
 <template>
-    <div class="page" id="homePage">
-      <h3>Welcome to Neat Nest! Log in or sign up and start nesting today!</h3>
-    </div>
+  <HomeDisplay/>
 </template>

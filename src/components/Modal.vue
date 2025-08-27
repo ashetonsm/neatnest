@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { PetType } from '@/assets/PetExports';
+import type { Schema } from '../../amplify/data/resource';
 import { ref } from 'vue';
 
 defineProps<{
-  pet: PetType
+  pet: Schema['Pet']['type']
 }>()
 
 const emit = defineEmits<{
