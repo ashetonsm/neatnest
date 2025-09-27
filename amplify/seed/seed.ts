@@ -35,7 +35,7 @@ const response = await dataClient.models.Item.create(
     image: 'rubberduck'
   },
   {
-    authMode: "userPool",
+    authMode: "identityPool",
   }
 );
 
@@ -45,12 +45,12 @@ const response2 = await dataClient.models.Pet.create(
     species: 'Human',
     hunger: 0,
     mood: 1,
-    owner: 'nnneato', 
+    owner: '7fields3@gmail.com', 
     health: 100, 
     image: '4'
   },
   {
-    authMode: "userPool",
+    authMode: "identityPool",
   }
 );
 

@@ -26,7 +26,7 @@ async function fetchItems() {
     const { data: items, errors } = await client.models.Item.list(
       {
         filter: { shopfront: { eq: shopFrontName } },
-        authMode: 'userPool',
+        authMode: 'identityPool',
       });
     localStorage.setItem(shopFrontName + ' Items', JSON.stringify(items))
     fetchedItems.value = items
