@@ -11,6 +11,17 @@ const schema = a.schema({
       rarity: a.integer(),
       image: a.string()
     })
+    .secondaryIndexes((index) => [
+      index("name")
+        .sortKeys(["health", "owner", "price", "rarity", "shopfront"])
+        .queryField("listByName"),
+      index("owner")
+        .sortKeys(["health", "name", "price", "rarity", "shopfront"])
+        .queryField("listByOwner"),
+      index("shopfront")
+        .sortKeys(["health", "name", "price", "rarity", "owner"])
+        .queryField("listByShopfront")
+    ])
     .authorization((allow) => [
       // Guests are read only
       allow.guest().to(['read']),
@@ -31,6 +42,14 @@ const schema = a.schema({
       health: a.integer(),
       image: a.string()
     })
+    .secondaryIndexes((index) => [
+      index("owner")
+        .sortKeys(["health", "hunger", "mood", "name", "species"])
+        .queryField("listByOwner"),
+      index("name")
+        .sortKeys(["health", "hunger", "mood", "owner", "species"])
+        .queryField("listByName")
+    ])
     .authorization((allow) => [
       // Guests are read only
       allow.guest().to(['read']),
@@ -44,9 +63,18 @@ const schema = a.schema({
   User: a
     .model({
       username: a.string(),
+      userId: a.string(),
       itemsRemaining: a.integer(),
       petsRemaining: a.integer()
     })
+    .secondaryIndexes((index) => [
+      index("username")
+        .sortKeys(["itemsRemaining", "petsRemaining", "userId"])
+        .queryField("listByUsername"),
+      index("userId")
+        .sortKeys(["itemsRemaining", "petsRemaining", "username"])
+        .queryField("listByUserId")
+    ])
     .authorization((allow) => [
       // Guests are read only
       allow.guest().to(['read']),
