@@ -3,6 +3,7 @@ import Pet from './Pet.vue'
 import { onMounted, ref } from 'vue';
 import type { Schema } from '../../amplify/data/resource';
 import { generateClient } from 'aws-amplify/api';
+import { getCurrentUser } from 'aws-amplify/auth';
 
 const client = generateClient<Schema>()
 
@@ -15,10 +16,12 @@ async function fetchPets() {
     fetchedPets.value = JSON.parse(cachedPets)
   } else {
     console.log("No cached pets found, querying database.")
+    const {signInDetails } = await getCurrentUser()
+
     const { data: pets, errors } = await client.models.Pet.list(
       {
-        filter: { owner: { eq: 'nnneato' } },
-        authMode: 'userPool',
+        filter: { owner: { eq: signInDetails?.loginId } },
+        authMode: 'identityPool',
       });
     localStorage.setItem('pets', JSON.stringify(pets))
     fetchedPets.value = pets
