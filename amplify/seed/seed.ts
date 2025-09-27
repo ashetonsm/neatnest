@@ -25,11 +25,12 @@ await signInUser({
   signInFlow: "Password",
 });
 
-const response = await dataClient.models.Item.create(
+const item0 = await dataClient.models.Item.create(
   {
     name: 'Rubber Duck', 
     price: 5, 
     shopfront: 'Test Emporium',
+    owner: '',
     health: 100, 
     rarity: 0, 
     image: 'rubberduck'
@@ -39,15 +40,60 @@ const response = await dataClient.models.Item.create(
   }
 );
 
-const response2 = await dataClient.models.Pet.create(
+const item1 = await dataClient.models.Item.create(
   {
-    name: 'N', 
+    name: 'Soccer Ball', 
+    price: 5, 
+    shopfront: 'Test Shack',
+    owner: '',
+    health: 100, 
+    rarity: 0, 
+    image: 'soccerball'
+  },
+  {
+    authMode: "identityPool",
+  }
+);
+
+const item2 = await dataClient.models.Item.create(
+  {
+    name: 'Cake', 
+    price: 777, 
+    shopfront: 'Test Emporium',
+    owner: '7fields3@gmail.com',
+    health: 50, 
+    rarity: 0, 
+    image: 'cake'
+  },
+  {
+    authMode: "identityPool",
+  }
+);
+
+const pet0 = await dataClient.models.Pet.create(
+  {
+    name: 'NaturalHG', 
     species: 'Human',
     hunger: 0,
     mood: 1,
     owner: '7fields3@gmail.com', 
     health: 100, 
     image: '4'
+  },
+  {
+    authMode: "identityPool",
+  }
+);
+
+const pet1 = await dataClient.models.Pet.create(
+  {
+    name: 'Pompom', 
+    species: 'Dog',
+    hunger: 5,
+    mood: 5,
+    owner: '7fields3@gmail.com', 
+    health: 99, 
+    image: '1'
   },
   {
     authMode: "identityPool",
