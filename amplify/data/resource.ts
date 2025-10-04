@@ -14,13 +14,13 @@ const schema = a.schema({
     .secondaryIndexes((index) => [
       index("name")
         .sortKeys(["health", "owner", "price", "rarity", "shopfront"])
-        .queryField("listByName"),
+        .queryField("listItemsByName"),
       index("owner")
         .sortKeys(["health", "name", "price", "rarity", "shopfront"])
-        .queryField("listByOwner"),
+        .queryField("listItemsByOwner"),
       index("shopfront")
         .sortKeys(["health", "name", "price", "rarity", "owner"])
-        .queryField("listByShopfront")
+        .queryField("listItemsByShopfront")
     ])
     .authorization((allow) => [
       // Guests are read only
@@ -45,10 +45,10 @@ const schema = a.schema({
     .secondaryIndexes((index) => [
       index("owner")
         .sortKeys(["health", "hunger", "mood", "name", "species"])
-        .queryField("listByOwner"),
+        .queryField("listPetsByOwner"),
       index("name")
         .sortKeys(["health", "hunger", "mood", "owner", "species"])
-        .queryField("listByName")
+        .queryField("listPetsByName")
     ])
     .authorization((allow) => [
       // Guests are read only
@@ -70,10 +70,10 @@ const schema = a.schema({
     .secondaryIndexes((index) => [
       index("username")
         .sortKeys(["itemsRemaining", "petsRemaining", "userId"])
-        .queryField("listByUsername"),
+        .queryField("listUsersByUsername"),
       index("userId")
         .sortKeys(["itemsRemaining", "petsRemaining", "username"])
-        .queryField("listByUserId")
+        .queryField("listUsersByUserId")
     ])
     .authorization((allow) => [
       // Guests are read only
