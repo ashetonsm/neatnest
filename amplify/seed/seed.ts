@@ -3,13 +3,12 @@ import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/api";
 import { Schema } from "../data/resource";
 import {
-  addToUserGroup,
   createAndSignUpUser,
   getSecret,
   signInUser,
 } from "@aws-amplify/seed";
-import * as auth from "aws-amplify/auth";
-import { signUp } from "aws-amplify/auth";
+import { defineAuth } from "@aws-amplify/backend";
+import { getCurrentUser, signOut } from "aws-amplify/auth";
 
 // this is used to get the amplify_outputs.json file as the file will not exist until sandbox is created
 const url = new URL("../../amplify_outputs.json", import.meta.url);
@@ -17,14 +16,36 @@ const outputs = JSON.parse(await readFile(url, { encoding: "utf8" }));
 Amplify.configure(outputs);
 const dataClient = generateClient<Schema>();
 
-const username = await getSecret("username");
-const password = await getSecret("password");
+const un = await getSecret("username");
+const pw = await getSecret("password");
+let currentUser;
 
-
-const { nextStep } = await auth.signIn({
-  username: username,
-  password: password
+export const auth = defineAuth({
+  loginWith: {
+    email: true,
+  }
 });
+
+const user = await createAndSignUpUser({
+  username: un,
+  password: pw,
+  signInAfterCreation: true,
+  signInFlow: "Password"
+}).then(async () => {
+  const { signInDetails } = await getCurrentUser();
+  currentUser = signInDetails?.loginId
+}).catch(async (error) => {
+  console.log("User already exists. Signing in")
+  const signIn = await signInUser({
+    username: un,
+    password: pw,
+    signInFlow: "Password"
+  }).then(async () => {
+      const { signInDetails } = await getCurrentUser();
+    console.log("Signed in " + signInDetails?.loginId )
+    currentUser = signInDetails?.loginId
+  })
+})
 
 
 const item0 = await dataClient.models.Item.create(
@@ -38,7 +59,7 @@ const item0 = await dataClient.models.Item.create(
     image: 'rubberduck'
   },
   {
-    authMode: "identityPool",
+    authMode: "userPool",
   }
 );
 
@@ -53,7 +74,7 @@ const item1 = await dataClient.models.Item.create(
     image: 'soccerball'
   },
   {
-    authMode: "identityPool",
+    authMode: "userPool",
   }
 );
 
@@ -62,15 +83,17 @@ const item2 = await dataClient.models.Item.create(
     name: 'Cake', 
     price: 777, 
     shopfront: 'Test Emporium',
-    owner: username,
+    owner: currentUser,
     health: 50, 
     rarity: 0, 
     image: 'cake'
   },
   {
-    authMode: "identityPool",
+    authMode: "userPool",
   }
-);
+).then((res) => {
+  console.log(res)
+})
 
 const pet0 = await dataClient.models.Pet.create(
   {
@@ -78,14 +101,16 @@ const pet0 = await dataClient.models.Pet.create(
     species: 'Human',
     hunger: 0,
     mood: 1,
-    owner: username, 
+    owner: currentUser, 
     health: 100, 
     image: '4'
   },
   {
-    authMode: "identityPool",
+    authMode: "userPool",
   }
-);
+).then((res) => {
+  console.log(res)
+})
 
 const pet1 = await dataClient.models.Pet.create(
   {
@@ -93,13 +118,15 @@ const pet1 = await dataClient.models.Pet.create(
     species: 'Dog',
     hunger: 5,
     mood: 5,
-    owner: username, 
+    owner: currentUser, 
     health: 99, 
     image: '1'
   },
   {
-    authMode: "identityPool",
+    authMode: "userPool",
   }
-);
+).then((res) => {
+  console.log(res)
+})
 
-auth.signOut();
+signOut();

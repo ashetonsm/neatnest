@@ -26,7 +26,7 @@ const schema = a.schema({
       // Guests are read only
       allow.guest().to(['read']),
       // Authenticated users can read and write (change item values)
-      allow.authenticated('identityPool').to(['read', 'update']),
+      allow.authenticated('userPools').to(['read', 'update']),
       // Owners can read, write, and delete (change and consume items)
       allow.owner().to(['read', 'update', 'delete']),
       // Users in the admin group have full permissions
@@ -54,7 +54,7 @@ const schema = a.schema({
       // Guests are read only
       allow.guest().to(['read']),
       // Authenticated users can read and write (change item values)
-      allow.authenticated('identityPool').to(['read', 'update']),
+      allow.authenticated('userPools').to(['read', 'update']),
       // Owners can read, write, and delete (change and consume items)
       allow.owner().to(['read', 'update', 'delete']),
       // Users in the admin group have full permissions
@@ -79,7 +79,7 @@ const schema = a.schema({
       // Guests are read only
       allow.guest().to(['read']),
       // Authenticated users can read and write (change item values)
-      allow.authenticated('identityPool').to(['read', 'update']),
+      allow.authenticated('userPools').to(['read', 'update']),
       // Owners can read, write, and delete (change and consume items)
       allow.owner().to(['read', 'update', 'delete']),
       // Users in the admin group have full permissions
@@ -92,6 +92,6 @@ export type Schema = ClientSchema<typeof schema>;
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: 'identityPool',
+    defaultAuthorizationMode: 'userPool',
   },
 });
