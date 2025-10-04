@@ -9,6 +9,7 @@ import {
   signInUser,
 } from "@aws-amplify/seed";
 import * as auth from "aws-amplify/auth";
+import { signUp } from "aws-amplify/auth";
 
 // this is used to get the amplify_outputs.json file as the file will not exist until sandbox is created
 const url = new URL("../../amplify_outputs.json", import.meta.url);
@@ -19,11 +20,12 @@ const dataClient = generateClient<Schema>();
 const username = await getSecret("username");
 const password = await getSecret("password");
 
-await signInUser({
+
+const { nextStep } = await auth.signIn({
   username: username,
-  password: password,
-  signInFlow: "Password",
+  password: password
 });
+
 
 const item0 = await dataClient.models.Item.create(
   {
@@ -60,7 +62,7 @@ const item2 = await dataClient.models.Item.create(
     name: 'Cake', 
     price: 777, 
     shopfront: 'Test Emporium',
-    owner: '7fields3@gmail.com',
+    owner: username,
     health: 50, 
     rarity: 0, 
     image: 'cake'
@@ -76,7 +78,7 @@ const pet0 = await dataClient.models.Pet.create(
     species: 'Human',
     hunger: 0,
     mood: 1,
-    owner: '7fields3@gmail.com', 
+    owner: username, 
     health: 100, 
     image: '4'
   },
@@ -91,7 +93,7 @@ const pet1 = await dataClient.models.Pet.create(
     species: 'Dog',
     hunger: 5,
     mood: 5,
-    owner: '7fields3@gmail.com', 
+    owner: username, 
     health: 99, 
     image: '1'
   },
