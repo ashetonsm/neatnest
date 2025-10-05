@@ -18,11 +18,14 @@ async function fetchPets() {
     console.log("No cached pets found, querying database.")
     const {signInDetails } = await getCurrentUser()
 
-    const { data: pets, errors } = await client.models.Pet.list(
+    const { data: pets, errors } = await client.models.Pet.listPetsByOwnerAndName(
       {
-        filter: { owner: { eq: signInDetails?.loginId } },
-        authMode: 'identityPool',
-      });
+        owner: signInDetails?.loginId ?? 'undefined',
+      },
+      {
+        authMode: 'userPool',
+      }
+    );
     localStorage.setItem('pets', JSON.stringify(pets))
     fetchedPets.value = pets
   }

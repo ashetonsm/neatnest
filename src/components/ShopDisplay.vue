@@ -23,11 +23,15 @@ async function fetchItems() {
     fetchedItems.value = JSON.parse(cachedItems)
   } else {
     console.log("No cached shop items found, querying database.")
-    const { data: items, errors } = await client.models.Item.list(
+    const { data: items, errors } = await client.models.Item.listItemsByShopfrontAndOwner(
       {
-        filter: { shopfront: { eq: shopFrontName } },
-        authMode: 'identityPool',
-      });
+        shopfront: shopFrontName,
+        owner: { eq: ''},
+      },
+      {
+        authMode: 'userPool'
+      }
+    );
     localStorage.setItem(shopFrontName + ' Items', JSON.stringify(items))
     fetchedItems.value = items
   }
