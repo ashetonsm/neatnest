@@ -13,14 +13,14 @@ const schema = a.schema({
     })
     .secondaryIndexes((index) => [
       index("name")
-        .sortKeys(["health", "owner", "price", "rarity", "shopfront"])
-        .queryField("listItemsByName"),
+        .sortKeys(["owner"])
+        .queryField("listItemsByNameAndOwner"),
       index("owner")
-        .sortKeys(["health", "name", "price", "rarity", "shopfront"])
-        .queryField("listItemsByOwner"),
+        .sortKeys(["name"])
+        .queryField("listItemsByOwnerAndName"),
       index("shopfront")
-        .sortKeys(["health", "name", "price", "rarity", "owner"])
-        .queryField("listItemsByShopfront")
+        .sortKeys(["owner"])
+        .queryField("listItemsByShopfrontAndOwner")
     ])
     .authorization((allow) => [
       // Guests are read only
@@ -44,11 +44,14 @@ const schema = a.schema({
     })
     .secondaryIndexes((index) => [
       index("owner")
-        .sortKeys(["health", "hunger", "mood", "name", "species"])
-        .queryField("listPetsByOwner"),
+        .sortKeys(["name"])
+        .queryField("listPetsByOwnerAndName"),
+      index("species")
+        .sortKeys(["name"])
+        .queryField("listPetsBySpeciesAndName"),
       index("name")
-        .sortKeys(["health", "hunger", "mood", "owner", "species"])
-        .queryField("listPetsByName")
+        .sortKeys(["species"])
+        .queryField("listPetsByNameAndSpecies")
     ])
     .authorization((allow) => [
       // Guests are read only
@@ -69,11 +72,11 @@ const schema = a.schema({
     })
     .secondaryIndexes((index) => [
       index("username")
-        .sortKeys(["itemsRemaining", "petsRemaining", "userId"])
-        .queryField("listUsersByUsername"),
+        .sortKeys(["userId"])
+        .queryField("listUsersByUsernameAndUserId"),
       index("userId")
-        .sortKeys(["itemsRemaining", "petsRemaining", "username"])
-        .queryField("listUsersByUserId")
+        .sortKeys(["username"])
+        .queryField("listUsersByUserIdAndUsername")
     ])
     .authorization((allow) => [
       // Guests are read only
