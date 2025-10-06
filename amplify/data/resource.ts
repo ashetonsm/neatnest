@@ -27,8 +27,10 @@ const schema = a.schema({
       allow.guest().to(['read']),
       // Authenticated users can read and write (change item values)
       allow.authenticated('userPools').to(['read', 'update']),
-      // Owners can read, write, and delete (change and consume items)
-      allow.owner().to(['read', 'update', 'delete']),
+      // Owners can delete their items
+      allow.owner().to(['delete']),
+      // Users in the itemMaker group can create a new item
+      allow.groups(['itemMaker']).to(['create']),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
@@ -58,8 +60,10 @@ const schema = a.schema({
       allow.guest().to(['read']),
       // Authenticated users can read and write (change item values)
       allow.authenticated('userPools').to(['read', 'update']),
-      // Owners can read, write, and delete (change and consume items)
-      allow.owner().to(['read', 'update', 'delete']),
+      // Owners can delete their pets
+      allow.owner().to(['delete']),
+      // Users in the petMaker group can create a new pet
+      allow.groups(['petMaker']).to(['create']),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
@@ -84,7 +88,7 @@ const schema = a.schema({
       // Authenticated users can read and write (change item values)
       allow.authenticated('userPools').to(['read', 'update']),
       // Owners can read, write, and delete (change and consume items)
-      allow.owner().to(['read', 'update', 'delete']),
+      allow.owner().to(['update']),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),

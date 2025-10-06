@@ -53,7 +53,7 @@ const item0 = await dataClient.models.Item.create(
     name: 'Rubber Duck', 
     price: 5, 
     shopfront: 'Test Emporium',
-    owner: '',
+    owner: 'NA',
     health: 100, 
     rarity: 0, 
     image: 'rubberduck'
@@ -68,7 +68,7 @@ const item1 = await dataClient.models.Item.create(
     name: 'Soccer Ball', 
     price: 5, 
     shopfront: 'Test Shack',
-    owner: '',
+    owner: 'NA',
     health: 100, 
     rarity: 0, 
     image: 'soccerball'
@@ -78,55 +78,72 @@ const item1 = await dataClient.models.Item.create(
   }
 );
 
-const item2 = await dataClient.models.Item.create(
-  {
-    name: 'Cake', 
-    price: 777, 
-    shopfront: 'Test Emporium',
-    owner: currentUser,
-    health: 50, 
-    rarity: 0, 
-    image: 'cake'
-  },
-  {
-    authMode: "userPool",
-  }
-).then((res) => {
-  console.log(res)
-})
+// const item2 = await dataClient.models.Item.create(
+//   {
+//     name: 'Cake', 
+//     price: 777, 
+//     shopfront: 'Test Emporium',
+//     owner: currentUser,
+//     health: 50, 
+//     rarity: 0, 
+//     image: 'cake'
+//   },
+//   {
+//     authMode: "userPool",
+//   }
+// ).then((res) => {
+//   console.log(res)
+// })
 
-const pet0 = await dataClient.models.Pet.create(
-  {
-    name: 'NaturalHG', 
-    species: 'Human',
-    hunger: 0,
-    mood: 1,
-    owner: currentUser, 
-    health: 100, 
-    image: '4'
-  },
-  {
-    authMode: "userPool",
-  }
-).then((res) => {
-  console.log(res)
-})
+// const pet0 = await dataClient.models.Pet.create(
+//   {
+//     name: 'NaturalHG', 
+//     species: 'Human',
+//     hunger: 0,
+//     mood: 1,
+//     owner: currentUser, 
+//     health: 100, 
+//     image: '4'
+//   },
+//   {
+//     authMode: "userPool",
+//   }
+// ).then((res) => {
+//   console.log(res)
+// })
 
-const pet1 = await dataClient.models.Pet.create(
-  {
-    name: 'Pompom', 
-    species: 'Dog',
-    hunger: 5,
-    mood: 5,
-    owner: currentUser, 
-    health: 99, 
-    image: '1'
-  },
-  {
-    authMode: "userPool",
-  }
-).then((res) => {
-  console.log(res)
-})
+// const pet1 = await dataClient.models.Pet.create(
+//   {
+//     name: 'Pompom', 
+//     species: 'Dog',
+//     hunger: 5,
+//     mood: 5,
+//     owner: currentUser, 
+//     health: 99, 
+//     image: '1'
+//   },
+//   {
+//     authMode: "userPool",
+//   }
+// ).then((res) => {
+//   console.log(res)
+// })
+
+// const pet2 = await dataClient.models.Pet.create(
+//   {
+//     name: 'Retsuko', 
+//     species: 'Red Panda',
+//     hunger: 3,
+//     mood: 1,
+//     owner: 'ashetonsm@gmail.com', 
+//     health: 99, 
+//     image: '2'
+//   },
+//   {
+//     authMode: "userPool",
+//   }
+// ).then((res) => {
+//   console.log(res)
+// })
 
 signOut();

@@ -26,7 +26,9 @@ async function fetchItems() {
     const { data: items, errors } = await client.models.Item.listItemsByShopfrontAndOwner(
       {
         shopfront: shopFrontName,
-        owner: { eq: ''},
+        owner: {
+          eq: 'NA',
+        },
       },
       {
         authMode: 'userPool'
@@ -52,7 +54,7 @@ onMounted(() => {
     <template v-if="!fetchedItems">
       <h1>Loading!</h1>
     </template>
-    <template v-else-if="!fetchedItems.length">
+    <template v-if="!fetchedItems.length">
       <h1>This shop is sold out!</h1>
     </template>
     <template v-else>
