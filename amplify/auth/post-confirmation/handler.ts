@@ -9,19 +9,22 @@ const client = new CognitoIdentityProviderClient();
 
 // add user to group
 export const handler: PostConfirmationTriggerHandler = async (event) => {
-  const command = new AdminAddUserToGroupCommand({
+  const addItemMakerGroup = new AdminAddUserToGroupCommand({
     GroupName: env.ITEM_MAKER,
     Username: event.userName,
     UserPoolId: event.userPoolId
   });
-  const command1 = new AdminAddUserToGroupCommand({
+  const response1 = await client.send(addItemMakerGroup);
+  console.log('processed', response1.$metadata.requestId);
+
+  const addPetMakerGroup = new AdminAddUserToGroupCommand({
     GroupName: env.PET_MAKER,
     Username: event.userName,
     UserPoolId: event.userPoolId
   });
-  const response = await client.send(command);
-  const response1 = await client.send(command1);
-  console.log('processed', response.$metadata.requestId);
-  console.log('processed', response1.$metadata.requestId);
+  const response2 = await client.send(addPetMakerGroup);
+  console.log('processed', response2.$metadata.requestId);
+
+
   return event;
 };
