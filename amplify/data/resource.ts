@@ -70,7 +70,7 @@ const schema = a.schema({
   User: a
     .model({
       username: a.string(),
-      userId: a.string(),
+      userId: a.string(), // redundant, can be removed
       itemsRemaining: a.integer(),
       petsRemaining: a.integer()
     })
