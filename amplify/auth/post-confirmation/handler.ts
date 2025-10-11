@@ -4,8 +4,14 @@ import {
   AdminAddUserToGroupCommand
 } from '@aws-sdk/client-cognito-identity-provider';
 import { env } from '$amplify/env/post-confirmation';
+import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 
 const client = new CognitoIdentityProviderClient();
+
+// DynamoDB
+const ddbclient = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(ddbclient);
 
 // add user to group
 export const handler: PostConfirmationTriggerHandler = async (event) => {
@@ -23,6 +29,21 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
     UserPoolId: event.userPoolId
   });
   const response2 = await client.send(addPetMakerGroup);
+
+  // userId is redundant and can be removed.
+  const command = new PutCommand({
+    TableName: "User-s3tx5jmvlbbirewqb5lepfwf4e-NONE",
+    Item: {
+      id: event.userName,
+      username: event.request.userAttributes.email,
+      userId: event.userName,
+      itemsRemaining: 5,
+      petsRemaining: 5
+    }
+  });
+
+  const response3 = await docClient.send(command);
+
   console.log('processed', response2.$metadata.requestId);
 
 
