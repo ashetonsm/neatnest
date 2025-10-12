@@ -1,33 +1,26 @@
-# neatnest
+## AWS Amplify Vue.js Starter Template
 
-This template should help get you started developing with Vue 3 in Vite.
+This repository provides a starter template for creating applications using Vue.js and AWS Amplify, emphasizing easy setup for authentication, API, and database capabilities.
 
-## Recommended IDE Setup
+## Overview
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+This template equips you with a foundational Vue application integrated with AWS Amplify, streamlined for scalability and performance. It is ideal for developers looking to jumpstart their project with pre-configured AWS services like Cognito, AppSync, and DynamoDB.
 
-## Type Support for `.vue` Imports in TS
+## Features
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+- **Authentication**: Setup with Amazon Cognito for secure user authentication.
+- **API**: Ready-to-use GraphQL endpoint with AWS AppSync.
+- **Database**: Real-time database powered by Amazon DynamoDB.
 
-## Customize configuration
+## Deploying to AWS
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+For detailed instructions on deploying your application, refer to the [deployment section](https://docs.amplify.aws/vue/start/quickstart/#deploy-a-fullstack-app-to-aws) of our documentation.
 
-## Project Setup
 
-```sh
-npm install
-```
+## Security
 
-### Compile and Hot-Reload for Development
+See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
 
-```sh
-npm run dev
-```
+## License
 
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
+This library is licensed under the MIT-0 License. See the LICENSE file.

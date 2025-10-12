@@ -1,190 +1,65 @@
-@import './base.css';
-
-#app {
-  max-width: 1280px;
-  margin: auto;
-  padding: 2rem;
-  font-weight: normal;
-}
-
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
-}
-
-
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
 body {
-  display: flex;
-  place-items: center;
-}
-
-h1 {
-  font-weight: 500;
-  font-size: 2.6rem;
-}
-
-h3 {
-  font-size: 1.2rem;
-}
-
-.greetings h1,
-.greetings h3 {
-  text-align: center;
-}
-
-#inventoryPage,
-#shopPage,
-#petsPage {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  width: inherit;
-}
-
-.modal {
-  position: fixed;
-  z-index: 999;
-  top: 20%;
-  left: 50%;
-  width: 300px;
-  margin-left: -150px;
-}
-
-#modal-block {
-  z-index: 998;
-  background-color: black;
-  opacity: 50%;
-  position: absolute;
   margin: 0;
-  padding: 0;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
+  background: linear-gradient(180deg, rgb(117, 81, 194), rgb(255, 255, 255));
+  display: flex;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  height: 100vh;
+  width: 100vw;
+  justify-content: center;
+  align-items: center;
 }
 
-.closeButton {
-  background-color: red;
-}
-
-.box {
+main {
   display: flex;
   flex-direction: column;
-  align-content: space-between;
-  border: 2px solid rgb(96 139 168);
-  margin: 1em;
-  background-color: rgb(96 139 168 / 0.2);
+  align-items: stretch;
 }
 
-.box div {
-  height: auto;
-  text-align: center;
-}
-
-header {
-  align-self: stretch;
-  display: flex;
-}
-
-.pet-image img {
-  object-fit: cover;
-  max-width: 250px;
-  max-height: 250px;
-}
-
-.item-image {
-  object-fit: cover;
-  width: 150px;
-  height: 150px;
-}
-
-.logo {
-  max-width: 50px;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-.item-image,
-.pet-image {
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
   cursor: pointer;
+  transition: border-color 0.25s;
+  color: white;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (min-width: 1024px) {
-
-  nav {
-    font-size: 1rem;
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-
+ul {
+  padding-inline-start: 0;
+  margin-block-start: 0;
+  margin-block-end: 0;
+  list-style-type: none;
+  display: flex;
+  flex-direction: column;
+  margin: 8px 0;
+  border: 1px solid black;
+  gap: 1px;
+  background-color: black;
+  border-radius: 8px;
+  overflow: auto;
 }
 
-@media (max-width: 1023px) {
-  .pet-image img {
-    object-fit: cover;
-    min-width: 200px;
-    min-height: 200px;
-    max-width: 50vw;
-    max-height: 50vw;
-  }
+li {
+  background-color: white;
+  padding: 8px;
+}
 
-  .item-image {
-    object-fit: cover;
-    min-width: 100px;
-    min-height: 100px;
-    max-width: 25vw;
-    max-height: 25vw;
-  }
+li:hover {
+  background: #dadbf9;
+}
 
-  #inventoryPage,
-  #shopPage,
-  #petsPage {
-    border: 2px dotted rgb(96 139 168);
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    width: inherit;
-  }
-
-  .box {
-    margin: 0.1em;
-    width: min-content;
-  }
-
-  .box>* {
-    align-self: stretch;
-  }
+a {
+  font-weight: 800;
+  text-decoration: none;
 }

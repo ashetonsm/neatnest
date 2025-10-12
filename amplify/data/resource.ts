@@ -1,87 +1,17 @@
-import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
+import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
+/*== STEP 1 ===============================================================
+The section below creates a Todo database table with a "content" field. Try
+adding a new "isDone" field as a boolean. The authorization rule below
+specifies that any user authenticated via an API key can "create", "read",
+"update", and "delete" any "Todo" records.
+=========================================================================*/
 const schema = a.schema({
-  Item: a
+  Todo: a
     .model({
-      name: a.string(),
-      price: a.integer(),
-      shopfront: a.string(),
-      owner: a.string(),
-      health: a.integer(),
-      rarity: a.integer(),
-      image: a.string()
+      content: a.string(),
     })
-    .secondaryIndexes((index) => [
-      index("name")
-        .sortKeys(["owner"])
-        .queryField("listItemsByNameAndOwner"),
-      index("owner")
-        .sortKeys(["name"])
-        .queryField("listItemsByOwnerAndName"),
-      index("shopfront")
-        .sortKeys(["owner"])
-        .queryField("listItemsByShopfrontAndOwner")
-    ])
-    .authorization((allow) => [
-      // Guests are read only
-      allow.guest().to(['read']),
-      // Authenticated users can read and write (change item values)
-      allow.authenticated('userPools').to(['read', 'update', 'create']),
-      // Owners can delete their items
-      allow.owner().to(['delete']),
-      // Users in the admin group have full permissions
-      allow.groups(['admin'])
-    ]),
-  Pet: a
-    .model({
-      name: a.string(),
-      species: a.string(),
-      hunger: a.integer(),
-      mood: a.integer(),
-      owner: a.string(),
-      health: a.integer(),
-      image: a.string()
-    })
-    .secondaryIndexes((index) => [
-      index("owner")
-        .sortKeys(["name"])
-        .queryField("listPetsByOwnerAndName"),
-      index("species")
-        .sortKeys(["name"])
-        .queryField("listPetsBySpeciesAndName"),
-      index("name")
-        .sortKeys(["species"])
-        .queryField("listPetsByNameAndSpecies")
-    ])
-    .authorization((allow) => [
-      // Guests are read only
-      allow.guest().to(['read']),
-      // Authenticated users can read and write (change item values)
-      allow.authenticated('userPools').to(['read', 'update', 'create']),
-      // Owners can delete their pets
-      allow.owner().to(['delete']),
-      // Users in the admin group have full permissions
-      allow.groups(['admin'])
-    ]),
-  User: a
-    .model({
-      username: a.string(),
-      itemsRemaining: a.integer(),
-      petsRemaining: a.integer()
-    })
-    .secondaryIndexes((index) => [
-      index("username")
-    ])
-    .authorization((allow) => [
-      // Guests are read only
-      allow.guest().to(['read']),
-      // Authenticated users can read and write (change item values)
-      allow.authenticated('userPools').to(['read', 'update']),
-      // Owners can read, write, and delete (change and consume items)
-      allow.owner().to(['update']),
-      // Users in the admin group have full permissions
-      allow.groups(['admin'])
-    ]),
+    .authorization((allow) => [allow.publicApiKey()]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
@@ -89,6 +19,39 @@ export type Schema = ClientSchema<typeof schema>;
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: 'userPool',
+    defaultAuthorizationMode: "apiKey",
+    // API Key is used for a.allow.public() rules
+    apiKeyAuthorizationMode: {
+      expiresInDays: 30,
+    },
   },
 });
+
+/*== STEP 2 ===============================================================
+Go to your frontend source code. From your client-side code, generate a
+Data client to make CRUDL requests to your table. (THIS SNIPPET WILL ONLY
+WORK IN THE FRONTEND CODE FILE.)
+
+Using JavaScript or Next.js React Server Components, Middleware, Server 
+Actions or Pages Router? Review how to generate Data clients for those use
+cases: https://docs.amplify.aws/gen2/build-a-backend/data/connect-to-API/
+=========================================================================*/
+
+/*
+"use client"
+import { generateClient } from "aws-amplify/data";
+import type { Schema } from "@/amplify/data/resource";
+
+const client = generateClient<Schema>() // use this Data client for CRUDL requests
+*/
+
+/*== STEP 3 ===============================================================
+Fetch records from the database and use them in your frontend component.
+(THIS SNIPPET WILL ONLY WORK IN THE FRONTEND CODE FILE.)
+=========================================================================*/
+
+/* For example, in a React component, you can use this snippet in your
+  function's RETURN statement */
+// const { data: todos } = await client.models.Todo.list()
+
+// return <ul>{todos.map(todo => <li key={todo.id}>{todo.content}</li>)}</ul>
