@@ -4,8 +4,7 @@ export const postConfirmation = defineFunction({
   name: 'post-confirmation',
   // optionally define an environment variable for your group name
   environment: {
-    ITEM_MAKER: 'itemMaker',
-    PET_MAKER: 'petMaker',
+    TABLE_NAME: 'User-ofpnwhntdngzdlgy2e7wd4i5jq-NONE'
   },
   resourceGroupName: 'auth'
 });
