@@ -2,7 +2,7 @@
 
 #app {
   max-width: 1280px;
-  margin: 0 auto;
+  margin: auto;
   padding: 2rem;
   font-weight: normal;
 }
@@ -15,21 +15,176 @@ a,
   padding: 3px;
 }
 
+
 @media (hover: hover) {
   a:hover {
     background-color: hsla(160, 100%, 37%, 0.2);
   }
 }
 
+body {
+  display: flex;
+  place-items: center;
+}
+
+h1 {
+  font-weight: 500;
+  font-size: 2.6rem;
+}
+
+h3 {
+  font-size: 1.2rem;
+}
+
+.greetings h1,
+.greetings h3 {
+  text-align: center;
+}
+
+#inventoryPage,
+#shopPage,
+#petsPage {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: inherit;
+}
+
+.modal {
+  position: fixed;
+  z-index: 999;
+  top: 20%;
+  left: 50%;
+  width: 300px;
+  margin-left: -150px;
+}
+
+#modal-block {
+  z-index: 998;
+  background-color: black;
+  opacity: 50%;
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.closeButton {
+  background-color: red;
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  align-content: space-between;
+  border: 2px solid rgb(96 139 168);
+  margin: 1em;
+  background-color: rgb(96 139 168 / 0.2);
+}
+
+.box div {
+  height: auto;
+  text-align: center;
+}
+
+header {
+  align-self: stretch;
+  display: flex;
+}
+
+.pet-image img {
+  object-fit: cover;
+  max-width: 250px;
+  max-height: 250px;
+}
+
+.item-image {
+  object-fit: cover;
+  width: 150px;
+  height: 150px;
+}
+
+.logo {
+  max-width: 50px;
+}
+
+nav {
+  width: 100%;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+nav a.router-link-exact-active {
+  color: var(--color-text);
+}
+
+nav a.router-link-exact-active:hover {
+  background-color: transparent;
+}
+
+nav a {
+  display: inline-block;
+  padding: 0 1rem;
+  border-left: 1px solid var(--color-border);
+}
+
+nav a:first-of-type {
+  border: 0;
+}
+
+.item-image,
+.pet-image {
+  cursor: pointer;
+}
+
 @media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
+
+  nav {
+    font-size: 1rem;
+    padding: 1rem 0;
+    margin-top: 1rem;
   }
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
+}
+
+@media (max-width: 1023px) {
+  .pet-image img {
+    object-fit: cover;
+    min-width: 200px;
+    min-height: 200px;
+    max-width: 50vw;
+    max-height: 50vw;
+  }
+
+  .item-image {
+    object-fit: cover;
+    min-width: 100px;
+    min-height: 100px;
+    max-width: 25vw;
+    max-height: 25vw;
+  }
+
+  #inventoryPage,
+  #shopPage,
+  #petsPage {
+    border: 2px dotted rgb(96 139 168);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: inherit;
+  }
+
+  .box {
+    margin: 0.1em;
+    width: min-content;
+  }
+
+  .box>* {
+    align-self: stretch;
   }
 }
