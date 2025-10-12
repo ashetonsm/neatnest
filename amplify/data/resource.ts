@@ -26,11 +26,9 @@ const schema = a.schema({
       // Guests are read only
       allow.guest().to(['read']),
       // Authenticated users can read and write (change item values)
-      allow.authenticated('userPools').to(['read', 'update']),
+      allow.authenticated('userPools').to(['read', 'update', 'create']),
       // Owners can delete their items
       allow.owner().to(['delete']),
-      // Users in the itemMaker group can create a new item
-      allow.groups(['itemMaker']).to(['create']),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
@@ -59,28 +57,20 @@ const schema = a.schema({
       // Guests are read only
       allow.guest().to(['read']),
       // Authenticated users can read and write (change item values)
-      allow.authenticated('userPools').to(['read', 'update']),
+      allow.authenticated('userPools').to(['read', 'update', 'create']),
       // Owners can delete their pets
       allow.owner().to(['delete']),
-      // Users in the petMaker group can create a new pet
-      allow.groups(['petMaker']).to(['create']),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
   User: a
     .model({
       username: a.string(),
-      userId: a.string(), // redundant, can be removed
       itemsRemaining: a.integer(),
       petsRemaining: a.integer()
     })
     .secondaryIndexes((index) => [
       index("username")
-        .sortKeys(["userId"])
-        .queryField("listUsersByUsernameAndUserId"),
-      index("userId")
-        .sortKeys(["username"])
-        .queryField("listUsersByUserIdAndUsername")
     ])
     .authorization((allow) => [
       // Guests are read only
