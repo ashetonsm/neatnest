@@ -8,6 +8,7 @@ import { getCurrentUser } from 'aws-amplify/auth';
 const client = generateClient<Schema>()
 
 const fetchedPets = ref<Array<Schema['Pet']['type']>>([]);
+var createPet = false;
 
 async function fetchPets() {
   const cachedPets = localStorage.getItem('pets')
@@ -31,8 +32,21 @@ async function fetchPets() {
   }
 }
 
+async function setCreation() {
+  const {signInDetails, userId, username } = await getCurrentUser()
+  console.log(signInDetails)
+  console.log(userId)
+  await client.models.User.listUserByUsername({ username: signInDetails?.loginId ?? 'undefined' })
+    .then((data) => {
+      console.log(data)
+      createPet = true
+    })
+  
+}
+
 onMounted(() => {
   fetchPets()
+  setCreation()
 })
 
 </script>
@@ -43,6 +57,9 @@ onMounted(() => {
       <p>This is where you view your pets.</p>
   </div>
   <div class="page" id="petsPage">
+    <template v-if="createPet">
+      <button>Create a new pet</button>
+    </template>
     <template v-if="!fetchedPets">
       <h1>Loading!</h1>
     </template>
