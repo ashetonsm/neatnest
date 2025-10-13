@@ -1,4 +1,5 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
+import { postConfirmation } from '../auth/post-confirmation/resource';
 
 const schema = a.schema({
   Item: a
@@ -69,19 +70,23 @@ const schema = a.schema({
       username: a.string(),
       owner: a.string(),
       itemsRemaining: a.integer(),
-      petsRemaining: a.integer()
+      petsRemaining: a.integer(),
+      createdAt: a.datetime(),
+      updatedAt: a.datetime(),
     })
     .secondaryIndexes((index) => [
       index("username")
     ])
     .authorization((allow) => [
+      allow.authenticated('identityPool'),
+      allow.authenticated('userPools'),
       // Allow owners
       allow.ownerDefinedIn("owner"),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
 })
-// .authorization((allow) => [allow.resource(postConfirmation)])
+.authorization((allow) => [allow.resource(postConfirmation)])
 
 export type Schema = ClientSchema<typeof schema>;
 
