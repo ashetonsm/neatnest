@@ -20,10 +20,10 @@ async function fetchItems() {
     // fetchedItems.value = JSON.parse(cachedItems)
   // } else {
     console.log("No cached inventory found, querying database.")
-      const { signInDetails } = await getCurrentUser()
+      const { userId } = await getCurrentUser()
     const { data: items, errors } = await client.models.Item.listItemsByOwnerAndName(
       {
-        owner: signInDetails?.loginId ?? 'undefined'
+        owner: userId
       },
       {
         authMode: 'userPool'
@@ -35,20 +35,39 @@ async function fetchItems() {
 }
 
 async function createItem() {
-  const { signInDetails } = await getCurrentUser()
+  const { userId } = await getCurrentUser()
 
-  client.models.Item.create({
-    name: "EMPORIUM ITEM",
-    price: 1,
-    shopfront: "Test Emporium",
-    // owner: signInDetails?.loginId ?? 'undefined',
-    owner: 'NA',
-    health: 1,
-    rarity: 1,
-    image: "a.string()"
-  }).then((res) => {
-    console.log(res)
-  });
+  const thisUser = await client.models.User.get({id: userId})
+  console.log(thisUser)
+
+  // If itemsRemaining is not null and is greater than 0
+  if (thisUser.data!.itemsRemaining !== null && thisUser.data!.itemsRemaining > 0) {
+    // Create a new item
+    client.models.Item.create({
+      name: "User-made Item",
+      price: 1,
+      shopfront: "NA",
+      // owner: thisUser.data?.id ?? 'undefined',
+      owner: thisUser.data?.id, // IDs will be more unique than emails or usernames
+      health: 1,
+      rarity: 1,
+      image: "placeholder image 1"
+    }).then((res) => {
+      // Update the user by decreasing itemsRemaining by 1 if itemsRemaining > 0
+
+      var updatedUser = thisUser.data!
+      // Subtract 1 from itemsRemaining
+      updatedUser.itemsRemaining!--
+      // Update the updatedAt time for the User
+      updatedUser.updatedAt = new Date().toISOString()
+
+      client.models.User.update(updatedUser)
+        .then((res) => {
+          console.log(res)
+        })
+      console.log(res)
+    });
+  }
 }
 
 onMounted(() => {
