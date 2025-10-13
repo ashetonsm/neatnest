@@ -17,22 +17,19 @@ const toggleModal = (n:boolean) => {
   console.log(open)
   return open
 };
-
-
 </script>
 
 <template>
-
-<div v-if="open == true">
-  <Modal :pet="pet" @open="toggleModal(false)"/>
-</div>
+  <div v-if="open == true">
+    <Modal :pet="pet" @open="toggleModal(false)"/>
+  </div>
 
   <div class="pet-container box">
     <div class="pet-image">
         <img :src="'/src/assets/testPets/' + pet.image + '.jpg'" 
         :alt="'an image of ' + pet.name"
         @click="toggleModal(true)"/>
-</div>
+    </div>
 
     <div class="pet-info">
         <h1 class="green">{{ pet.name }}</h1>
