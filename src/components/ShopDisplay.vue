@@ -17,11 +17,11 @@ const client = generateClient<Schema>()
 const fetchedItems = ref<Array<Schema['Item']['type']>>([]);
 
 async function fetchItems() { 
-  const cachedItems = localStorage.getItem(shopFrontName + ' Items')
-  if (cachedItems) {
-    console.log("Cached shop items found.")
-    fetchedItems.value = JSON.parse(cachedItems)
-  } else {
+  // const cachedItems = localStorage.getItem(shopFrontName + ' Items')
+  // if (cachedItems) {
+  //   console.log("Cached shop items found.")
+  //   fetchedItems.value = JSON.parse(cachedItems)
+  // } else {
     console.log("No cached shop items found, querying database.")
     const { data: items, errors } = await client.models.Item.listItemsByShopfrontAndOwner(
       {
@@ -36,7 +36,7 @@ async function fetchItems() {
     );
     localStorage.setItem(shopFrontName + ' Items', JSON.stringify(items))
     fetchedItems.value = items
-  }
+  // }
 }
 
 onMounted(() => {
