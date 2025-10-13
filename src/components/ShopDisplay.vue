@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import Item from './Item.vue';
 import { useRoute } from 'vue-router';
-import { generateClient } from 'aws-amplify/data';
-import type { Schema } from '../../amplify/data/resource';
 import { onMounted, ref } from 'vue';
+import { generateClient } from 'aws-amplify/api';
+import type { Schema } from '../../amplify/data/resource';
 // These should be items that are freely in the pool for this shop
 
 const route = useRoute()
