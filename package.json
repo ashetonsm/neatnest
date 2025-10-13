@@ -13,7 +13,8 @@
   "dependencies": {
     "@aws-amplify/ui-vue": "^4.3.5",
     "aws-amplify": "^6.6.6",
-    "vue": "^3.4.21"
+    "vue": "^3.4.21",
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@aws-amplify/backend": "^1.5.0",
