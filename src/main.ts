@@ -1,9 +1,14 @@
-import "./assets/main.css";
-import { createApp } from "vue";
-import App from "./App.vue";
-import { Amplify } from "aws-amplify";
-import outputs from "../amplify_outputs.json";
+import './assets/main.css'
 
-Amplify.configure(outputs);
+import { Amplify } from 'aws-amplify'
+import outputs from '../amplify_outputs.json'
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
 
-createApp(App).mount("#app");
+Amplify.configure(outputs)
+const app = createApp(App)
+
+app.use(router)
+
+app.mount('#app')
