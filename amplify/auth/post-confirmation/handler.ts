@@ -10,8 +10,7 @@ const docClient = DynamoDBDocumentClient.from(ddbclient);
 export const handler: PostConfirmationTriggerHandler = async (event) => {
 
   const command = new PutCommand({
-    TableName: "User-6vm7dpzwfjdntdr6iim3mvwmpm-NONE", // DEV TABLE
-    // TableName: "User-xylrvsccenftvhi344pz5qbs7m-NONE", // PROD TABLE
+    TableName: process.env.USER_TABLE,  // This stays as is, do not use import.meta.env
     Item: {
       id: event.userName, // Always the most unique value. The cognito user ID.
       owner: event.userName,
