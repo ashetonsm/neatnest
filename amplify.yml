@@ -9,8 +9,8 @@ frontend:
   phases:
     build:
       commands:
-        - echo "VITE_USER_TABLE=$VITE_USER_TABLE" >> .env
         - npm run build
+        - VITE_USER_TABLE=$VITE_USER_TABLE
   artifacts:
     baseDirectory: dist
     files:
