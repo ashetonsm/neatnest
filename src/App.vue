@@ -17,9 +17,12 @@ const links = [
   { title: 'About', name: '/about' },
 ]
 
+console.log(import.meta.env.VITE_USER_TABLE)  // This only works with the VITE prefix
+// This is true even though the var name is only USER_TABLE...
 </script>
 
 <template>
+  
   <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />          
   <main>
       <Authenticator>
