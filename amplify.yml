@@ -7,10 +7,31 @@ backend:
         - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
 frontend:
   phases:
+    prebuild:
+      commands:
+        - echo "Fetching secrets from SSM..."
+        - |
+          for secret in $(aws ssm get-parameters-by-path \
+            --path /amplify/shared/d2aw0idn5nx6cg/ \
+            --with-decryption \
+            --region us-east-2 \
+            --query "Parameters[*].{Name:Name}" \
+            --output text); do
+
+              key=$(basename "$secret")
+              value=$(aws ssm get-parameter \
+                --name "$secret" \
+                --with-decryption \
+                --region us-east-2 \
+                --query "Parameter.Value" \
+                --output text)
+
+              echo "$key=$value" >> .env
+              export "$key=$value"
+        - cat .env
     build:
       commands:
         - npm run build
-        - VITE_USER_TABLE=$VITE_USER_TABLE
   artifacts:
     baseDirectory: dist
     files:
