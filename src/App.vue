@@ -17,8 +17,6 @@ const links = [
   { title: 'About', name: '/about' },
 ]
 
-console.log(import.meta.env.VITE_USER_TABLE)  // This only works with the VITE prefix
-// This is true even though the var name is only USER_TABLE...
 </script>
 
 <template>
