@@ -42,31 +42,32 @@ async function createItem() {
 
   // If itemsRemaining is not null and is greater than 0
   if (thisUser.data!.itemsRemaining !== null && thisUser.data!.itemsRemaining > 0) {
-    // Create a new item
-    client.models.Item.create({
-      name: "User-made Item",
-      price: 1,
-      shopfront: "NA",
-      // owner: thisUser.data?.id ?? 'undefined',
-      owner: thisUser.data?.id, // IDs will be more unique than emails or usernames
-      health: 1,
-      rarity: 1,
-      image: "placeholder image 1"
-    }).then((res) => {
-      // Update the user by decreasing itemsRemaining by 1 if itemsRemaining > 0
+    // Create a new item with the pixel convas
 
-      var updatedUser = thisUser.data!
-      // Subtract 1 from itemsRemaining
-      updatedUser.itemsRemaining!--
-      // Update the updatedAt time for the User
-      updatedUser.updatedAt = new Date().toISOString()
+    // client.models.Item.create({
+    //   name: "SANDBOX Item",
+    //   price: 1,
+    //   shopfront: "NA",
+    //   // owner: thisUser.data?.id ?? 'undefined',
+    //   owner: thisUser.data?.id, // IDs will be more unique than emails or usernames
+    //   health: 1,
+    //   rarity: 1,
+    //   image: "placeholder image 1"
+    // }).then((res) => {
+    //   // Update the user by decreasing itemsRemaining by 1 if itemsRemaining > 0
 
-      client.models.User.update(updatedUser)
-        .then((res) => {
-          console.log(res)
-        })
-      console.log(res)
-    });
+    //   var updatedUser = thisUser.data!
+    //   // Subtract 1 from itemsRemaining
+    //   updatedUser.itemsRemaining!--
+    //   // Update the updatedAt time for the User
+    //   updatedUser.updatedAt = new Date().toISOString()
+
+    //   client.models.User.update(updatedUser)
+    //     .then((res) => {
+    //       console.log(res)
+    //     })
+    //   console.log(res)
+    // });
   }
 }
 
@@ -84,7 +85,7 @@ onMounted(() => {
     </div>
   <div class="page" id="inventoryPage">
     <template v-if="canCreate">
-      <button @click="createItem">Create a new ITEM</button>
+      <a href="/canvas" target="_blank">Launch Item Canvas</a>
     </template>
     <template v-if="!fetchedItems">
       <h1>Loading!</h1>
