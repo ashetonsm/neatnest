@@ -12,7 +12,7 @@ const route = useRoute()
 
 const color = ref<string>('#000000')
 let thingType = route.params.type
-let thingName
+let thingName: string | null
 var currentUserId : string
 var currentUserObj : any
 var canCreatePet = true
@@ -45,20 +45,24 @@ async function handleSubmit() {
     if (thingName) {
       const canvas = document.querySelector('canvas')
       if (canvas) {
-        const image = canvas.toDataURL('image/png')
-        const thingPath = `images/${currentUserId}/${thingType}/${thingName}`
-        // Upload the image
-        try {
-          const result = await uploadData({
-            path: thingPath,
-            data: image,
-          }).result;
-         console.log(`${currentUserId}/${thingType}s/${thingName}`)
-          console.log('Succeeded: ', result);
-        } catch (error) {
-          console.log('Error : ', error);
-        }
+        const thingPath = `images/${currentUserId}/${thingType}/${thingName}.png`
+        canvas.toBlob(async (blob) => {
+          try {
+            const result = await uploadData({
+              path: thingPath,
+              data: blob!,
+              options: {
+                contentType: 'image/png'
+              }
+            }).result;
+           console.log(`${currentUserId}/${thingType}s/${thingName}`)
+            console.log('Succeeded: ', result);
+          } catch (error) {
+            console.log('Error : ', error);
+          }
 
+        }, 'image/png')
+        
         // Create the thing (Item only)
         try {
           client.models.Item.create({
@@ -75,12 +79,13 @@ async function handleSubmit() {
             console.log("currentUserObj:", currentUserObj)
             var updatedUser = currentUserObj
             // Subtract 1 from itemsRemaining
-            updatedUser.itemsRemaining!--
+            updatedUser.itemsRemaining = updatedUser.itemsRemaining - 1
             // Update the updatedAt time for the User
             updatedUser.updatedAt = new Date().toISOString()
 
             client.models.User.update(updatedUser)
               .then((res) => {
+                console.log("updatedUser: ", updatedUser)
                 console.log(res)
               })
             console.log(res)
@@ -100,11 +105,11 @@ async function handleSubmit() {
 }
 
 async function setCreation() {
-  const { userId, signInDetails } = await getCurrentUser()
+  const { userId } = await getCurrentUser()
   currentUserId = userId
-  currentUserObj = signInDetails
   await client.models.User.get({id: userId})
-    .then((u) => {
+  .then((u) => {
+    currentUserObj = u.data
       if ((u) && (u.data) && (u.data.itemsRemaining)) {
         if (u.data.itemsRemaining > 0)
           console.log(u.data.itemsRemaining)
