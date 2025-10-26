@@ -42,7 +42,7 @@ function useFlow(i : Schema['Item']['type']) {
 <template>
   <div class="item-container box">
     <div class="item-info">
-        <img :src="'/src/assets/testItems/' + item.image + '.jpg'" 
+        <img :src="'https://amplify-amplifyvuetemplat-neatnestimagestoragebuck-ldbl42dt8bft.s3.us-east-2.amazonaws.com/' + item.image"
         :alt="'an image of ' + item.name" class="item-image"
         @click="item.owner == 'NA' ? buyFlow(item) : useFlow(item)"/>
 
