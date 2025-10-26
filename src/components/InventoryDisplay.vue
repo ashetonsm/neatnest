@@ -25,6 +25,12 @@ async function fetchItems() {
         owner: currentUser
       },
       {
+        headers: {
+          'Access-Control-Allow-Headers': '*',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': '*',
+          'Content-Type': 'application/json',
+        },
         authMode: 'userPool'
       }
     ).catch((error : any) => {
