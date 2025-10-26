@@ -8,20 +8,19 @@ import { getCurrentUser } from 'aws-amplify/auth';
 const client = generateClient<Schema>()
 
 const fetchedPets = ref<Array<Schema['Pet']['type']>>([]);
-var createPet = false;
+var currentUser: string
+var canCreate = true;
 
 async function fetchPets() {
   const cachedPets = localStorage.getItem('pets')
-  if (cachedPets) {
-    console.log("Cached pets found.")
-    fetchedPets.value = JSON.parse(cachedPets)
-  } else {
+  // if (cachedPets) {
+  //   console.log("Cached pets found.")
+  //   fetchedPets.value = JSON.parse(cachedPets)
+  // } else {
     console.log("No cached pets found, querying database.")
-    const {signInDetails } = await getCurrentUser()
-
-    const { data: pets, errors } = await client.models.Pet.listPetsByOwnerAndName(
+    const { data: pets } = await client.models.Pet.listPetsByOwnerAndName(
       {
-        owner: signInDetails?.loginId ?? 'undefined',
+        owner: currentUser ?? 'undefined'
       },
       {
         authMode: 'userPool',
@@ -30,23 +29,24 @@ async function fetchPets() {
     localStorage.setItem('pets', JSON.stringify(pets))
     fetchedPets.value = pets
   }
-}
+// }
 
 async function setCreation() {
-  const {signInDetails, userId, username } = await getCurrentUser()
-  console.log(signInDetails)
-  console.log(userId)
-  await client.models.User.listUserByUsername({ username: signInDetails?.loginId ?? 'undefined' })
-    .then((data) => {
-      console.log(data)
-      createPet = true
+  const { userId } = await getCurrentUser()
+  currentUser = userId
+  await client.models.User.get({id: userId})
+    .then((u) => {
+      if ((u) && (u.data) && (u.data.petsRemaining)) {
+        if (u.data.petsRemaining > 0)
+          canCreate = true
+      }
+      console.log(u)
     })
-  
 }
 
 onMounted(() => {
-  fetchPets()
   setCreation()
+  fetchPets()
 })
 
 </script>
@@ -57,8 +57,10 @@ onMounted(() => {
       <p>This is where you view your pets.</p>
   </div>
   <div class="page" id="petsPage">
-    <template v-if="createPet">
-      <button>Create a new pet</button>
+    <template v-if="canCreate">
+      <div>
+        <a href="/canvas/pet" target="_blank">Launch pet canvas</a>
+      </div>
     </template>
     <template v-if="!fetchedPets">
       <h1>Loading!</h1>

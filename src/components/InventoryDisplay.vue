@@ -10,8 +10,8 @@ const client = generateClient<Schema>()
 
 // create a reactive reference to Item[]
 const fetchedItems = ref<Array<Schema['Item']['type']>>([]);
-
-const canCreate = true
+var currentUser : string
+var canCreate = true
 
 async function fetchItems() { 
   // const cachedItems = localStorage.getItem('inventory')
@@ -20,59 +20,41 @@ async function fetchItems() {
     // fetchedItems.value = JSON.parse(cachedItems)
   // } else {
     console.log("No cached inventory found, querying database.")
-      const { userId } = await getCurrentUser()
-    const { data: items, errors } = await client.models.Item.listItemsByOwnerAndName(
+    const items = await client.models.Item.listItemsByOwnerAndName(
       {
-        owner: userId
+        owner: currentUser
       },
       {
         authMode: 'userPool'
       }
-    );
+    ).catch((error : any) => {
+      console.log ("No items found for this user.")
+      fetchedItems.value = []
+    });
     localStorage.setItem('inventory', JSON.stringify(items))
-    fetchedItems.value = items
+    fetchedItems.value = items.data
   // }
 }
 
-async function createItem() {
+async function setCreation() {
   const { userId } = await getCurrentUser()
-
-  const thisUser = await client.models.User.get({id: userId})
-  console.log(thisUser)
-
-  // If itemsRemaining is not null and is greater than 0
-  if (thisUser.data!.itemsRemaining !== null && thisUser.data!.itemsRemaining > 0) {
-    // Create a new item with the pixel convas
-
-    // client.models.Item.create({
-    //   name: "SANDBOX Item",
-    //   price: 1,
-    //   shopfront: "NA",
-    //   // owner: thisUser.data?.id ?? 'undefined',
-    //   owner: thisUser.data?.id, // IDs will be more unique than emails or usernames
-    //   health: 1,
-    //   rarity: 1,
-    //   image: "placeholder image 1"
-    // }).then((res) => {
-    //   // Update the user by decreasing itemsRemaining by 1 if itemsRemaining > 0
-
-    //   var updatedUser = thisUser.data!
-    //   // Subtract 1 from itemsRemaining
-    //   updatedUser.itemsRemaining!--
-    //   // Update the updatedAt time for the User
-    //   updatedUser.updatedAt = new Date().toISOString()
-
-    //   client.models.User.update(updatedUser)
-    //     .then((res) => {
-    //       console.log(res)
-    //     })
-    //   console.log(res)
-    // });
-  }
+  currentUser = userId
+  await client.models.User.get({id: userId})
+    .then((u) => {
+      console.log(u.data?.itemsRemaining)
+      if ((u) && (u.data) && (u.data.itemsRemaining)) {
+        if (u.data.itemsRemaining > 0)
+          console.log("u.data?.itemsRemaining is greater than 0")
+          canCreate = true
+      }
+      console.log("canCreate: " + canCreate)
+    })
+    console.log(currentUser)
 }
 
-onMounted(() => {
-  fetchItems()
+onMounted(async () => {
+  await setCreation()
+  await fetchItems()
 })
 
 
@@ -85,7 +67,9 @@ onMounted(() => {
     </div>
   <div class="page" id="inventoryPage">
     <template v-if="canCreate">
-      <a href="/canvas" target="_blank">Launch Item Canvas</a>
+      <div>
+        <a href="/canvas/item" target="_blank">Launch Item Canvas</a>
+      </div>
     </template>
     <template v-if="!fetchedItems">
       <h1>Loading!</h1>
