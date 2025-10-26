@@ -25,6 +25,7 @@
     "@tsconfig/node20": "^20.1.4",
     "@types/aws-lambda": "^8.10.155",
     "@types/node": "^20.12.5",
+    "@vitejs/plugin-basic-ssl": "^1.2.0",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/tsconfig": "^0.5.1",
     "aws-cdk": "^2.137.0",
