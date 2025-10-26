@@ -41,7 +41,7 @@ const router = createRouter({
       component: () => import('@/views/PetsView.vue'),
     },
     {
-      path: '/canvas',
+      path: '/canvas/:type',
       name: 'canvas',
       component: CanvasView,
     },
