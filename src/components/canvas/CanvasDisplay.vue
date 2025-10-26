@@ -1,12 +1,22 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import Canvas from './Canvas.vue'
+import { uploadData } from 'aws-amplify/storage'
+import { getCurrentUser } from 'aws-amplify/auth'
+import { generateClient } from 'aws-amplify/api'
+import type { Schema } from 'amplify/data/resource'
+import { useRoute } from 'vue-router'
+
+const client = generateClient<Schema>()
+const route = useRoute()
 
 const color = ref<string>('#000000')
-let imgURL = "https://google.com"
-let thingType = "pet"
+let thingType = route.params.type
 let thingName
-let createdBy = ""
+var currentUserId : string
+var currentUserObj : any
+var canCreatePet = true
+var canCreateItem = true
 
 function resetCanvas() {
   try {
@@ -28,19 +38,56 @@ function handleColor(e: Event) {
   }
 }
 
-function handleSubmit() {
+async function handleSubmit() {
   try {
-    thingName = prompt(`Name your ${thingType}:`)
+    thingName = prompt(`Name your ${route.params.type}:`)
 
     if (thingName) {
       const canvas = document.querySelector('canvas')
       if (canvas) {
-        const date = new Date().toUTCString().replace(',', '').replace(/ /g,"-")
         const image = canvas.toDataURL('image/png')
-        const fimg = document.querySelector('#finishedImg')
-        fimg!.href = image;
-        fimg!.download = `${thingType}-${thingName}-${date}`; // Or any desired filename
-        console.log(image)
+        const thingPath = `images/${currentUserId}/${thingType}/${thingName}`
+        // Upload the image
+        try {
+          const result = await uploadData({
+            path: thingPath,
+            data: image,
+          }).result;
+         console.log(`${currentUserId}/${thingType}s/${thingName}`)
+          console.log('Succeeded: ', result);
+        } catch (error) {
+          console.log('Error : ', error);
+        }
+
+        // Create the thing (Item only)
+        try {
+          client.models.Item.create({
+            name: thingName,
+            price: 1,
+            shopfront: "NA",
+            owner: currentUserId,
+            health: 1,
+            rarity: 1,
+            image: thingPath
+          }).then((res) => {
+            // Update the user by decreasing itemsRemaining by 1 if itemsRemaining > 0
+
+            console.log("currentUserObj:", currentUserObj)
+            var updatedUser = currentUserObj
+            // Subtract 1 from itemsRemaining
+            updatedUser.itemsRemaining!--
+            // Update the updatedAt time for the User
+            updatedUser.updatedAt = new Date().toISOString()
+
+            client.models.User.update(updatedUser)
+              .then((res) => {
+                console.log(res)
+              })
+            console.log(res)
+          });
+        } catch (error : any) {
+          console.log(error)
+        }
       } else {
         console.log("Canvas not found!")
       }
@@ -52,6 +99,29 @@ function handleSubmit() {
   }
 }
 
+async function setCreation() {
+  const { userId, signInDetails } = await getCurrentUser()
+  currentUserId = userId
+  currentUserObj = signInDetails
+  await client.models.User.get({id: userId})
+    .then((u) => {
+      if ((u) && (u.data) && (u.data.itemsRemaining)) {
+        if (u.data.itemsRemaining > 0)
+          console.log(u.data.itemsRemaining)
+          canCreateItem = true
+      }
+      if ((u) && (u.data) && (u.data.petsRemaining)) {
+        if (u.data.petsRemaining > 0)
+          console.log(u.data.petsRemaining)
+          canCreatePet = true
+      }
+      console.log(u)
+    })
+}
+
+onMounted(() => {
+  setCreation()
+})
 
 </script>
 
@@ -59,26 +129,27 @@ function handleSubmit() {
   <div class="page-header">
     <h1>Canvas page</h1>
     <p>This is where you draw on a canvas.</p>
-
-  <div class="navbar">
-    <div>
-      <button @click="resetCanvas">Reset</button>
-      <button @click="handleSubmit">Finish</button>
-    </div>
-    <div>
-      <a href="finishedImg" id="finishedImg" download>My Finished Image</a>
-    </div>
-    <div>
-      <h3>Colors:</h3>
-      <button class="black color" value="#000000" @click="handleColor($event)"></button>
-      <button class="white color" value="#FFFFFF" @click="handleColor($event)"></button>
-    </div>
   </div>
-
-  </div>
-  <div class="page" id="canvasPage">
-    <Canvas :size="24" :color="color"></Canvas>
-  </div>
+    <template v-if="canCreatePet || canCreateItem" >
+      <div class="navbar">
+        <div>
+          <button @click="resetCanvas">Reset</button>
+          <button @click="handleSubmit">Finish</button>
+        </div>
+        <div>
+          <a href="finishedImg" id="finishedImg" download>My Finished Image</a>
+        </div>
+        <div>
+          <h3>Colors:</h3>
+          <button class="black color" value="#000000" @click="handleColor($event)"></button>
+          <button class="white color" value="#FFFFFF" @click="handleColor($event)"></button>
+        </div>
+      </div>
+  
+      <div class="page" id="canvasPage">
+        <Canvas :size="24" :color="color"></Canvas>
+      </div>
+    </template>
 </template>
 
 <style lang="css" scoped>
