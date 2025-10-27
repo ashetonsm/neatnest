@@ -13,10 +13,10 @@ var canCreate = true;
 
 async function fetchPets() {
   const cachedPets = localStorage.getItem('pets')
-  // if (cachedPets) {
-  //   console.log("Cached pets found.")
-  //   fetchedPets.value = JSON.parse(cachedPets)
-  // } else {
+  if (cachedPets) {
+    console.log("Cached pets found.")
+    fetchedPets.value = JSON.parse(cachedPets)
+  } else {
     console.log("No cached pets found, querying database.")
     const { data: pets } = await client.models.Pet.listPetsByOwnerAndName(
       {
@@ -29,7 +29,7 @@ async function fetchPets() {
     localStorage.setItem('pets', JSON.stringify(pets))
     fetchedPets.value = pets
   }
-// }
+}
 
 async function setCreation() {
   const { userId } = await getCurrentUser()
