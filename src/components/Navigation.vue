@@ -3,7 +3,6 @@ import { RouterLink } from 'vue-router'
 
 var links = [
   { title: 'Home', name: '/' },
-  { title: 'Login', name: '/login' },
   { title: 'Shop 1', name: '/shop/1' },
   { title: 'Shop 2', name: '/shop/2' },
   { title: 'Inventory', name: '/inventory' },
