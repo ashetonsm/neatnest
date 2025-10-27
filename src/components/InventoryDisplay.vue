@@ -53,12 +53,9 @@ async function setCreation() {
       console.log(u.data?.itemsRemaining)
       if ((u) && (u.data) && (u.data.itemsRemaining)) {
         if (u.data.itemsRemaining > 0)
-          console.log("u.data?.itemsRemaining is greater than 0")
           canCreate = true
       }
-      console.log("canCreate: " + canCreate)
     })
-    console.log(currentUser)
 }
 
 onMounted(async () => {

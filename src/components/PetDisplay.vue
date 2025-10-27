@@ -20,7 +20,7 @@ async function fetchPets() {
     console.log("No cached pets found, querying database.")
     const { data: pets } = await client.models.Pet.listPetsByOwnerAndName(
       {
-        owner: currentUser ?? 'undefined'
+        owner: currentUser
       },
       {
         authMode: 'userPool',
@@ -40,13 +40,12 @@ async function setCreation() {
         if (u.data.petsRemaining > 0)
           canCreate = true
       }
-      console.log(u)
     })
 }
 
-onMounted(() => {
-  setCreation()
-  fetchPets()
+onMounted(async () => {
+  await setCreation()
+  await fetchPets()
 })
 
 </script>

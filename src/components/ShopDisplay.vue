@@ -41,13 +41,12 @@ async function fetchItems() {
 async function getUser() {
   const { userId } = await getCurrentUser()
   currentUser = userId
-  console.log(currentUser)
 }
 
 
-onMounted(() => {
-  getUser()
-  fetchItems()
+onMounted(async () => {
+  await getUser()
+  await fetchItems()
 })
 
 </script>

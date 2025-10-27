@@ -13,7 +13,6 @@ const props = defineProps<{
 }>()
 
 async function buyFlow(i : Schema['Item']['type']) {
-  console.log("The currentUser is: " + props.currentUser)
   const choice = confirm('Buy ' + i.name + ' for ' + i.price + '?')
   if (choice) {
     // Set the owner to the signed in user
@@ -47,8 +46,6 @@ async function getFileUrl(fileName: any) {
 }
 
 function useFlow(i : Schema['Item']['type']) {
-  console.log("The currentUser is: " + props.currentUser)
-
   const choice = confirm('Use ' + i.name + '?')
   if (choice) {
     // Do use logic
@@ -58,8 +55,8 @@ function useFlow(i : Schema['Item']['type']) {
   }
 }
 
-onMounted(() => {
-  getFileUrl(props.item.image)
+onMounted(async () => {
+  await getFileUrl(props.item.image)
 })
 
 </script>
