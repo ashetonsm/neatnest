@@ -14,13 +14,13 @@ var currentUser : string
 var canCreate = true
 
 async function fetchItems() { 
-  // const cachedItems = localStorage.getItem('inventory')
-  // if (cachedItems) {
-    // console.log("Cached inventory found.")
-    // fetchedItems.value = JSON.parse(cachedItems)
-  // } else {
+  const cachedItems = localStorage.getItem('inventory')
+  if (cachedItems) {
+    console.log("Cached inventory found.")
+    fetchedItems.value = JSON.parse(cachedItems)
+  } else {
     console.log("No cached inventory found, querying database.")
-    const items = await client.models.Item.listItemsByOwnerAndName(
+    await client.models.Item.listItemsByOwnerAndName(
       {
         owner: currentUser
       },
@@ -33,13 +33,16 @@ async function fetchItems() {
         },
         authMode: 'userPool'
       }
-    ).catch((error : any) => {
+    )
+    .then((res) => {
+      localStorage.setItem('inventory', JSON.stringify(res.data))
+      fetchedItems.value = res.data
+    })
+    .catch((error : any) => {
       console.log ("No items found for this user.")
       fetchedItems.value = []
     });
-    localStorage.setItem('inventory', JSON.stringify(items))
-    fetchedItems.value = items.data
-  // }
+  }
 }
 
 async function setCreation() {
@@ -84,7 +87,7 @@ onMounted(async () => {
       <h1>Your inventory is empty</h1>
     </template>
     <template v-else>
-      <Item v-for="(item, i) in fetchedItems" :key="item.name ?? i" :item="item" />
+      <Item v-for="(item, i) in fetchedItems" :key="item.name ?? i" :item="item" :currentUser="currentUser" />
     </template>
   </div>
 </template>
