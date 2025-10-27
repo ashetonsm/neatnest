@@ -1,23 +1,23 @@
 <script setup lang="ts">
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../amplify/data/resource';
-import { getCurrentUser } from 'aws-amplify/auth';
+import { getUrl } from 'aws-amplify/storage';
+import { onMounted, ref } from 'vue';
 
 const client = generateClient<Schema>() // use this Data client for CRUDL requests
+const signedSrc = ref('null')
 
-defineProps<{
-  item: Schema['Item']['type']
+const props = defineProps<{
+  item: Schema['Item']['type'],
+  currentUser: string
 }>()
 
 async function buyFlow(i : Schema['Item']['type']) {
+  console.log("The currentUser is: " + props.currentUser)
   const choice = confirm('Buy ' + i.name + ' for ' + i.price + '?')
   if (choice) {
-    // Do buy logic, remove item from available and add to player's inventory.
-    const { signInDetails } = await getCurrentUser()
-
-    console.log(signInDetails?.loginId ?? 'undefined')
     // Set the owner to the signed in user
-    i.owner = signInDetails?.loginId ?? 'undefined'
+    i.owner = props.currentUser
 
     // send the update request
      await await client.models.Item.update(i).then((res) => {
@@ -28,7 +28,27 @@ async function buyFlow(i : Schema['Item']['type']) {
   }
 }
 
+async function getFileUrl(fileName: any) {
+  try {
+    const result = await getUrl({
+      path: fileName, // Adjust path as needed (e.g., private/, protected/)
+      options: {
+        expiresIn: 3600, // URL valid for 1 hour
+        validateObjectExistence: true,
+      },
+    });
+    signedSrc.value = result.url.toString()
+  } catch (error) {
+    console.error('Error getting URL:', error);
+    return null;
+  }
+
+  return 
+}
+
 function useFlow(i : Schema['Item']['type']) {
+  console.log("The currentUser is: " + props.currentUser)
+
   const choice = confirm('Use ' + i.name + '?')
   if (choice) {
     // Do use logic
@@ -37,18 +57,23 @@ function useFlow(i : Schema['Item']['type']) {
     return console.log(choice)
   }
 }
+
+onMounted(() => {
+  getFileUrl(props.item.image)
+})
+
 </script>
 
 <template>
-  <div class="item-container box">
-    <div class="item-info">
-        <img :src="'https://amplify-amplifyvuetemplat-neatnestimagestoragebuck-ldbl42dt8bft.s3.us-east-2.amazonaws.com/' + item.image"
+    <div class="item-container box">
+      <div class="item-info">
+        <img :src="signedSrc"
         :alt="'an image of ' + item.name" class="item-image"
         @click="item.owner == 'NA' ? buyFlow(item) : useFlow(item)"/>
-
+        
         <h2 class="green">{{ item.name }}</h2>
         <h2>Price:</h2>
         <h2 class="green">{{ item.price }}</h2>
+      </div>
     </div>
-  </div>
 </template>
