@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import Modal from './Modal.vue'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../amplify/data/resource';
+import { getUrl } from 'aws-amplify/storage';
 
 const client = generateClient<Schema>() // use this Data client for CRUDL requests
 const open = ref(false)
+const signedSrc = ref('null')
 
-defineProps<{
+const props = defineProps<{
   pet: Schema['Pet']['type']
 }>()
 
@@ -17,6 +19,28 @@ const toggleModal = (n:boolean) => {
   console.log(open)
   return open
 };
+
+async function getFileUrl(fileName: any) {
+  try {
+    const result = await getUrl({
+      path: fileName, // Adjust path as needed (e.g., private/, protected/)
+      options: {
+        expiresIn: 3600, // URL valid for 1 hour
+        validateObjectExistence: true,
+      },
+    });
+    signedSrc.value = result.url.toString()
+  } catch (error) {
+    console.error('Error getting URL:', error);
+    return null;
+  }
+
+  return 
+}
+
+onMounted(async () => {
+  await getFileUrl(props.pet.image)
+})
 </script>
 
 <template>
@@ -26,7 +50,7 @@ const toggleModal = (n:boolean) => {
 
   <div class="pet-container box">
     <div class="pet-image">
-        <img :src="'/src/assets/testPets/' + pet.image + '.jpg'" 
+        <img :src="signedSrc" 
         :alt="'an image of ' + pet.name"
         @click="toggleModal(true)"/>
     </div>
