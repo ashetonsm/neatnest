@@ -6,6 +6,8 @@ import { getCurrentUser } from 'aws-amplify/auth'
 import { generateClient } from 'aws-amplify/api'
 import type { Schema } from 'amplify/data/resource'
 import { useRoute } from 'vue-router'
+import { createItem } from '../tools/createItem'
+import { createPet } from '../tools/createPet'
 
 const client = generateClient<Schema>()
 const route = useRoute()
@@ -38,71 +40,41 @@ function handleColor(e: Event) {
   }
 }
 
-async function handleSubmit() {
-  try {
-    thingName = prompt(`Name your ${route.params.type}:`)
-
-    if (thingName) {
-      const canvas = document.querySelector('canvas')
-      if (canvas) {
-        const thingPath = `images/${currentUserId}/${thingType}/${thingName}.png`
-        canvas.toBlob(async (blob) => {
-          try {
-            const result = await uploadData({
-              path: thingPath,
-              data: blob!,
-              options: {
-                contentType: 'image/png'
-              }
-            }).result;
-           console.log(`${currentUserId}/${thingType}s/${thingName}`)
-            console.log('Succeeded: ', result);
-          } catch (error) {
-            console.log('Error : ', error);
-          }
-
-        }, 'image/png')
-        
-        // Create the thing (Item only)
-        try {
-          client.models.Item.create({
-            name: thingName,
-            price: 1,
-            shopfront: "NA",
-            owner: currentUserId,
-            health: 1,
-            rarity: 1,
-            image: thingPath
-          }).then((res) => {
-            // Update the user by decreasing itemsRemaining by 1 if itemsRemaining > 0
-
-            console.log("currentUserObj:", currentUserObj)
-            var updatedUser = currentUserObj
-            // Subtract 1 from itemsRemaining
-            updatedUser.itemsRemaining = updatedUser.itemsRemaining - 1
-            // Update the updatedAt time for the User
-            updatedUser.updatedAt = new Date().toISOString()
-
-            client.models.User.update(updatedUser)
-              .then((res) => {
-                console.log("updatedUser: ", updatedUser)
-                console.log(res)
-              })
-            console.log(res)
-          });
-        } catch (error : any) {
-          console.log(error)
+async function handleSubmit(t : string) {
+  switch (t) {
+    case "pet":
+      thingName = prompt(`Name your ${t}:`)
+      if (thingName) {
+        var thingSpecies = prompt(`Give your ${t} a species name:`)
+        if (thingSpecies) {
+          // Set the path
+          const thingPath = `images/${currentUserId}/${thingType}/${thingName}.png`
+          createPet(thingName!, thingSpecies!, thingPath!, currentUserId, currentUserObj)
+        } else {
+          alert(`You must set a species name! Please try again.`)
         }
       } else {
-        console.log("Canvas not found!")
+        alert(`You must name your ${thingType}! Please try again.`)
       }
-    } else {
-      alert(`You must name your ${thingType}! Please try again.`)
-    }
-  } catch (error : any) {
-    console.log(error)
+      break;
+    case "item":
+      // Prompt for a name
+      thingName = prompt(`Name your ${t}:`)
+      // If you get a valid name:
+      if (thingName) {
+        // Set the path
+        const thingPath = `images/${currentUserId}/${thingType}/${thingName}.png`
+        createItem(thingName, thingPath, currentUserId, currentUserObj)
+      } else {
+        alert(`You must name your ${thingType}! Please try again.`)
+      }
+      break;
+    default:
+      console.log("Invalid route param: ", t)
+      return
   }
 }
+
 
 async function setCreation() {
   const { userId } = await getCurrentUser()
@@ -112,20 +84,17 @@ async function setCreation() {
     currentUserObj = u.data
       if ((u) && (u.data) && (u.data.itemsRemaining)) {
         if (u.data.itemsRemaining > 0)
-          console.log(u.data.itemsRemaining)
           canCreateItem = true
       }
       if ((u) && (u.data) && (u.data.petsRemaining)) {
         if (u.data.petsRemaining > 0)
-          console.log(u.data.petsRemaining)
           canCreatePet = true
       }
-      console.log(u)
     })
 }
 
-onMounted(() => {
-  setCreation()
+onMounted(async () => {
+  await setCreation()
 })
 
 </script>
@@ -139,7 +108,7 @@ onMounted(() => {
       <div class="navbar">
         <div>
           <button @click="resetCanvas">Reset</button>
-          <button @click="handleSubmit">Finish</button>
+          <button @click="handleSubmit(route.params.type.toString())">Finish</button>
         </div>
         <div>
           <a href="finishedImg" id="finishedImg" download>My Finished Image</a>
