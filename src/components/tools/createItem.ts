@@ -4,7 +4,12 @@ import { uploadData } from "aws-amplify/storage";
 
 const client = generateClient<Schema>()
 
-export function createItem(name:string, imgPath:string, userID:string, userObj: any) {
+export function createItem(
+  name:string, 
+  imgPath:string, 
+  itemCat:string, 
+  userID:string, 
+  userObj: any) {
     // Query for the canvas
     const canvas = document.querySelector('canvas')
 
@@ -30,6 +35,7 @@ export function createItem(name:string, imgPath:string, userID:string, userObj: 
         try {
           client.models.Item.create({
             name: name,
+            category: itemCat,
             price: 1,
             shopfront: "NA",
             owner: userID,
