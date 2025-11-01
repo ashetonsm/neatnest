@@ -16,8 +16,9 @@ let thingType = route.params.type
 let thingName: string | null
 var currentUserId : string
 var currentUserObj : any
-var canCreatePet = true
-var canCreateItem = true
+var loading = ref<boolean>(true)
+var canCreatePet = ref<boolean>(false)
+var canCreateItem = ref<boolean>(false)
 
 function resetCanvas() {
   try {
@@ -39,7 +40,7 @@ function handleColor(e: Event) {
   }
 }
 
-async function handleSubmit(t : string) {
+async function handleSubmit(this: any, t : string) {
   switch (t) {
     case "pet":
       thingName = prompt(`Name your ${t}:`)
@@ -48,7 +49,7 @@ async function handleSubmit(t : string) {
         if (thingSpecies) {
           // Set the path
           const thingPath = `images/${currentUserId}/${thingType}/${thingName}.png`
-          createPet(thingName!, thingSpecies!, thingPath!, currentUserId, currentUserObj)
+          createPet(thingName!, thingSpecies!, thingPath!, currentUserId, currentUserObj, client)
         } else {
           alert(`You must set a species name! Please try again.`)
         }
@@ -65,7 +66,7 @@ async function handleSubmit(t : string) {
         if (itemCategory) {
           // Set the path
           const thingPath = `images/${currentUserId}/${thingType}/${thingName}.png`
-          createItem(thingName, thingPath, itemCategory, currentUserId, currentUserObj)
+          createItem(thingName, thingPath, itemCategory, currentUserId, currentUserObj, client)
         } else {
           alert("You must set your item category! Please try again.")
         }
@@ -85,22 +86,23 @@ async function setCreation() {
   currentUserId = userId
   await client.models.User.get({id: userId})
   .then((u) => {
-    currentUserObj = u.data
-      if ((u) && (u.data) && (u.data.itemsRemaining)) {
-        if (u.data.itemsRemaining > 0)
-          canCreateItem = true
+    currentUserObj = u.data!
+    console.log(currentUserObj)
+      if (u.data!.itemsRemaining! > 0) {
+        canCreateItem.value = true
       }
-      if ((u) && (u.data) && (u.data.petsRemaining)) {
-        if (u.data.petsRemaining > 0)
-          canCreatePet = true
+      if (u.data!.petsRemaining! > 0) {
+        canCreatePet.value = true
       }
+      console.log("canCreateItem: ", canCreateItem.value)
+      console.log("canCreatePet: ", canCreatePet.value)
+      loading.value = false
     })
 }
 
 onMounted(async () => {
   await setCreation()
-})
-
+});
 </script>
 
 <template>
@@ -108,7 +110,11 @@ onMounted(async () => {
     <h1>Canvas page</h1>
     <p>This is where you draw on a canvas.</p>
   </div>
-    <template v-if="canCreatePet || canCreateItem" >
+  <div class="page" id="canvasPage">
+    <template v-if="loading" >
+      <h1>Loading...</h1>
+    </template>
+    <template v-if="!loading && canCreatePet || canCreateItem" >
       <div class="navbar">
         <div>
           <button @click="resetCanvas">Reset</button>
@@ -123,11 +129,13 @@ onMounted(async () => {
           <button class="white color" value="#FFFFFF" @click="handleColor($event)"></button>
         </div>
       </div>
-  
-      <div class="page" id="canvasPage">
         <Canvas :size="24" :color="color"></Canvas>
-      </div>
     </template>
+    <template v-if="!loading && !canCreatePet && !canCreateItem" >
+        <h1>Hmm, looks like you can't make anything right now.</h1>
+    </template>
+  </div>
+    
 </template>
 
 <style lang="css" scoped>
