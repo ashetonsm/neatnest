@@ -4,10 +4,12 @@ import { onMounted, ref } from 'vue';
 import type { Schema } from '../../amplify/data/resource';
 import { generateClient } from 'aws-amplify/api';
 import { getCurrentUser } from 'aws-amplify/auth';
+import { fetchInventory } from './tools/fetchInventory';
 
 const client = generateClient<Schema>()
 
 const fetchedPets = ref<Array<Schema['Pet']['type']>>([]);
+var fetchedItems = ref<Array<Schema['Item']['type']>>([]);
 var currentUser: string
 var canCreate = true;
 
@@ -46,6 +48,14 @@ async function setCreation() {
 onMounted(async () => {
   await setCreation()
   await fetchPets()
+  const cachedItems = localStorage.getItem('inventory')
+    if (cachedItems) {
+      console.log("Cached inventory found (PetDisplay).")
+      fetchedItems.value = JSON.parse(cachedItems)
+    } else {
+      fetchedItems = await fetchInventory(currentUser, fetchedItems)
+    }
+
 })
 
 </script>
@@ -68,7 +78,7 @@ onMounted(async () => {
       <h1>No pets found</h1>
     </template>
     <template v-else>
-      <Pet v-for="(pet, i) in fetchedPets" :key="pet.name ?? i" :pet=pet />
+      <Pet v-for="(pet, i) in fetchedPets" :key="pet.name ?? i" :pet=pet :items=fetchedItems />
     </template>
   </div>
 
