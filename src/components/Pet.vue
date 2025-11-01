@@ -1,22 +1,21 @@
 <script setup lang="ts">
 import Modal from './Modal.vue'
 import { onMounted, ref } from 'vue'
-import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../amplify/data/resource';
 import { getUrl } from 'aws-amplify/storage';
 
-const client = generateClient<Schema>() // use this Data client for CRUDL requests
 const open = ref(false)
 const signedSrc = ref('null')
 
 const props = defineProps<{
-  pet: Schema['Pet']['type']
+  pet: Schema['Pet']['type'],
+  items: Array<Schema['Item']['type']>
 }>()
 
 const toggleModal = (n:boolean) => {
   console.log('Modal toggled');
   open.value = n
-  console.log(open)
+  console.log("open: ", open)
   return open
 };
 
@@ -45,7 +44,7 @@ onMounted(async () => {
 
 <template>
   <div v-if="open == true">
-    <Modal :pet="pet" @open="toggleModal(false)"/>
+    <Modal :pet="pet" :items="items" @open="toggleModal(false)"/>
   </div>
 
   <div class="pet-container box">
