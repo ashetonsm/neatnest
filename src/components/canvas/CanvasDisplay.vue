@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import Canvas from './Canvas.vue'
-import { uploadData } from 'aws-amplify/storage'
 import { getCurrentUser } from 'aws-amplify/auth'
 import { generateClient } from 'aws-amplify/api'
 import type { Schema } from 'amplify/data/resource'
@@ -62,9 +61,14 @@ async function handleSubmit(t : string) {
       thingName = prompt(`Name your ${t}:`)
       // If you get a valid name:
       if (thingName) {
-        // Set the path
-        const thingPath = `images/${currentUserId}/${thingType}/${thingName}.png`
-        createItem(thingName, thingPath, currentUserId, currentUserObj)
+        var itemCategory = prompt(`Is your ${t} food or entertainment?:`)
+        if (itemCategory) {
+          // Set the path
+          const thingPath = `images/${currentUserId}/${thingType}/${thingName}.png`
+          createItem(thingName, thingPath, itemCategory, currentUserId, currentUserObj)
+        } else {
+          alert("You must set your item category! Please try again.")
+        }
       } else {
         alert(`You must name your ${thingType}! Please try again.`)
       }
