@@ -1,28 +1,33 @@
 <script setup lang="ts">
 import type { Schema } from '../../amplify/data/resource';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
-defineProps<{
-  pet: Schema['Pet']['type']
+const props = defineProps<{
+  pet: Schema['Pet']['type'],
+  items: Array<Schema['Item']['type']>
 }>()
 
 const emit = defineEmits<{
   (e: 'open', value: boolean) : boolean
 }>()
 
-const food = ref('A')
-const entertainment = ref('A')
+var foodOptions: any
 
-const foodOptions = ref([
-  { text: 'Cake', value: 'A' },
-  { text: 'Test Food 1', value: 'B' },
-  { text: 'Test Food 2', value: 'C' }
-])
-const entertainmentOptions = ref([
-  { text: 'Soccer Ball', value: 'A' },
-  { text: 'Rubber Duck', value: 'B' },
-  { text: 'Stuffed Bunny', value: 'C' }
-])
+var playOptions: any
+
+onMounted(() => {
+  console.log(props.items)
+  const itemFilter1 = props.items
+  const itemFilter2 = props.items
+  foodOptions = itemFilter1.filter((item) => 
+    item.category == "food"
+  )
+  playOptions = itemFilter2.filter((item) => 
+    item.category == "entertainment"
+  )
+  console.log("foodOptions: ", foodOptions)
+  console.log("playOptions: ", playOptions)
+})
 
 </script>
 <template>
@@ -34,21 +39,21 @@ const entertainmentOptions = ref([
     </div>
     <div class="select-input-container">
       <h2>Feed</h2>
-      <select v-model="food">
+      <select v-model="foodOptions">
         <option disabled value="">Please select one</option>
-        <option v-for="food in foodOptions" :value="food.value">
-          {{ food.text }}
+        <option v-for="item in foodOptions" :value="item.name">
+          {{ item.name }}
         </option>
       </select>
       <button @click="emit('open', false)">Do it!</button>
     </div>
 
     <div class="select-input-container">
-      <h2>Entertain</h2>
-      <select v-model="entertainment">
+      <h2>Play</h2>
+      <select v-model="playOptions">
         <option disabled value="">Please select one</option>
-        <option v-for="entertainment in entertainmentOptions" :value="entertainment.value">
-          {{ entertainment.text }}
+        <option v-for="toy in playOptions" :value="toy.name">
+          {{ toy.name }}
         </option>
       </select>
     </div>
