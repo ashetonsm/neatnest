@@ -1,16 +1,19 @@
-import type { Schema } from "amplify/data/resource";
-import { generateClient } from "aws-amplify/api";
 import { uploadData } from "aws-amplify/storage";
-
-const client = generateClient<Schema>()
+import router from '@/router'
 
 export function createPet(
-    name:string, 
-    species:string, 
-    imgPath:string, 
-    userID:string, 
-    userObj: any
+  name:string, 
+  species:string, 
+  imgPath:string, 
+  userID:string, 
+  userObj:any,
+  client:any
 ) {
+    if ((userObj.itemsRemaining - 1) < 0) {
+      // Make sure creation won't put the user into negative numbers.
+      console.log("Insufficient itemsRemaining. Aborting process.")
+      return
+    } else {
     // Query for the canvas
     const canvas = document.querySelector('canvas')
 
@@ -42,7 +45,7 @@ export function createPet(
             owner: userID,
             health: 100,
             image: imgPath
-          }).then((res) => {
+          }).then(() => {
             // Update the user by decreasing petsRemaining by 1 if petsRemaining > 0
             var updatedUser = userObj
             // Subtract 1 from petsRemaining
@@ -51,10 +54,13 @@ export function createPet(
             updatedUser.updatedAt = new Date().toISOString()
 
             client.models.User.update(updatedUser)
-              .then((res) => {
-                console.log(res)
+              .then((res: any) => {
+                console.log("User updated: ", res)
               })
-            console.log(res)
+              .then(() => {
+                router.push({name: 'pets'})
+                router.go(1)
+              })
           });
         } catch (error : any) {
           console.log(error)
@@ -63,4 +69,5 @@ export function createPet(
     } catch (e: any) {
         console.log("Error: ", e)
     } 
+  }
 }
