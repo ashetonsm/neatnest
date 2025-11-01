@@ -4,46 +4,15 @@ import { onMounted, ref } from 'vue';
 import type { Schema } from '../../amplify/data/resource';
 import { generateClient } from 'aws-amplify/data';
 import { getCurrentUser } from 'aws-amplify/auth';
+import { fetchInventory } from './tools/fetchInventory';
 
 // These should be items where the owner is the logged in user
 const client = generateClient<Schema>()
 
 // create a reactive reference to Item[]
-const fetchedItems = ref<Array<Schema['Item']['type']>>([]);
+var fetchedItems = ref<Array<Schema['Item']['type']>>([]);
 var currentUser : string
 var canCreate = true
-
-async function fetchItems() { 
-  const cachedItems = localStorage.getItem('inventory')
-  if (cachedItems) {
-    console.log("Cached inventory found.")
-    fetchedItems.value = JSON.parse(cachedItems)
-  } else {
-    console.log("No cached inventory found, querying database.")
-    await client.models.Item.listItemsByOwnerAndName(
-      {
-        owner: currentUser
-      },
-      {
-        headers: {
-          'Access-Control-Allow-Headers': '*',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': '*',
-          'Content-Type': 'application/json',
-        },
-        authMode: 'userPool'
-      }
-    )
-    .then((res) => {
-      localStorage.setItem('inventory', JSON.stringify(res.data))
-      fetchedItems.value = res.data
-    })
-    .catch((error : any) => {
-      console.log ("No items found for this user.")
-      fetchedItems.value = []
-    });
-  }
-}
 
 async function setCreation() {
   const { userId } = await getCurrentUser()
@@ -60,7 +29,7 @@ async function setCreation() {
 
 onMounted(async () => {
   await setCreation()
-  await fetchItems()
+  fetchedItems = await fetchInventory(currentUser, fetchedItems)
 })
 
 
