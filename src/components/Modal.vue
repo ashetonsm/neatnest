@@ -11,20 +11,29 @@ const emit = defineEmits<{
   (e: 'open', value: boolean) : boolean
 }>()
 
-var foodOptions: any
+function handleSubmit(item: any) {
+  // Close the window
+  emit('open', false)
 
-var playOptions: any
+  console.log(item)
+}
 
-onMounted(() => {
-  console.log(props.items)
+var foodOptions = ref([])
+var playOptions = ref([])
+var selectedFoodOption = ref('')
+var selectedPlayOption = ref('')
+
+onMounted(async () => {
   const itemFilter1 = props.items
   const itemFilter2 = props.items
-  foodOptions = itemFilter1.filter((item) => 
-    item.category == "food"
-  )
-  playOptions = itemFilter2.filter((item) => 
-    item.category == "entertainment"
-  )
+  foodOptions.value = JSON.parse(JSON.stringify(
+    itemFilter1.filter((item) => 
+      item.category == "food"))
+    )
+  playOptions.value = JSON.parse(JSON.stringify(
+    itemFilter2.filter((item) => 
+    item.category == "entertainment"))
+    )
   console.log("foodOptions: ", foodOptions)
   console.log("playOptions: ", playOptions)
 })
@@ -39,26 +48,26 @@ onMounted(() => {
     </div>
     <div class="select-input-container">
       <h2>Feed</h2>
-      <select v-model="foodOptions">
+      <select v-model="selectedFoodOption">
         <option disabled value="">Please select one</option>
-        <option v-for="item in foodOptions" :value="item.name">
+        <option v-for="item in foodOptions" :value="item">
           {{ item.name }}
         </option>
       </select>
-      <button @click="emit('open', false)">Do it!</button>
+      <button @click="handleSubmit(JSON.parse(JSON.stringify(selectedFoodOption)))">Do it!</button>
     </div>
 
     <div class="select-input-container">
       <h2>Play</h2>
-      <select v-model="playOptions">
+      <select v-model="selectedPlayOption">
         <option disabled value="">Please select one</option>
-        <option v-for="toy in playOptions" :value="toy.name">
-          {{ toy.name }}
+        <option v-for="item in playOptions" :value="item">
+          {{ item.name }}
         </option>
       </select>
+    <button @click="handleSubmit(JSON.parse(JSON.stringify(selectedPlayOption)))">Do it!</button>
     </div>
 
-    <button @click="emit('open', false)">Do it!</button>
     </div>
   <div id="modal-block" @scroll.prevent @touchmove.prevent @wheel.prevent>You can't click on anything else</div>
   </Teleport>
