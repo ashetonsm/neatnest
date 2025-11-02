@@ -1,22 +1,15 @@
 <script setup lang="ts">
 defineProps<{
-  user: String
-}>()
+  user: String;
+}>();
 </script>
 
 <template>
   <div class="greetings">
     <h1 class="green">
-      <span v-if="user">
-        Hello, {{ user }}
-      </span>
-      <span v-else="!user">
-        Hello!
-      </span>
+      <span v-if="user"> Hello, {{ user }} </span>
+      <span v-else="!user"> Hello! </span>
     </h1>
-    <h3>
-      Welcome to Neat Nest.
-    </h3>
+    <h3>Welcome to Neat Nest.</h3>
   </div>
 </template>
-
