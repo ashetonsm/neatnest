@@ -43,7 +43,7 @@ export function createItem(
           price: 1,
           shopfront: "NA",
           owner: userID,
-          health: 1,
+          health: 99,
           rarity: 1,
           image: imgPath
         }).then(() => {
@@ -59,6 +59,7 @@ export function createItem(
               console.log("User updated: ", res)
             })
             .then(() => {
+              localStorage.removeItem("inventory");
               router.push({ name: 'inventory' })
               router.go(1)
             })
