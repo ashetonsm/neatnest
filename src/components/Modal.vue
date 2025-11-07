@@ -1,6 +1,10 @@
 <script setup lang="ts">
+import router from "@/router";
+import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../amplify/data/resource";
 import { onMounted, ref } from "vue";
+
+const client = generateClient<Schema>();
 
 const props = defineProps<{
   pet: Schema["Pet"]["type"];
@@ -11,11 +15,58 @@ const emit = defineEmits<{
   (e: "open", value: boolean): boolean;
 }>();
 
-function handleSubmit(item: any) {
+async function handleSubmit(item: any) {
+  const pet = JSON.parse(JSON.stringify(props.pet))
+  console.log("pet: ", pet)
+  try {
+    var updatedItem = item;
+    var updatedPet = pet;
+    var itemWillBeDeleted = false;
+    updatedItem.health--;
+
+    if (updatedItem.health <= 0) {
+      itemWillBeDeleted = true;
+    }
+
+console.log("itemWillBeDeleted: ", itemWillBeDeleted)
+    // Update the item.
+    if (itemWillBeDeleted) {
+      var confirmDeletion = confirm("This item will disappear after use. Continue?");
+      console.log(confirmDeletion);
+      if (confirmDeletion == true) {
+        // Delete the item
+        await client.models.Item.delete({ id: item.id }).then((res: any) => {
+          console.log("Item deleted due to health falling to 0: ", res);
+        });
+      }
+    } else {
+      // Item will not be deleted
+      // Subtract 1 from health
+      updatedItem.updatedAt = new Date().toISOString();
+      await client.models.Item.update(updatedItem).then((res: any) => {
+        console.log("Item updated: ", res);
+      });
+    }
+
+    // Update the pet
+    if (pet.mood < 5) {
+      // Increment mood by one
+      updatedPet.mood++;
+    }
+    await client.models.Pet.update(updatedPet).then((res: any) => {
+      console.log("Pet updated: ", res);
+    });
+    // Remove cached inventory and pets
+    localStorage.removeItem("inventory");
+    localStorage.removeItem("pets");
+    router.go(0);
+  } catch (error: any) {
+    console.error("Error: ", error);
+  }
+
   // Close the window
   emit("open", false);
-
-  console.log(item);
+  // console.log(item);
 }
 
 var foodOptions = ref([]);
