@@ -24,7 +24,7 @@ async function handleSubmit(item: any) {
     var itemWillBeDeleted = false;
     updatedItem.health--;
 
-    if (updatedItem.health <= 0) {
+    if (updatedItem.health <= 0 || updatedItem.category == 'food') {
       itemWillBeDeleted = true;
     }
 
@@ -32,12 +32,14 @@ console.log("itemWillBeDeleted: ", itemWillBeDeleted)
     // Update the item.
     if (itemWillBeDeleted) {
       var confirmDeletion = confirm("This item will disappear after use. Continue?");
-      console.log(confirmDeletion);
       if (confirmDeletion == true) {
         // Delete the item
         await client.models.Item.delete({ id: item.id }).then((res: any) => {
-          console.log("Item deleted due to health falling to 0: ", res);
+          console.log("Item deleted: ", res);
         });
+      } else {
+        // Deletion was not confirmed.
+        return
       }
     } else {
       // Item will not be deleted
@@ -49,10 +51,20 @@ console.log("itemWillBeDeleted: ", itemWillBeDeleted)
     }
 
     // Update the pet
+
+    // Mood actions
     if (pet.mood < 5) {
       // Increment mood by one
       updatedPet.mood++;
     }
+    // Food actions
+    if (item.category == 'food') {
+      if (pet.hunger > 0) {
+        // decrease hunger by one
+        updatedPet.hunger--;
+      }
+    }
+
     await client.models.Pet.update(updatedPet).then((res: any) => {
       console.log("Pet updated: ", res);
     });
