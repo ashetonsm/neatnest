@@ -1,54 +1,52 @@
 <script setup lang="ts">
-import Item from './Item.vue';
-import { useRoute } from 'vue-router';
-import { onMounted, ref } from 'vue';
-import { generateClient } from 'aws-amplify/api';
-import type { Schema } from '../../amplify/data/resource';
-import { getCurrentUser } from 'aws-amplify/auth';
+import Item from "./Item.vue";
+import { useRoute } from "vue-router";
+import { onMounted, ref } from "vue";
+import { generateClient } from "aws-amplify/api";
+import type { Schema } from "../../amplify/data/resource";
+import { getCurrentUser } from "aws-amplify/auth";
 // These should be items that are freely in the pool for this shop
 
-const route = useRoute()
+const route = useRoute();
 
 // TODO: Determine shop name based on number from route
-var shopFrontName = route.params.id == "1" ? "Test Emporium" : "Test Shack"
-const client = generateClient<Schema>()
-const fetchedItems = ref<Array<Schema['Item']['type']>>([]);
-var currentUser : string
+var shopFrontName = route.params.id == "1" ? "Test Emporium" : "Test Shack";
+const client = generateClient<Schema>();
+const fetchedItems = ref<Array<Schema["Item"]["type"]>>([]);
+var currentUser: string;
 
-async function fetchItems() { 
-  const cachedItems = localStorage.getItem(shopFrontName + ' Items')
+async function fetchItems() {
+  const cachedItems = localStorage.getItem(shopFrontName + " Items");
   if (cachedItems) {
-    console.log("Cached shop items found.")
-    fetchedItems.value = JSON.parse(cachedItems)
+    console.log("Cached shop items found.");
+    fetchedItems.value = JSON.parse(cachedItems);
   } else {
-    console.log("No cached shop items found, querying database.")
+    console.log("No cached shop items found, querying database.");
     const { data: items, errors } = await client.models.Item.listItemsByShopfrontAndOwner(
       {
         shopfront: shopFrontName,
         owner: {
-          eq: 'NA',
+          eq: "NA",
         },
       },
       {
-        authMode: 'userPool'
+        authMode: "userPool",
       }
     );
-    localStorage.setItem(shopFrontName + ' Items', JSON.stringify(items))
-    fetchedItems.value = items
+    localStorage.setItem(shopFrontName + " Items", JSON.stringify(items));
+    fetchedItems.value = items;
   }
 }
 
 async function getUser() {
-  const { userId } = await getCurrentUser()
-  currentUser = userId
+  const { userId } = await getCurrentUser();
+  currentUser = userId;
 }
 
-
 onMounted(async () => {
-  await getUser()
-  await fetchItems()
-})
-
+  await getUser();
+  await fetchItems();
+});
 </script>
 
 <template>
@@ -64,7 +62,12 @@ onMounted(async () => {
       <h1>This shop is sold out!</h1>
     </template>
     <template v-else>
-      <Item v-for="(item, i) in fetchedItems" :key="item.name ?? i" :item="item" :current-user="currentUser" />
+      <Item
+        v-for="(item, i) in fetchedItems"
+        :key="item.name ?? i"
+        :item="item"
+        :current-user="currentUser"
+      />
     </template>
   </div>
 </template>

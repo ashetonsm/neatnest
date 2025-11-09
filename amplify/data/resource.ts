@@ -7,6 +7,7 @@ const schema = a.schema({
       price: a.integer(),
       shopfront: a.string(),
       owner: a.string(),
+      category: a.string(),
       health: a.integer(),
       rarity: a.integer(),
       image: a.string()
