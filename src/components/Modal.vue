@@ -3,6 +3,7 @@ import router from "@/router";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../amplify/data/resource";
 import { onMounted, ref } from "vue";
+import { deleteStorage } from "./tools/deleteStorage";
 
 const client = generateClient<Schema>();
 
@@ -15,31 +16,35 @@ const emit = defineEmits<{
   (e: "open", value: boolean): boolean;
 }>();
 
-async function handleSubmit(item: any) {
-  const pet = JSON.parse(JSON.stringify(props.pet))
-  console.log("pet: ", pet)
+async function handleSubmit(item: Schema["Item"]["type"]) {
+  const pet = JSON.parse(JSON.stringify(props.pet));
+  console.log("pet: ", pet);
   try {
     var updatedItem = item;
     var updatedPet = pet;
     var itemWillBeDeleted = false;
     updatedItem.health--;
 
-    if (updatedItem.health <= 0 || updatedItem.category == 'food') {
+    if (updatedItem.health <= 0 || updatedItem.category == "food") {
       itemWillBeDeleted = true;
     }
 
-console.log("itemWillBeDeleted: ", itemWillBeDeleted)
+    console.log("itemWillBeDeleted: ", itemWillBeDeleted);
     // Update the item.
     if (itemWillBeDeleted) {
       var confirmDeletion = confirm("This item will disappear after use. Continue?");
       if (confirmDeletion == true) {
         // Delete the item
-        await client.models.Item.delete({ id: item.id }).then((res: any) => {
-          console.log("Item deleted: ", res);
-        });
+        await client.models.Item.delete({ id: item.id })
+          .then((res: any) => {
+            console.log("Item deleted: ", res);
+          })
+          .then(async () => {
+            await deleteStorage(item.image);
+          });
       } else {
         // Deletion was not confirmed.
-        return
+        return;
       }
     } else {
       // Item will not be deleted
@@ -58,7 +63,7 @@ console.log("itemWillBeDeleted: ", itemWillBeDeleted)
       updatedPet.mood++;
     }
     // Food actions
-    if (item.category == 'food') {
+    if (item.category == "food") {
       if (pet.hunger > 0) {
         // decrease hunger by one
         updatedPet.hunger--;
