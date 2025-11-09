@@ -1,9 +1,14 @@
 <script setup lang="ts">
+import router from "@/router";
+import { useRoute } from "vue-router";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../amplify/data/resource";
 import { getUrl } from "aws-amplify/storage";
 import { onMounted, ref } from "vue";
+import { deleteStorage } from "./tools/deleteStorage"
+const route = useRoute();
 
+var shopFrontName = route.params.id == "1" ? "Test Emporium" : "Test Shack";
 const client = generateClient<Schema>(); // use this Data client for CRUDL requests
 const signedSrc = ref("null");
 
@@ -19,9 +24,16 @@ async function buyFlow(i: Schema["Item"]["type"]) {
     i.owner = props.currentUser;
 
     // send the update request
-    await await client.models.Item.update(i).then((res) => {
+    await client.models.Item.update(i).then((res) => {
       console.log(res);
     });
+    // Remove cached inventory
+    await localStorage.removeItem("inventory");
+    // Remove cached shop inventory
+    console.log(shopFrontName)
+    await localStorage.removeItem(shopFrontName);
+    // Refresh
+    router.go(0);
   } else {
     return console.log(choice);
   }
@@ -43,6 +55,25 @@ async function getFileUrl(fileName: any) {
   }
 
   return;
+}
+
+async function handleDelete(i: Schema["Item"]["type"]) {
+  const choice = confirm("Delete " + i.name + "?");
+  if (choice) {
+    // Do delete logic
+    // Delete the item
+    await client.models.Item.delete({ id: i.id }).then((res: any) => {
+      console.log("Item deleted: ", res);
+    }).then(async () => {
+      await deleteStorage(i.image)
+    })
+    // Remove cached inventory
+    localStorage.removeItem("inventory");
+    // Refresh
+    router.go(0);
+  } else {
+    return console.log("Deletion aborted.");
+  }
 }
 
 function useFlow(i: Schema["Item"]["type"]) {
@@ -71,8 +102,15 @@ onMounted(async () => {
       />
 
       <h2 class="green">{{ item.name }}</h2>
-      <h2>Price:</h2>
-      <h2 class="green">{{ item.price }}</h2>
+      <div v-if="item.owner != props.currentUser">
+        <h2>Price:</h2>
+        <h2 class="green">{{ item.price }}</h2>
+      </div>
+      <div v-if="item.owner == props.currentUser">
+        <h2 class="red">
+          <button @click="handleDelete(item)">Delete</button>
+        </h2>
+      </div>
     </div>
   </div>
 </template>
