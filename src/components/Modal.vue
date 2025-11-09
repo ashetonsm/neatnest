@@ -23,9 +23,9 @@ async function handleSubmit(item: Schema["Item"]["type"]) {
     var updatedItem = item;
     var updatedPet = pet;
     var itemWillBeDeleted = false;
-    updatedItem.health--;
+    updatedItem.health!--;
 
-    if (updatedItem.health <= 0 || updatedItem.category == "food") {
+    if (updatedItem.health! <= 0 || updatedItem.category == "food") {
       itemWillBeDeleted = true;
     }
 
@@ -40,7 +40,7 @@ async function handleSubmit(item: Schema["Item"]["type"]) {
             console.log("Item deleted: ", res);
           })
           .then(async () => {
-            await deleteStorage(item.image);
+            await deleteStorage(item.image!);
           });
       } else {
         // Deletion was not confirmed.
@@ -49,7 +49,6 @@ async function handleSubmit(item: Schema["Item"]["type"]) {
     } else {
       // Item will not be deleted
       // Subtract 1 from health
-      updatedItem.updatedAt = new Date().toISOString();
       await client.models.Item.update(updatedItem).then((res: any) => {
         console.log("Item updated: ", res);
       });
@@ -86,8 +85,8 @@ async function handleSubmit(item: Schema["Item"]["type"]) {
   // console.log(item);
 }
 
-var foodOptions = ref([]);
-var playOptions = ref([]);
+var foodOptions = ref<Array<Schema["Item"]["type"]>>();
+var playOptions = ref<Array<Schema["Item"]["type"]>>();
 var selectedFoodOption = ref("");
 var selectedPlayOption = ref("");
 
@@ -129,7 +128,7 @@ onMounted(async () => {
         <select v-model="selectedPlayOption">
           <option disabled value="">Please select one</option>
           <option v-for="item in playOptions" :value="item">
-            {{ item.name }}
+            {{ item.name! }}
           </option>
         </select>
         <button @click="handleSubmit(JSON.parse(JSON.stringify(selectedPlayOption)))">
