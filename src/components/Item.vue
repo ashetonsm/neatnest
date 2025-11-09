@@ -65,7 +65,7 @@ async function handleDelete(i: Schema["Item"]["type"]) {
     await client.models.Item.delete({ id: i.id }).then((res: any) => {
       console.log("Item deleted: ", res);
     }).then(async () => {
-      await deleteStorage(i.image)
+      await deleteStorage(i.image!)
     })
     // Remove cached inventory
     localStorage.removeItem("inventory");
