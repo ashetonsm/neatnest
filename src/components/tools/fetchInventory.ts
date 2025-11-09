@@ -4,12 +4,12 @@ import type { Schema } from "amplify/data/resource"
 const client = generateClient<Schema>()
 
 export async function fetchInventory(currentUser: any, fetchedItems: any): Promise<any> {
-  const cachedItems = localStorage.getItem('inventory')
-  if (cachedItems) {
-    console.log("Cached inventory found.")
-    fetchedItems.value = JSON.parse(cachedItems)
-  } else {
-    console.log("No cached inventory found, querying database.")
+  // const cachedItems = localStorage.getItem('inventory')
+  // if (cachedItems) {
+    // console.log("Cached inventory found.")
+    // fetchedItems.value = JSON.parse(cachedItems)
+  // } else {
+    // console.log("No cached inventory found, querying database.")
     await client.models.Item.listItemsByOwnerAndName(
       {
         owner: currentUser
@@ -34,6 +34,6 @@ export async function fetchInventory(currentUser: any, fetchedItems: any): Promi
         fetchedItems.value = []
         return fetchedItems.value
       });
-  }
+  // }
 
 }
