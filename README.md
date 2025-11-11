@@ -1,26 +1,26 @@
-## AWS Amplify Vue.js Starter Template
+## About NeatNest (AWS Amplify)
 
-This repository provides a starter template for creating applications using Vue.js and AWS Amplify, emphasizing easy setup for authentication, API, and database capabilities.
+NeatNest is a pixel pet site inspired by Neopets and classic oekakis (drawing message boards). After creating an account, you can design your own items and pets with the pixel canvas.
 
-## Overview
+Make friends, make art, make a name for yourself!
 
-This template equips you with a foundational Vue application integrated with AWS Amplify, streamlined for scalability and performance. It is ideal for developers looking to jumpstart their project with pre-configured AWS services like Cognito, AppSync, and DynamoDB.
+Play [here](https://google.com)!
 
-## Features
+## To do:
 
-- **Authentication**: Setup with Amazon Cognito for secure user authentication.
-- **API**: Ready-to-use GraphQL endpoint with AWS AppSync.
+[ ] - Create friend system
+[ ] - Create comment system
+[ ] - Create user stores
+[ ] - Seed default shops on a timer
+[ ] - Delete owned pets
+[ ] - Trade pets
+[ ] - Add user profile pages
+[ ] - Add pet profile pages
+[ ] - Add form input to item/pet creation
+[ ] - Update canvas to make drawing easier
+
+## Technology Used:
+
+- **Hosting**: Via Amazon Amplify.
+- **Authentication**: Via Amazon Cognito.
 - **Database**: Real-time database powered by Amazon DynamoDB.
-
-## Deploying to AWS
-
-For detailed instructions on deploying your application, refer to the [deployment section](https://docs.amplify.aws/vue/start/quickstart/#deploy-a-fullstack-app-to-aws) of our documentation.
-
-
-## Security
-
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
-
-## License
-
-This library is licensed under the MIT-0 License. See the LICENSE file.
