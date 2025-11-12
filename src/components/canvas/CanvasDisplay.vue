@@ -37,7 +37,7 @@ function resetCanvas() {
 function handleColor(e: Event) {
   if (e.target) {
     color.value = (e.target as HTMLInputElement).value.toString();
-    console.log(color.value);
+    console.log("color.value: ", color.value);
   }
 }
 
@@ -140,12 +140,18 @@ onMounted(async () => {
           <h3>Colors:</h3>
           <button
             class="black color"
-            value="#000000"
+            value="rgb(0, 0, 0)"
             @click="handleColor($event)"
           ></button>
           <button
             class="white color"
-            value="#FFFFFF"
+            value="rgb(255, 255, 255)"
+            @click="handleColor($event)"
+          ></button>
+          <button
+            id="lastColor"
+            class="last color"
+            value="rgb(245, 73, 39)"
             @click="handleColor($event)"
           ></button>
         </div>
