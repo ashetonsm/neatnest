@@ -8,15 +8,15 @@ const props = defineProps<{
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const canvasBoundingRect = ref<any | null>(null);
+const click = ref<boolean>(false)
+var pixelSize = 0
 
 const draw = (ctx: CanvasRenderingContext2D, e: any) => {
   if (canvasRef.value) {
-    var pixelSize = canvasRef.value.width / props.size;
+    pixelSize = canvasRef.value.width / props.size;
     const x = e.pageX - canvasRef.value.offsetLeft;
     const y = e.pageY - canvasRef.value.offsetTop;
     ctx.fillStyle = props.color;
-
-    console.log("ctx.fillStyle: ", ctx.fillStyle);
 
     ctx.fillRect(
       Math.floor(x / pixelSize) * pixelSize,
@@ -28,9 +28,8 @@ const draw = (ctx: CanvasRenderingContext2D, e: any) => {
 };
 
 const preview = (ctx: CanvasRenderingContext2D, e: any) => {
-  console.log("props.color: ", props.color);
   if (canvasRef.value) {
-    var pixelSize = canvasRef.value.width / props.size;
+    pixelSize = canvasRef.value.width / props.size;
     const x = e.pageX - canvasRef.value.offsetLeft;
     const y = e.pageY - canvasRef.value.offsetTop;
 
@@ -47,12 +46,19 @@ const preview = (ctx: CanvasRenderingContext2D, e: any) => {
 
     // RGB of the moused over area
     const rgb = `rgb(${r}, ${g}, ${b})`;
-    console.log("rgb: ", rgb);
+
+    if (click.value == true) {
+      draw(ctx, e)
+    }
   }
 };
 
-function fillPixel(e: any) {
-  draw(canvasRef.value!.getContext("2d")!, e);
+function mouseDown() {
+  return click.value = true
+}
+
+function mouseUp() {
+  return click.value = false
 }
 
 function previewPixel(e: any) {
@@ -67,16 +73,17 @@ function adjustCanvasSize() {
 
     // Fill the canvas with white again
     const context = canvasRef.value.getContext("2d");
-    context!.fillStyle = "#FFFFFF";
+    context!.fillStyle = "rgb(255, 255, 255)";
     context!.fillRect(0, 0, canvasRef.value.width, canvasRef.value.height);
   }
 }
 
 onMounted(() => {
-  // alert("Warning: If you resize the window, your work will be lost!");
+  alert("Warning: If you resize the window, your work will be lost!");
   // Adjust the canvas size when the window is resized so the pixels aren't placed incorrectly
   window.addEventListener("resize", adjustCanvasSize);
-  window.addEventListener("mousedown", fillPixel);
+  window.addEventListener("mousedown", mouseDown);
+  window.addEventListener("mouseup", mouseUp);
 
   if (canvasRef.value) {
     // Make the width and height equal so it's a square
@@ -86,7 +93,7 @@ onMounted(() => {
 
     // Fill the canvas with white
     const context = canvasRef.value.getContext("2d");
-    context!.fillStyle = "#FFFFFF";
+    context!.fillStyle = "rgb(255, 255, 255)";
     context!.fillRect(0, 0, canvasRef.value.width, canvasRef.value.height);
   }
 });
