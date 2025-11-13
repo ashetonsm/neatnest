@@ -26,7 +26,8 @@ function resetCanvas() {
     const canvas = document.querySelector("canvas");
     if (canvas) {
       const context = canvas.getContext("2d");
-      context!.clearRect(0, 0, canvas.width, canvas.height);
+      context!.fillStyle = "rgb(255, 255, 255)";
+      context!.fillRect(0, 0, canvas.width, canvas.height);
     } else {
       console.log("Canvas not found!");
     }
@@ -39,7 +40,6 @@ function handleColor(e: Event) {
   if (e.target) {
     lastColor.value = color.value;
     color.value = (e.target as HTMLInputElement).value.toString();
-    console.log("color.value: ", color.value);
   }
 }
 
@@ -102,15 +102,12 @@ async function setCreation() {
   currentUserId = userId;
   await client.models.User.get({ id: userId }).then((u) => {
     currentUserObj = u.data!;
-    console.log(currentUserObj);
     if (u.data!.itemsRemaining! > 0) {
       canCreateItem.value = true;
     }
     if (u.data!.petsRemaining! > 0) {
       canCreatePet.value = true;
     }
-    console.log("canCreateItem: ", canCreateItem.value);
-    console.log("canCreatePet: ", canCreatePet.value);
     loading.value = false;
   });
 }
@@ -136,9 +133,6 @@ onMounted(async () => {
           <button @click="handleSubmit(route.params.type.toString())">Finish</button>
         </div>
         <div>
-          <a href="finishedImg" id="finishedImg" download>My Finished Image</a>
-        </div>
-        <div>
           <h3>Colors:</h3>
           <button
             class="black color"
@@ -150,23 +144,16 @@ onMounted(async () => {
             class="white color"
             value="rgb(255, 255, 255)"
             @click="handleColor($event)"
-            style="background-color: white;"
+            style="background-color: rgb(255, 255, 255);"
           ></button>
           <button
             id="lastColor"
             class="last color"
-            value="rgb(245, 73, 39)"
-            @click="handleColor($event)"
-            style="background-color: rgb(245, 73, 39);"
-
-          ></button>
-          <button
-            id="currentColor"
-            class="current color"
-            value=""
+            value="rgb(0, 0, 0)"
             @click="handleColor($event)"
             :style="`background-color: ${lastColor}`"
           ></button>
+
         </div>
       </div>
       <Canvas :size="24" :color="color"></Canvas>
