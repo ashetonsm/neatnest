@@ -19,6 +19,7 @@ var currentUserObj: any;
 var loading = ref<boolean>(true);
 var canCreatePet = ref<boolean>(false);
 var canCreateItem = ref<boolean>(false);
+var lastColor = ref<string>("rgb(0, 0, 0)");
 
 function resetCanvas() {
   try {
@@ -36,6 +37,7 @@ function resetCanvas() {
 
 function handleColor(e: Event) {
   if (e.target) {
+    lastColor.value = color.value;
     color.value = (e.target as HTMLInputElement).value.toString();
     console.log("color.value: ", color.value);
   }
@@ -142,17 +144,28 @@ onMounted(async () => {
             class="black color"
             value="rgb(0, 0, 0)"
             @click="handleColor($event)"
+            style="background-color: black;"
           ></button>
           <button
             class="white color"
             value="rgb(255, 255, 255)"
             @click="handleColor($event)"
+            style="background-color: white;"
           ></button>
           <button
             id="lastColor"
             class="last color"
             value="rgb(245, 73, 39)"
             @click="handleColor($event)"
+            style="background-color: rgb(245, 73, 39);"
+
+          ></button>
+          <button
+            id="currentColor"
+            class="current color"
+            value=""
+            @click="handleColor($event)"
+            :style="`background-color: ${lastColor}`"
           ></button>
         </div>
       </div>
