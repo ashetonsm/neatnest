@@ -10,48 +10,13 @@ const canvasRef = ref<HTMLCanvasElement | null>(null);
 const canvasBoundingRect = ref<any | null>(null);
 
 const draw = (ctx: CanvasRenderingContext2D, e: any) => {
-
-  console.log("props.color: ", props.color)
   if (canvasRef.value) {
     var pixelSize = canvasRef.value.width / props.size;
-    // This is the fillStyle RGBA format: "rgb(0, 0, 255)"
-    // Make a string of:
-    // rgba(
-    // data 0, which is R
-    // data 1, which is G
-    // data 3, which is B
-    // 255), which is alpha
-
-
     const x = e.pageX - canvasRef.value.offsetLeft;
     const y = e.pageY - canvasRef.value.offsetTop;
+    ctx.fillStyle = props.color;
 
-    var locationColor = ctx.getImageData(
-      Math.floor(x / pixelSize) * pixelSize,
-      Math.floor(y / pixelSize) * pixelSize,
-      pixelSize,
-      pixelSize)
-
-      // console.log(locationColor.data)
-
-      const r = locationColor.data[300].toString()
-      const g = locationColor.data[301].toString()
-      const b = locationColor.data[302].toString()
-
-      // RGB of the moused over area
-      const rgb = `moused over rgb(${r}, ${g}, ${b})`
-      console.log("rgb: ", rgb)
-
-      // Of course this works even with the rgb format
-      // ctx.fillStyle = props.color;
-      
-      // Something is making it not recognize when it's mousing over the same color
-      if (rgb != props.color) {
-        ctx.fillStyle = props.color;
-      }
-
-    console.log("ctx.fillStyle: ", ctx.fillStyle)
-      
+    console.log("ctx.fillStyle: ", ctx.fillStyle);
 
     ctx.fillRect(
       Math.floor(x / pixelSize) * pixelSize,
@@ -62,9 +27,36 @@ const draw = (ctx: CanvasRenderingContext2D, e: any) => {
   }
 };
 
+const preview = (ctx: CanvasRenderingContext2D, e: any) => {
+  console.log("props.color: ", props.color);
+  if (canvasRef.value) {
+    var pixelSize = canvasRef.value.width / props.size;
+    const x = e.pageX - canvasRef.value.offsetLeft;
+    const y = e.pageY - canvasRef.value.offsetTop;
+
+    var locationColor = ctx.getImageData(
+      Math.floor(x / pixelSize) * pixelSize,
+      Math.floor(y / pixelSize) * pixelSize,
+      pixelSize,
+      pixelSize
+    );
+
+    const r = locationColor.data[300].toString();
+    const g = locationColor.data[301].toString();
+    const b = locationColor.data[302].toString();
+
+    // RGB of the moused over area
+    const rgb = `rgb(${r}, ${g}, ${b})`;
+    console.log("rgb: ", rgb);
+  }
+};
+
 function fillPixel(e: any) {
-  const context = canvasRef.value!.getContext("2d");
-  draw(context!, e);
+  draw(canvasRef.value!.getContext("2d")!, e);
+}
+
+function previewPixel(e: any) {
+  preview(canvasRef.value!.getContext("2d")!, e);
 }
 
 function adjustCanvasSize() {
@@ -84,6 +76,7 @@ onMounted(() => {
   // alert("Warning: If you resize the window, your work will be lost!");
   // Adjust the canvas size when the window is resized so the pixels aren't placed incorrectly
   window.addEventListener("resize", adjustCanvasSize);
+  window.addEventListener("mousedown", fillPixel);
 
   if (canvasRef.value) {
     // Make the width and height equal so it's a square
@@ -100,7 +93,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <canvas @mouseover="fillPixel" ref="canvasRef"></canvas>
+  <canvas @mousemove="previewPixel" ref="canvasRef"></canvas>
 </template>
 
 <style lang="css" scoped>
