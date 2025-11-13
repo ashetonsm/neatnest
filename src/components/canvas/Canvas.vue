@@ -126,16 +126,6 @@ input {
   border-radius: 100%;
 }
 
-.black {
-  color: white;
-  background-color: black;
-}
-
-.white {
-  color: black;
-  background-color: white;
-}
-
 .container {
   display: flex;
   width: 100%;
