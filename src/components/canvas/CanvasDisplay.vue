@@ -11,7 +11,7 @@ import { createPet } from "../tools/createPet";
 const client = generateClient<Schema>();
 const route = useRoute();
 
-const color = ref<string>("#000000");
+const color = ref<string>("rgb(0, 0, 0)");
 let thingType = route.params.type;
 let thingName: string | null;
 var currentUserId: string;
@@ -19,13 +19,15 @@ var currentUserObj: any;
 var loading = ref<boolean>(true);
 var canCreatePet = ref<boolean>(false);
 var canCreateItem = ref<boolean>(false);
+var lastColor = ref<string>("rgb(0, 0, 0)");
 
 function resetCanvas() {
   try {
     const canvas = document.querySelector("canvas");
     if (canvas) {
       const context = canvas.getContext("2d");
-      context!.clearRect(0, 0, canvas.width, canvas.height);
+      context!.fillStyle = "rgb(255, 255, 255)";
+      context!.fillRect(0, 0, canvas.width, canvas.height);
     } else {
       console.log("Canvas not found!");
     }
@@ -35,9 +37,10 @@ function resetCanvas() {
 }
 
 function handleColor(e: Event) {
+  console.log(e.target)
   if (e.target) {
+    lastColor.value = color.value;
     color.value = (e.target as HTMLInputElement).value.toString();
-    console.log(color.value);
   }
 }
 
@@ -100,15 +103,12 @@ async function setCreation() {
   currentUserId = userId;
   await client.models.User.get({ id: userId }).then((u) => {
     currentUserObj = u.data!;
-    console.log(currentUserObj);
     if (u.data!.itemsRemaining! > 0) {
       canCreateItem.value = true;
     }
     if (u.data!.petsRemaining! > 0) {
       canCreatePet.value = true;
     }
-    console.log("canCreateItem: ", canCreateItem.value);
-    console.log("canCreatePet: ", canCreatePet.value);
     loading.value = false;
   });
 }
@@ -133,79 +133,48 @@ onMounted(async () => {
           <button @click="resetCanvas">Reset</button>
           <button @click="handleSubmit(route.params.type.toString())">Finish</button>
         </div>
-        <div>
-          <a href="finishedImg" id="finishedImg" download>My Finished Image</a>
-        </div>
-        <div>
-          <h3>Colors:</h3>
-          <button
-            class="black color"
-            value="#000000"
-            @click="handleColor($event)"
-          ></button>
-          <button
-            class="white color"
-            value="#FFFFFF"
-            @click="handleColor($event)"
-          ></button>
+        <div class="container-block">
+          <div class="row">
+            <h3>Colors:</h3>
+          </div>
+          <div class="row">
+            <div class="column">
+              <button
+                class="black color"
+                value="rgb(0, 0, 0)"
+                @click="handleColor($event)"
+                style="background-color: rgb(0, 0, 0)"
+              ></button>
+              Black
+            </div>
+            <div class="column">
+              <button
+                class="white color"
+                value="rgb(255, 255, 255)"
+                @click="handleColor($event)"
+                style="background-color: rgb(255, 255, 255)"
+              ></button>
+              White
+            </div>
+            <div class="column">
+              <button
+                id="lastColor"
+                class="last color"
+                :value="`${lastColor}`"
+                @click="handleColor($event)"
+                :style="`background-color: ${lastColor}`"
+              ></button>
+              Last
+            </div>
+          </div>
         </div>
       </div>
-      <Canvas :size="24" :color="color"></Canvas>
+      <div class="container-flex">
+        <Canvas :size="24" :color="color"></Canvas>
+      </div>
     </template>
     <template v-if="!loading && !canCreatePet && !canCreateItem">
       <h1>Hmm, looks like you can't make anything right now.</h1>
     </template>
   </div>
 </template>
-
-<style lang="css" scoped>
-.navbar {
-  padding: 1em;
-  margin-bottom: 1em;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: gray;
-  border-radius: 3px;
-}
-
-button,
-input {
-  height: 35px;
-  padding: 0 1em;
-}
-
-.color {
-  width: 1em;
-  border-radius: 100%;
-}
-
-.black {
-  color: white;
-  background-color: black;
-}
-
-.white {
-  color: black;
-  background-color: white;
-}
-
-.container {
-  display: flex;
-  width: 100%;
-  align-content: center;
-  align-items: center;
-  justify-content: center;
-}
-
-canvas {
-  border: 2px solid black;
-  min-width: 300px;
-  width: 25vw;
-  max-width: 500px;
-  min-height: 300px;
-  height: 25vw;
-  max-height: 500px;
-}
-</style>
