@@ -65,23 +65,8 @@ function previewPixel(e: any) {
   preview(canvasRef.value!.getContext("2d")!, e);
 }
 
-function adjustCanvasSize() {
-  if (canvasRef.value) {
-    // Make the width and height equal so it's a square
-    canvasRef.value!.width = canvasRef.value!.offsetWidth;
-    canvasRef.value!.height = canvasRef.value!.offsetWidth;
-
-    // Fill the canvas with white again
-    const context = canvasRef.value.getContext("2d");
-    context!.fillStyle = "rgb(255, 255, 255)";
-    context!.fillRect(0, 0, canvasRef.value.width, canvasRef.value.height);
-  }
-}
 
 onMounted(() => {
-  alert("Warning: If you resize the window, your work will be lost!");
-  // Adjust the canvas size when the window is resized so the pixels aren't placed incorrectly
-  window.addEventListener("resize", adjustCanvasSize);
   window.addEventListener("mousedown", mouseDown);
   window.addEventListener("mouseup", mouseUp);
 
@@ -136,11 +121,7 @@ input {
 
 canvas {
   border: 2px solid black;
-  min-width: 300px;
-  width: 25vw;
-  max-width: 500px;
-  min-height: 300px;
-  height: 25vw;
-  max-height: 500px;
+  width: 300px;
+  height: 300px;
 }
 </style>
