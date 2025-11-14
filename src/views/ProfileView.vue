@@ -1,8 +1,7 @@
 <script setup lang="ts">
+import Profile from "@/components/Profile.vue";
 </script>
 
 <template>
-  <div class="page" id="profilePage">
-    <h1>This is a profile page</h1>
-  </div>
+  <Profile />
 </template>
