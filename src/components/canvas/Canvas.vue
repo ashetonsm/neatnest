@@ -8,8 +8,8 @@ const props = defineProps<{
 
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const canvasBoundingRect = ref<any | null>(null);
-const click = ref<boolean>(false)
-var pixelSize = 0
+const click = ref<boolean>(false);
+var pixelSize = 0;
 
 const draw = (ctx: CanvasRenderingContext2D, e: any) => {
   if (canvasRef.value) {
@@ -29,42 +29,23 @@ const draw = (ctx: CanvasRenderingContext2D, e: any) => {
 
 const preview = (ctx: CanvasRenderingContext2D, e: any) => {
   if (canvasRef.value) {
-    pixelSize = canvasRef.value.width / props.size;
-    const x = e.pageX - canvasRef.value.offsetLeft;
-    const y = e.pageY - canvasRef.value.offsetTop;
-
-    var locationColor = ctx.getImageData(
-      Math.floor(x / pixelSize) * pixelSize,
-      Math.floor(y / pixelSize) * pixelSize,
-      pixelSize,
-      pixelSize
-    );
-
-    const r = locationColor.data[300].toString();
-    const g = locationColor.data[301].toString();
-    const b = locationColor.data[302].toString();
-
-    // RGB of the moused over area
-    const rgb = `rgb(${r}, ${g}, ${b})`;
-
     if (click.value == true) {
-      draw(ctx, e)
+      draw(ctx, e);
     }
   }
 };
 
 function mouseDown() {
-  return click.value = true
+  return (click.value = true);
 }
 
 function mouseUp() {
-  return click.value = false
+  return (click.value = false);
 }
 
 function previewPixel(e: any) {
   preview(canvasRef.value!.getContext("2d")!, e);
 }
-
 
 onMounted(() => {
   window.addEventListener("mousedown", mouseDown);
@@ -87,41 +68,3 @@ onMounted(() => {
 <template>
   <canvas @mousemove="previewPixel" ref="canvasRef"></canvas>
 </template>
-
-<style lang="css" scoped>
-.navbar {
-  padding: 1em;
-  margin-bottom: 1em;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: gray;
-  border-radius: 3px;
-}
-
-button,
-input {
-  height: 35px;
-  padding: 0 1em;
-}
-
-.color {
-  width: 1em;
-  border-radius: 100%;
-}
-
-.container {
-  display: flex;
-  width: 100%;
-  align-content: center;
-  align-items: center;
-  justify-content: center;
-}
-
-canvas {
-  border: 2px solid black;
-  width: 300px;
-  height: 300px;
-}
-</style>
