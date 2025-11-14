@@ -11,7 +11,7 @@ import { createPet } from "../tools/createPet";
 const client = generateClient<Schema>();
 const route = useRoute();
 
-const color = ref<string>("#000000");
+const color = ref<string>("rgb(0, 0, 0)");
 let thingType = route.params.type;
 let thingName: string | null;
 var currentUserId: string;
@@ -37,6 +37,7 @@ function resetCanvas() {
 }
 
 function handleColor(e: Event) {
+  console.log(e.target)
   if (e.target) {
     lastColor.value = color.value;
     color.value = (e.target as HTMLInputElement).value.toString();
@@ -132,35 +133,48 @@ onMounted(async () => {
           <button @click="resetCanvas">Reset</button>
           <button @click="handleSubmit(route.params.type.toString())">Finish</button>
         </div>
-        <div>
-          <h3>Colors:</h3>
-          <button
-            class="black color"
-            value="rgb(0, 0, 0)"
-            @click="handleColor($event)"
-            style="background-color: black;"
-          ></button>
-          <button
-            class="white color"
-            value="rgb(255, 255, 255)"
-            @click="handleColor($event)"
-            style="background-color: rgb(255, 255, 255);"
-          ></button>
-          <button
-            id="lastColor"
-            class="last color"
-            value="rgb(0, 0, 0)"
-            @click="handleColor($event)"
-            :style="`background-color: ${lastColor}`"
-          ></button>
-
+        <div class="container-block">
+          <div class="row">
+            <h3>Colors:</h3>
+          </div>
+          <div class="row">
+            <div class="column">
+              <button
+                class="black color"
+                value="rgb(0, 0, 0)"
+                @click="handleColor($event)"
+                style="background-color: rgb(0, 0, 0)"
+              ></button>
+              Black
+            </div>
+            <div class="column">
+              <button
+                class="white color"
+                value="rgb(255, 255, 255)"
+                @click="handleColor($event)"
+                style="background-color: rgb(255, 255, 255)"
+              ></button>
+              White
+            </div>
+            <div class="column">
+              <button
+                id="lastColor"
+                class="last color"
+                :value="`${lastColor}`"
+                @click="handleColor($event)"
+                :style="`background-color: ${lastColor}`"
+              ></button>
+              Last
+            </div>
+          </div>
         </div>
       </div>
-      <Canvas :size="24" :color="color"></Canvas>
+      <div class="container-flex">
+        <Canvas :size="24" :color="color"></Canvas>
+      </div>
     </template>
     <template v-if="!loading && !canCreatePet && !canCreateItem">
       <h1>Hmm, looks like you can't make anything right now.</h1>
     </template>
   </div>
 </template>
-
