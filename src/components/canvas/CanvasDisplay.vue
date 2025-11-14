@@ -204,14 +204,4 @@ input {
   align-items: center;
   justify-content: center;
 }
-
-canvas {
-  border: 2px solid black;
-  min-width: 300px;
-  width: 25vw;
-  max-width: 500px;
-  min-height: 300px;
-  height: 25vw;
-  max-height: 500px;
-}
 </style>
