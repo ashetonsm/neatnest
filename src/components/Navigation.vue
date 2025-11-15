@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { userStore } from "@/stores/user";
+import { onMounted } from "vue";
 import { RouterLink } from "vue-router";
 
 var links = [
@@ -10,6 +12,14 @@ var links = [
   { title: "Pets", name: "/pets" },
   { title: "About", name: "/about" },
 ];
+
+const store = userStore();
+
+onMounted(async () => {
+  await store.amplifyGetCurrentUser().then(() => {
+    console.log(JSON.parse(JSON.stringify(store.getUser)));
+  });
+});
 </script>
 
 <template>
