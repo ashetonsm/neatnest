@@ -4,7 +4,6 @@ import { useRoute } from "vue-router";
 import { onMounted, ref } from "vue";
 import { generateClient } from "aws-amplify/api";
 import type { Schema } from "../../amplify/data/resource";
-import { getCurrentUser } from "aws-amplify/auth";
 import { userStore } from "@/stores/user";
 
 // These should be items that are freely in the pool for this shop
@@ -15,7 +14,6 @@ const route = useRoute();
 var shopFrontName = route.params.id == "1" ? "Test Emporium" : "Test Shack";
 const client = generateClient<Schema>();
 const fetchedItems = ref<Array<Schema["Item"]["type"]>>([]);
-var currentUser: string;
 
 async function fetchItems() {
   // const cachedItems = localStorage.getItem(shopFrontName + " Items");
@@ -24,7 +22,7 @@ async function fetchItems() {
   //   fetchedItems.value = JSON.parse(cachedItems);
   // } else {
     // console.log("No cached shop items found, querying database.");
-    const { data: items, errors } = await client.models.Item.listItemsByShopfrontAndOwner(
+    const { data: items } = await client.models.Item.listItemsByShopfrontAndOwner(
       {
         shopfront: shopFrontName,
         owner: {
