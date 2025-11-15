@@ -4,25 +4,25 @@ import { useRoute } from "vue-router";
 import { onMounted, ref } from "vue";
 import { generateClient } from "aws-amplify/api";
 import type { Schema } from "../../amplify/data/resource";
-import { getCurrentUser } from "aws-amplify/auth";
-// These should be items that are freely in the pool for this shop
+import { userStore } from "@/stores/user";
 
+// These should be items that are freely in the pool for this shop
+const store = userStore();
 const route = useRoute();
 
 // TODO: Determine shop name based on number from route
 var shopFrontName = route.params.id == "1" ? "Test Emporium" : "Test Shack";
 const client = generateClient<Schema>();
 const fetchedItems = ref<Array<Schema["Item"]["type"]>>([]);
-var currentUser: string;
 
 async function fetchItems() {
-  const cachedItems = localStorage.getItem(shopFrontName + " Items");
-  if (cachedItems) {
-    console.log("Cached shop items found.");
-    fetchedItems.value = JSON.parse(cachedItems);
-  } else {
-    console.log("No cached shop items found, querying database.");
-    const { data: items, errors } = await client.models.Item.listItemsByShopfrontAndOwner(
+  // const cachedItems = localStorage.getItem(shopFrontName + " Items");
+  // if (cachedItems) {
+  //   console.log("Cached shop items found.");
+  //   fetchedItems.value = JSON.parse(cachedItems);
+  // } else {
+    // console.log("No cached shop items found, querying database.");
+    const { data: items } = await client.models.Item.listItemsByShopfrontAndOwner(
       {
         shopfront: shopFrontName,
         owner: {
@@ -35,16 +35,10 @@ async function fetchItems() {
     );
     localStorage.setItem(shopFrontName + " Items", JSON.stringify(items));
     fetchedItems.value = items;
-  }
-}
-
-async function getUser() {
-  const { userId } = await getCurrentUser();
-  currentUser = userId;
+  // }
 }
 
 onMounted(async () => {
-  await getUser();
   await fetchItems();
 });
 </script>
@@ -66,7 +60,7 @@ onMounted(async () => {
         v-for="(item, i) in fetchedItems"
         :key="item.name ?? i"
         :item="item"
-        :current-user="currentUser"
+        :current-user="store.getUser.id"
       />
     </template>
   </div>

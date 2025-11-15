@@ -1,21 +1,20 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import Canvas from "./Canvas.vue";
-import { getCurrentUser } from "aws-amplify/auth";
 import { generateClient } from "aws-amplify/api";
 import type { Schema } from "amplify/data/resource";
 import { useRoute } from "vue-router";
 import { createItem } from "../tools/createItem";
 import { createPet } from "../tools/createPet";
+import { userStore } from "@/stores/user";
 
 const client = generateClient<Schema>();
 const route = useRoute();
+const store = userStore();
 
 const color = ref<string>("rgb(0, 0, 0)");
 let thingType = route.params.type;
 let thingName: string | null;
-var currentUserId: string;
-var currentUserObj: any;
 var loading = ref<boolean>(true);
 var canCreatePet = ref<boolean>(false);
 var canCreateItem = ref<boolean>(false);
@@ -37,7 +36,7 @@ function resetCanvas() {
 }
 
 function handleColor(e: Event) {
-  console.log(e.target)
+  console.log(e.target);
   if (e.target) {
     lastColor.value = color.value;
     color.value = (e.target as HTMLInputElement).value.toString();
@@ -52,13 +51,13 @@ async function handleSubmit(this: any, t: string) {
         var thingSpecies = prompt(`Give your ${t} a species name:`);
         if (thingSpecies) {
           // Set the path
-          const thingPath = `images/${currentUserId}/${thingType}/${thingName}.png`;
+          const thingPath = `images/${store.getUser.id}/${thingType}/${thingName}.png`;
           createPet(
             thingName!,
             thingSpecies!,
             thingPath!,
-            currentUserId,
-            currentUserObj,
+            store.getUser.id,
+            store.getUser,
             client
           );
         } else {
@@ -76,13 +75,13 @@ async function handleSubmit(this: any, t: string) {
         var itemCategory = prompt(`Is your ${t} food or entertainment?:`);
         if (itemCategory) {
           // Set the path
-          const thingPath = `images/${currentUserId}/${thingType}/${thingName}.png`;
+          const thingPath = `images/${store.getUser.id}/${thingType}/${thingName}.png`;
           createItem(
             thingName,
             thingPath,
             itemCategory,
-            currentUserId,
-            currentUserObj,
+            store.getUser.id,
+            store.getUser,
             client
           );
         } else {
@@ -99,18 +98,13 @@ async function handleSubmit(this: any, t: string) {
 }
 
 async function setCreation() {
-  const { userId } = await getCurrentUser();
-  currentUserId = userId;
-  await client.models.User.get({ id: userId }).then((u) => {
-    currentUserObj = u.data!;
-    if (u.data!.itemsRemaining! > 0) {
-      canCreateItem.value = true;
-    }
-    if (u.data!.petsRemaining! > 0) {
-      canCreatePet.value = true;
-    }
-    loading.value = false;
-  });
+  if (store.getUser.itemsRemaining! > 0) {
+    canCreateItem.value = true;
+  }
+  if (store.getUser.petsRemaining! > 0) {
+    canCreatePet.value = true;
+  }
+  loading.value = false;
 }
 
 onMounted(async () => {
