@@ -69,6 +69,7 @@ const schema = a.schema({
       email: a.string(),
       username: a.string(),
       owner: a.string(),
+      autobiography: a.string(),
       itemsRemaining: a.integer(),
       petsRemaining: a.integer(),
       createdAt: a.datetime(),
