@@ -24,8 +24,6 @@ onMounted(async () => {
     if (mutation.storeId == "user") {
       const un = store.getUser.username;
       myProfile.value = un.toString();
-      console.log("un: ", un);
-      console.log("myProfile: ", myProfile.value);
 
       links.value = [
         { title: "Home", name: "/" },
@@ -37,8 +35,6 @@ onMounted(async () => {
         { title: "About", name: "/about" },
       ];
     }
-    // console.log('Mutation:', mutation);
-    // console.log('New state:', state);
   });
 });
 </script>
