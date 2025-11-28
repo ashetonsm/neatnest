@@ -20,7 +20,16 @@ app.mount('#app')
 router.beforeEach(async (to, from) => {
     const store = userStore()
     var user = store.getUser
+    var pets = store.getPets
+    var inventory = store.getInventory
     if (user == null) {
         user = await store.amplifyGetCurrentUser()
+
+        if (pets == null) {
+            pets = await store.fetchPets()
+        }
+        if (inventory == null) {
+            inventory = await store.fetchInventory()
+        }
     }
 })
