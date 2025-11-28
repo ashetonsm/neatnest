@@ -11,8 +11,8 @@ const client = generateClient<Schema>();
 const route = useRoute();
 const store = userStore();
 var profile = route.params.username;
-var userProfileDesc = "Lorem ipsum, this is a description.";
-var userFriendsDisplay: any[] = [];
+const thisProfileDesc = ref<String>("Lorum ipsum this is a description");
+const theseFriends = ref<Array<Schema["User"]["type"]>>([]);
 var thisUser: Schema["User"]["type"] | null = null
 const thesePets = ref<Array<Schema["Pet"]["type"]>>([]);
 var newUsername = ""
@@ -77,34 +77,49 @@ async function checkUsername() {
 }
 
 
-onMounted(async () => {
-  if (store.getUser.username !== profile) {
-    // get the user id via username
-    try {
-      client.models.User.userByUsername({
-        username: profile.toString()
-      }).then((res) => {
-        thisUser = res.data[0]
-        console.log(thisUser)
-      })
+async function fetchUser() {
+  try {
+    await client.models.User.userByUsername({
+      username: profile.toString()
+    }).then((res) => {
+      thisUser = res.data[0]
+      console.log(thisUser)
+    })
       .then(() => {
         // get the pets via id
         if (thisUser) {
           console.log("There is a user")
-          client.models.Pet.listPetsByOwnerAndName({
-            owner: thisUser.id
-          }).then((res) => {
-            console.log("Pet res: ", res.data)
-            thesePets.value = res.data
-            console.log(thesePets)
-          })
+          fetchPets()
         }
       })
 
-    } catch (error: any) {
-      console.error(error)  // The user probably doesn't exist in the db.
-    }
+  } catch (error: any) {
+    console.error(error)  // The user probably doesn't exist in the db.
   }
+}
+
+async function fetchPets() {
+  await client.models.Pet.listPetsByOwnerAndName({
+    owner: thisUser?.id as string
+  }).then((res) => {
+    console.log("Pet res: ", res.data)
+    thesePets.value = res.data
+    console.log(thesePets)
+  })
+}
+
+
+
+onMounted(async () => {
+  if (store.getUser.username !== profile) {
+    fetchUser()
+  } else {
+    thisUser = store.getUser
+    thisProfileDesc.value = thisUser?.description as string
+    thesePets.value = store.getPets
+    theseFriends.value = []
+  }
+
 })
 
 </script>
@@ -133,7 +148,7 @@ onMounted(async () => {
         </div>
         <div v-else>
           <p>
-            {{ userProfileDesc }}
+            {{ thisProfileDesc }}
           </p>
         </div>
       </div>
@@ -141,23 +156,18 @@ onMounted(async () => {
     <div class="header">
       <h1>{{ profile }}'s Pets</h1>
       <div class="user-pet-display">
-      <div v-if="thesePets.length !== 0">
-        <Pet
-          v-for="(pet, i) in thesePets"
-          :key="pet.name ?? i"
-          :pet="pet"
-          :items="[]"
-        />
-      </div>
-      <div v-else>
-          Aww, {{profile}} has no pets!
-      </div>
+        <div v-if="thesePets.length !== 0">
+          <Pet v-for="(pet, i) in thesePets" :key="pet.name ?? i" :pet="pet" :items="[]" />
+        </div>
+        <div v-else>
+          Aww, {{ profile }} has no pets!
+        </div>
       </div>
     </div>
     <div class="header">
       <div class="user-friends-display">
         <h1>{{ profile }}'s Friends</h1>
-        {{ userFriendsDisplay.length !== 0 ? userFriendsDisplay :
+        {{ theseFriends.length !== 0 ? theseFriends :
           `Awww, ${profile} has no friends!` }}
       </div>
     </div>
