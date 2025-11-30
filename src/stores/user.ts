@@ -3,7 +3,6 @@ import { defineStore } from 'pinia';
 import { generateClient } from 'aws-amplify/api';
 import type { Schema } from '../../amplify/data/resource'
 import { getCurrentUser } from 'aws-amplify/auth';
-import { fetchInventory } from '@/components/tools/fetchInventory';
 
 export const userStore = defineStore('user', {
     state: () => ({
@@ -28,7 +27,7 @@ export const userStore = defineStore('user', {
 
                 await client.models.User.get({ id: userId })
                     .then((u) => {
-                        console.log("userStore got the following user: ", u.data)
+                        // console.log("userStore got the following user: ", u.data)
 
                         // Needs an exclaimation point otherwise you get a nullable error
                         this.user = u.data!
@@ -57,7 +56,7 @@ export const userStore = defineStore('user', {
 
             await client.models.Item.listItemsByOwnerAndName(
                 {
-                    owner: this.user
+                    owner: this.user.id
                 },
                 {
                     headers: {
