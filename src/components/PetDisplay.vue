@@ -2,19 +2,12 @@
 import Pet from "./Pet.vue";
 import { onMounted, ref } from "vue";
 import type { Schema } from "../../amplify/data/resource";
-import { generateClient } from "aws-amplify/api";
 import { userStore } from "@/stores/user";
 const store = userStore();
-
-const client = generateClient<Schema>();
 
 const fetchedPets = ref<Array<Schema["Pet"]["type"]>>([]);
 const fetchedItems = ref<Array<Schema["Item"]["type"]>>([]);
 var canCreate = true;
-
-async function fetchPets() {
-  fetchedPets.value = JSON.parse(JSON.stringify(store.getPets));
-}
 
 async function setCreation() {
   if (store.getUser.petsRemaining > 0) {
@@ -24,7 +17,7 @@ async function setCreation() {
 
 onMounted(async () => {
   await setCreation();
-  await fetchPets();
+  fetchedPets.value = JSON.parse(JSON.stringify(store.getPets));
   fetchedItems.value = JSON.parse(JSON.stringify(store.getInventory));
 });
 </script>
