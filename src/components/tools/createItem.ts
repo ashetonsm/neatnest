@@ -59,7 +59,6 @@ export function createItem(
               console.log("User updated: ", res)
             })
             .then(() => {
-              localStorage.removeItem("inventory");
               router.push({ name: 'inventory' })
               router.go(1)
             })

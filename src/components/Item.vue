@@ -5,7 +5,7 @@ import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../amplify/data/resource";
 import { getUrl } from "aws-amplify/storage";
 import { onMounted, ref } from "vue";
-import { deleteStorage } from "./tools/deleteStorage"
+import { deleteStorage } from "./tools/deleteStorage";
 const route = useRoute();
 
 var shopFrontName = route.params.id == "1" ? "Test Emporium" : "Test Shack";
@@ -27,11 +27,6 @@ async function buyFlow(i: Schema["Item"]["type"]) {
     await client.models.Item.update(i).then((res) => {
       console.log(res);
     });
-    // Remove cached inventory
-    await localStorage.removeItem("inventory");
-    // Remove cached shop inventory
-    console.log(shopFrontName)
-    await localStorage.removeItem(shopFrontName);
     // Refresh
     router.go(0);
   } else {
@@ -62,13 +57,13 @@ async function handleDelete(i: Schema["Item"]["type"]) {
   if (choice) {
     // Do delete logic
     // Delete the item
-    await client.models.Item.delete({ id: i.id }).then((res: any) => {
-      console.log("Item deleted: ", res);
-    }).then(async () => {
-      await deleteStorage(i.image!)
-    })
-    // Remove cached inventory
-    localStorage.removeItem("inventory");
+    await client.models.Item.delete({ id: i.id })
+      .then((res: any) => {
+        console.log("Item deleted: ", res);
+      })
+      .then(async () => {
+        await deleteStorage(i.image!);
+      });
     // Refresh
     router.go(0);
   } else {
