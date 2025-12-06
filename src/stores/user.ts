@@ -20,6 +20,7 @@ export const userStore = defineStore('user', {
     actions: {
         async amplifyGetCurrentUser() {
             try {
+                // This isn't null. It's verified fine to use.
                 const { userId } = await getCurrentUser();
 
                 // If you define this before userStore, you'll get the Amplify Not Configured error.
@@ -27,8 +28,6 @@ export const userStore = defineStore('user', {
 
                 await client.models.User.get({ id: userId })
                     .then((u) => {
-                        // console.log("userStore got the following user: ", u.data)
-
                         // Needs an exclaimation point otherwise you get a nullable error
                         this.user = u.data!
                     });
@@ -39,6 +38,8 @@ export const userStore = defineStore('user', {
 
         async fetchPets() {
             const client = generateClient<Schema>();
+            await this.amplifyGetCurrentUser()
+
             try {
                 await client.models.Pet.listPetsByOwnerAndName(
                     { owner: this.user.id, },
@@ -53,6 +54,7 @@ export const userStore = defineStore('user', {
 
         async fetchInventory() {
             const client = generateClient<Schema>();
+            await this.amplifyGetCurrentUser()
 
             await client.models.Item.listItemsByOwnerAndName(
                 {
