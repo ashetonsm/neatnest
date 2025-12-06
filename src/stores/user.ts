@@ -21,6 +21,9 @@ export const userStore = defineStore('user', {
         async amplifyGetCurrentUser() {
             try {
                 const { userId } = await getCurrentUser();
+                const fullUser = await getCurrentUser();
+                console.log("Awaited userId: ", userId)
+                console.log("Awaited fullUser: ", fullUser)
 
                 // If you define this before userStore, you'll get the Amplify Not Configured error.
                 const client = generateClient<Schema>();
