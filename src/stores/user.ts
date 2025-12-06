@@ -27,7 +27,7 @@ export const userStore = defineStore('user', {
 
                 await client.models.User.get({ id: userId })
                     .then((u) => {
-                        // console.log("userStore got the following user: ", u.data)
+                        console.log("userStore got the following user: ", u.data)
 
                         // Needs an exclaimation point otherwise you get a nullable error
                         this.user = u.data!

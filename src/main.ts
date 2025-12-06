@@ -27,6 +27,7 @@ router.beforeEach(async (to, from) => {
             .then(() => {
                 user = store.getUser
                 console.log("user: ", user)
+                console.log("store.getUser: ", store.getUser)
             })
 
         if (pets == null) {
