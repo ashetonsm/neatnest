@@ -69,6 +69,7 @@ const schema = a.schema({
       email: a.string(),
       username: a.string(),
       owner: a.string(),
+      description: a.string(),
       itemsRemaining: a.integer(),
       petsRemaining: a.integer(),
       createdAt: a.datetime(),
@@ -76,6 +77,9 @@ const schema = a.schema({
     })
     .secondaryIndexes((index) => [
       index("username")
+        .queryField("userByUsername"),
+      index("email")
+        .queryField("userByEmail")
     ])
     .authorization((allow) => [
       allow.authenticated('identityPool'),

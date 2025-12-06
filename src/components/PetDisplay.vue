@@ -2,36 +2,12 @@
 import Pet from "./Pet.vue";
 import { onMounted, ref } from "vue";
 import type { Schema } from "../../amplify/data/resource";
-import { generateClient } from "aws-amplify/api";
-import { fetchInventory } from "./tools/fetchInventory";
 import { userStore } from "@/stores/user";
 const store = userStore();
 
-const client = generateClient<Schema>();
-
 const fetchedPets = ref<Array<Schema["Pet"]["type"]>>([]);
-var fetchedItems = ref<Array<Schema["Item"]["type"]>>([]);
+const fetchedItems = ref<Array<Schema["Item"]["type"]>>([]);
 var canCreate = true;
-
-async function fetchPets() {
-  const cachedPets = localStorage.getItem("pets");
-  if (cachedPets) {
-    console.log("Cached pets found.");
-    fetchedPets.value = JSON.parse(cachedPets);
-  } else {
-    console.log("No cached pets found, querying database.");
-  const { data: pets } = await client.models.Pet.listPetsByOwnerAndName(
-    {
-      owner: store.getUser.id,
-    },
-    {
-      authMode: "userPool",
-    }
-  );
-  localStorage.setItem("pets", JSON.stringify(pets));
-  fetchedPets.value = pets;
-  }
-}
 
 async function setCreation() {
   if (store.getUser.petsRemaining > 0) {
@@ -41,14 +17,8 @@ async function setCreation() {
 
 onMounted(async () => {
   await setCreation();
-  await fetchPets();
-  const cachedItems = localStorage.getItem("inventory");
-  if (cachedItems) {
-    console.log("Cached inventory found (PetDisplay).");
-    fetchedItems.value = JSON.parse(cachedItems);
-  } else {
-    fetchedItems = await fetchInventory(store.getUser.id, fetchedItems);
-  }
+  fetchedPets.value = JSON.parse(JSON.stringify(store.getPets));
+  fetchedItems.value = JSON.parse(JSON.stringify(store.getInventory));
 });
 </script>
 

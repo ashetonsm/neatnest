@@ -72,9 +72,6 @@ async function handleSubmit(item: Schema["Item"]["type"]) {
     await client.models.Pet.update(updatedPet).then((res: any) => {
       console.log("Pet updated: ", res);
     });
-    // Remove cached inventory and pets
-    localStorage.removeItem("inventory");
-    localStorage.removeItem("pets");
     router.go(0);
   } catch (error: any) {
     console.error("Error: ", error);
@@ -82,7 +79,6 @@ async function handleSubmit(item: Schema["Item"]["type"]) {
 
   // Close the window
   emit("open", false);
-  // console.log(item);
 }
 
 var foodOptions = ref<Array<Schema["Item"]["type"]>>();

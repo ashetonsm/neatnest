@@ -16,26 +16,18 @@ const client = generateClient<Schema>();
 const fetchedItems = ref<Array<Schema["Item"]["type"]>>([]);
 
 async function fetchItems() {
-  // const cachedItems = localStorage.getItem(shopFrontName + " Items");
-  // if (cachedItems) {
-  //   console.log("Cached shop items found.");
-  //   fetchedItems.value = JSON.parse(cachedItems);
-  // } else {
-    // console.log("No cached shop items found, querying database.");
-    const { data: items } = await client.models.Item.listItemsByShopfrontAndOwner(
-      {
-        shopfront: shopFrontName,
-        owner: {
-          eq: "NA",
-        },
+  const { data: items } = await client.models.Item.listItemsByShopfrontAndOwner(
+    {
+      shopfront: shopFrontName,
+      owner: {
+        eq: "NA",
       },
-      {
-        authMode: "userPool",
-      }
-    );
-    localStorage.setItem(shopFrontName + " Items", JSON.stringify(items));
-    fetchedItems.value = items;
-  // }
+    },
+    {
+      authMode: "userPool",
+    }
+  );
+  fetchedItems.value = items;
 }
 
 onMounted(async () => {
