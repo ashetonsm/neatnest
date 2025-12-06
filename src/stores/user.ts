@@ -20,18 +20,14 @@ export const userStore = defineStore('user', {
     actions: {
         async amplifyGetCurrentUser() {
             try {
+                // This isn't null. It's verified fine to use.
                 const { userId } = await getCurrentUser();
-                const fullUser = await getCurrentUser();
-                console.log("Awaited userId: ", userId)
-                console.log("Awaited fullUser: ", fullUser)
 
                 // If you define this before userStore, you'll get the Amplify Not Configured error.
                 const client = generateClient<Schema>();
 
                 await client.models.User.get({ id: userId })
                     .then((u) => {
-                        console.log("userStore got the following user: ", u.data)
-
                         // Needs an exclaimation point otherwise you get a nullable error
                         this.user = u.data!
                     });
