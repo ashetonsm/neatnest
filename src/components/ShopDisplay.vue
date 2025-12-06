@@ -1,48 +1,38 @@
 <script setup lang="ts">
-import Item from './Item.vue';
-import { useRoute } from 'vue-router';
-import { generateClient } from 'aws-amplify/data';
-import type { Schema } from '../../amplify/data/resource';
-import { onMounted, ref } from 'vue';
+import Item from "./Item.vue";
+import { useRoute } from "vue-router";
+import { onMounted, ref } from "vue";
+import { generateClient } from "aws-amplify/api";
+import type { Schema } from "../../amplify/data/resource";
+import { userStore } from "@/stores/user";
+
 // These should be items that are freely in the pool for this shop
+const store = userStore();
+const route = useRoute();
 
-const route = useRoute()
+// TODO: Determine shop name based on number from route
+var shopFrontName = route.params.id == "1" ? "Test Emporium" : "Test Shack";
+const client = generateClient<Schema>();
+const fetchedItems = ref<Array<Schema["Item"]["type"]>>([]);
 
-// Determine shop name based on number from route
-var shopFrontName = route.params.id == "1" ? "Test Emporium" : "Test Shack"
-
-const client = generateClient<Schema>()
-
-// create a reactive reference to Item[]
-const fetchedItems = ref<Array<Schema['Item']['type']>>([]);
-
-async function fetchItems() { 
-  const cachedItems = localStorage.getItem(shopFrontName + ' Items')
-  if (cachedItems) {
-    console.log("Cached shop items found.")
-    fetchedItems.value = JSON.parse(cachedItems)
-  } else {
-    console.log("No cached shop items found, querying database.")
-    const { data: items, errors } = await client.models.Item.listItemsByShopfrontAndOwner(
-      {
-        shopfront: shopFrontName,
-        owner: {
-          eq: 'NA',
-        },
+async function fetchItems() {
+  const { data: items } = await client.models.Item.listItemsByShopfrontAndOwner(
+    {
+      shopfront: shopFrontName,
+      owner: {
+        eq: "NA",
       },
-      {
-        authMode: 'userPool'
-      }
-    );
-    localStorage.setItem(shopFrontName + ' Items', JSON.stringify(items))
-    fetchedItems.value = items
-  }
+    },
+    {
+      authMode: "userPool",
+    }
+  );
+  fetchedItems.value = items;
 }
 
-onMounted(() => {
-  fetchItems()
-})
-
+onMounted(async () => {
+  await fetchItems();
+});
 </script>
 
 <template>
@@ -58,7 +48,12 @@ onMounted(() => {
       <h1>This shop is sold out!</h1>
     </template>
     <template v-else>
-      <Item v-for="(item, i) in fetchedItems" :key="item.name ?? i" :item="item" />
+      <Item
+        v-for="(item, i) in fetchedItems"
+        :key="item.name ?? i"
+        :item="item"
+        :current-user="store.getUser.id"
+      />
     </template>
   </div>
 </template>

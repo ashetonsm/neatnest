@@ -7,6 +7,7 @@ const schema = a.schema({
       price: a.integer(),
       shopfront: a.string(),
       owner: a.string(),
+      category: a.string(),
       health: a.integer(),
       rarity: a.integer(),
       image: a.string()
@@ -65,24 +66,30 @@ const schema = a.schema({
     ]),
   User: a
     .model({
+      email: a.string(),
       username: a.string(),
+      owner: a.string(),
+      description: a.string(),
       itemsRemaining: a.integer(),
-      petsRemaining: a.integer()
+      petsRemaining: a.integer(),
+      createdAt: a.datetime(),
+      updatedAt: a.datetime(),
     })
     .secondaryIndexes((index) => [
       index("username")
+        .queryField("userByUsername"),
+      index("email")
+        .queryField("userByEmail")
     ])
     .authorization((allow) => [
-      // Guests are read only
-      allow.guest().to(['read']),
-      // Authenticated users can read and write (change item values)
-      allow.authenticated('userPools').to(['read', 'update']),
-      // Owners can read, write, and delete (change and consume items)
-      allow.owner().to(['update']),
+      allow.authenticated('identityPool'),
+      allow.authenticated('userPools'),
+      // Allow owners
+      allow.ownerDefinedIn("owner"),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
-});
+})
 
 export type Schema = ClientSchema<typeof schema>;
 

@@ -1,58 +1,47 @@
 <script setup lang="ts">
-import Item from './Item.vue';
-import { onMounted, ref } from 'vue';
-import type { Schema } from '../../amplify/data/resource';
-import { generateClient } from 'aws-amplify/data';
-import { getCurrentUser } from 'aws-amplify/auth';
+import Item from "./Item.vue";
+import { onMounted, ref } from "vue";
+import type { Schema } from "../../amplify/data/resource";
+import { userStore } from "@/stores/user";
 
 // These should be items where the owner is the logged in user
-const client = generateClient<Schema>()
+const store = userStore();
 
 // create a reactive reference to Item[]
-const fetchedItems = ref<Array<Schema['Item']['type']>>([]);
+const fetchedItems: any = ref<Array<Schema["Item"]["type"]>>([]);
+var canCreate = true;
 
-async function fetchItems() { 
-  const cachedItems = localStorage.getItem('inventory')
-  if (cachedItems) {
-    console.log("Cached inventory found.")
-    fetchedItems.value = JSON.parse(cachedItems)
-  } else {
-    console.log("No cached inventory found, querying database.")
-      const { signInDetails } = await getCurrentUser()
-    const { data: items, errors } = await client.models.Item.listItemsByOwnerAndName(
-      {
-        owner: signInDetails?.loginId ?? 'undefined'
-      },
-      {
-        authMode: 'userPool'
-      }
-    );
-    localStorage.setItem('inventory', JSON.stringify(items))
-    fetchedItems.value = items
+async function setCreation() {
+  if (store.getUser.itemsRemaining > 0) {
+    canCreate = true;
   }
 }
 
-onMounted(() => {
-  fetchItems()
-})
-
-
+onMounted(async () => {
+  await setCreation();
+  fetchedItems.value = JSON.parse(JSON.stringify(store.getInventory));
+});
 </script>
 
 <template>
-    <div class="page-header">
-      <h1>Your Inventory</h1>
-      <p>This is where you view your inventory.</p>
-    </div>
+  <div class="page-header">
+    <h1>Your Inventory</h1>
+    <p>This is where you view your inventory.</p>
+  </div>
   <div class="page" id="inventoryPage">
-    <template v-if="!fetchedItems">
-      <h1>Loading!</h1>
-    </template>
-    <template v-else-if="!fetchedItems.length">
-      <h1>Your inventory is empty</h1>
-    </template>
-    <template v-else>
-      <Item v-for="(item, i) in fetchedItems" :key="item.name ?? i" :item="item" />
-    </template>
+    <div v-if="canCreate">
+      <a href="/canvas/item" target="_blank">Launch Item Canvas</a>
+    </div>
+    <div v-if="fetchedItems.length !== 0">
+      <Item
+        v-for="(item, i) in fetchedItems"
+        :key="item.name ?? i"
+        :item="item"
+        :currentUser="store.getUser.id"
+      />
+    </div>
+  </div>
+  <div v-if="fetchedItems.length == 0">
+    <h1>Your inventory is empty</h1>
   </div>
 </template>

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
+import CanvasView from '@/views/CanvasView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,7 +21,7 @@ const router = createRouter({
       component: () => import('@/views/LoginView.vue'),
     },
     {
-      path: '/profile',
+      path: '/profile/:username',
       name: 'profile',
       component: () => import('@/views/ProfileView.vue'),
     },
@@ -38,6 +39,11 @@ const router = createRouter({
       path: '/pets',
       name: 'pets',
       component: () => import('@/views/PetsView.vue'),
+    },
+    {
+      path: '/canvas/:type',
+      name: 'canvas',
+      component: CanvasView,
     },
   ],
 })

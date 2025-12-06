@@ -1,45 +1,111 @@
 <script setup lang="ts">
-// import type { ItemType } from '@/assets/ItemExports';
-import { generateClient } from 'aws-amplify/data';
-import type { Schema } from '../../amplify/data/resource';
+import router from "@/router";
+import { useRoute } from "vue-router";
+import { generateClient } from "aws-amplify/data";
+import type { Schema } from "../../amplify/data/resource";
+import { getUrl } from "aws-amplify/storage";
+import { onMounted, ref } from "vue";
+import { deleteStorage } from "./tools/deleteStorage";
+const route = useRoute();
 
-const client = generateClient<Schema>() // use this Data client for CRUDL requests
+var shopFrontName = route.params.id == "1" ? "Test Emporium" : "Test Shack";
+const client = generateClient<Schema>(); // use this Data client for CRUDL requests
+const signedSrc = ref("null");
 
-defineProps<{
-  item: Schema['Item']['type']
-}>()
+const props = defineProps<{
+  item: Schema["Item"]["type"];
+  currentUser: string;
+}>();
 
-function buyFlow(i : Schema['Item']['type']) {
-  const choice = confirm('Buy ' + i.name + ' for ' + i.price + '?')
+async function buyFlow(i: Schema["Item"]["type"]) {
+  const choice = confirm("Buy " + i.name + " for " + i.price + "?");
   if (choice) {
-    // Do buy logic, remove item from available and add to player's inventory.
-    return console.log(choice)
+    // Set the owner to the signed in user
+    i.owner = props.currentUser;
+
+    // send the update request
+    await client.models.Item.update(i).then((res) => {
+      console.log(res);
+    });
+    // Refresh
+    router.go(0);
   } else {
-    return console.log(choice)
+    return console.log(choice);
   }
 }
 
-function useFlow(i : Schema['Item']['type']) {
-  const choice = confirm('Use ' + i.name + '?')
+async function getFileUrl(fileName: any) {
+  try {
+    const result = await getUrl({
+      path: fileName, // Adjust path as needed (e.g., private/, protected/)
+      options: {
+        expiresIn: 3600, // URL valid for 1 hour
+        validateObjectExistence: true,
+      },
+    });
+    signedSrc.value = result.url.toString();
+  } catch (error) {
+    console.error("Error getting URL:", error);
+    return null;
+  }
+
+  return;
+}
+
+async function handleDelete(i: Schema["Item"]["type"]) {
+  const choice = confirm("Delete " + i.name + "?");
+  if (choice) {
+    // Do delete logic
+    // Delete the item
+    await client.models.Item.delete({ id: i.id })
+      .then((res: any) => {
+        console.log("Item deleted: ", res);
+      })
+      .then(async () => {
+        await deleteStorage(i.image!);
+      });
+    // Refresh
+    router.go(0);
+  } else {
+    return console.log("Deletion aborted.");
+  }
+}
+
+function useFlow(i: Schema["Item"]["type"]) {
+  const choice = confirm("Use " + i.name + "?");
   if (choice) {
     // Do use logic
-    return console.log(choice)
+    return console.log(choice);
   } else {
-    return console.log(choice)
+    return console.log(choice);
   }
 }
+
+onMounted(async () => {
+  await getFileUrl(props.item.image);
+});
 </script>
 
 <template>
   <div class="item-container box">
     <div class="item-info">
-        <img :src="'/src/assets/testItems/' + item.image + '.jpg'" 
-        :alt="'an image of ' + item.name" class="item-image"
-        @click="item.owner == '' ? buyFlow(item) : useFlow(item)"/>
+      <img
+        :src="signedSrc"
+        :alt="'an image of ' + item.name"
+        class="item-image"
+        @click="item.owner == 'NA' ? buyFlow(item) : useFlow(item)"
+      />
 
-        <h2 class="green">{{ item.name }}</h2>
+      <h2 class="green">{{ item.name }}</h2>
+      <div v-if="item.owner != props.currentUser">
         <h2>Price:</h2>
         <h2 class="green">{{ item.price }}</h2>
+      </div>
+      <div v-if="item.owner == props.currentUser">
+        <h2 class="red">
+          <button @click="handleDelete(item)">Delete</button>
+        </h2>
+      </div>
     </div>
   </div>
 </template>
