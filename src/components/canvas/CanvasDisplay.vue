@@ -7,18 +7,25 @@ import { useRoute } from "vue-router";
 import { createItem } from "../tools/createItem";
 import { createPet } from "../tools/createPet";
 import { userStore } from "@/stores/user";
+import CreationModal from "../CreationModal.vue";
 
 const client = generateClient<Schema>();
 const route = useRoute();
 const store = userStore();
+const open = ref(false);
 
 const color = ref<string>("rgb(0, 0, 0)");
-let thingType = route.params.type;
-let thingName: string | null;
+let thingType = route.params.type.toString();
+let thingSpecies: string | null;
 var loading = ref<boolean>(true);
 var canCreatePet = ref<boolean>(false);
 var canCreateItem = ref<boolean>(false);
 var lastColor = ref<string>("rgb(0, 0, 0)");
+
+const toggleModal = (n: boolean) => {
+  open.value = n;
+  return open;
+};
 
 function resetCanvas() {
   try {
@@ -36,7 +43,6 @@ function resetCanvas() {
 }
 
 function handleColor(e: Event) {
-  console.log(e.target);
   if (e.target) {
     lastColor.value = color.value;
     color.value = (e.target as HTMLInputElement).value.toString();
@@ -46,50 +52,23 @@ function handleColor(e: Event) {
 async function handleSubmit(this: any, t: string) {
   switch (t) {
     case "pet":
-      thingName = prompt(`Name your ${t}:`);
-      if (thingName) {
-        var thingSpecies = prompt(`Give your ${t} a species name:`);
-        if (thingSpecies) {
-          // Set the path
-          const thingPath = `images/${store.getUser.id}/${thingType}/${thingName}.png`;
-          createPet(
-            thingName!,
-            thingSpecies!,
-            thingPath!,
-            store.getUser.id,
-            store.getUser,
-            client
-          );
-        } else {
-          alert(`You must set a species name! Please try again.`);
-        }
-      } else {
-        alert(`You must name your ${thingType}! Please try again.`);
-      }
+      toggleModal(true);
+
+      // const thingPath = `images/${store.getUser.id}/${thingType}/${thingName}.png`;
+      // createPet(
+      //   thingName!,
+      //   thingSpecies!,
+      //   thingPath!,
+      //   store.getUser.id,
+      //   store.getUser,
+      //   client
+      // );
+      // alert(`You must set a species name! Please try again.`);
+      // alert(`You must name your ${thingType}! Please try again.`);
       break;
     case "item":
-      // Prompt for a name
-      thingName = prompt(`Name your ${t}:`);
-      // If you get a valid name:
-      if (thingName) {
-        var itemCategory = prompt(`Is your ${t} food or entertainment?:`);
-        if (itemCategory) {
-          // Set the path
-          const thingPath = `images/${store.getUser.id}/${thingType}/${thingName}.png`;
-          createItem(
-            thingName,
-            thingPath,
-            itemCategory,
-            store.getUser.id,
-            store.getUser,
-            client
-          );
-        } else {
-          alert("You must set your item category! Please try again.");
-        }
-      } else {
-        alert(`You must name your ${thingType}! Please try again.`);
-      }
+      toggleModal(true);
+
       break;
     default:
       console.log("Invalid route param: ", t);
@@ -122,6 +101,9 @@ onMounted(async () => {
       <h1>Loading...</h1>
     </template>
     <template v-if="(!loading && canCreatePet) || canCreateItem">
+      <div v-if="open == true">
+        <CreationModal @open="toggleModal(false)" :thing="thingType" />
+      </div>
       <div class="navbar">
         <div>
           <button @click="resetCanvas">Reset</button>
