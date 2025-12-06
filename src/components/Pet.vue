@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import Modal from "./Modal.vue";
 import { onMounted, ref } from "vue";
 import type { Schema } from "../../amplify/data/resource";
 import { getUrl } from "aws-amplify/storage";
+import PetItemModal from "./PetItemModal.vue";
 
 const open = ref(false);
 const signedSrc = ref("null");
@@ -13,9 +13,7 @@ const props = defineProps<{
 }>();
 
 const toggleModal = (n: boolean) => {
-  console.log("Modal toggled");
   open.value = n;
-  console.log("open: ", open);
   return open;
 };
 
@@ -44,7 +42,7 @@ onMounted(async () => {
 
 <template>
   <div v-if="open == true">
-    <Modal :pet="pet" :items="items" @open="toggleModal(false)" />
+    <PetItemModal :pet="pet" :items="items" @open="toggleModal(false)" />
   </div>
 
   <div class="pet-container box">
