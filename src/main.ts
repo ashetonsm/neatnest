@@ -23,7 +23,10 @@ router.beforeEach(async (to, from) => {
     var pets = store.getPets
     var inventory = store.getInventory
     if (user == null) {
-        user = await store.amplifyGetCurrentUser()
+        await store.amplifyGetCurrentUser()
+            .then(() => {
+                user = store.getUser
+            })
 
         if (pets == null) {
             pets = await store.fetchPets()
