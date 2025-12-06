@@ -39,6 +39,8 @@ export const userStore = defineStore('user', {
 
         async fetchPets() {
             const client = generateClient<Schema>();
+            await this.amplifyGetCurrentUser()
+
             try {
                 await client.models.Pet.listPetsByOwnerAndName(
                     { owner: this.user.id, },
@@ -53,6 +55,7 @@ export const userStore = defineStore('user', {
 
         async fetchInventory() {
             const client = generateClient<Schema>();
+            await this.amplifyGetCurrentUser()
 
             await client.models.Item.listItemsByOwnerAndName(
                 {

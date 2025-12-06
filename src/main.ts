@@ -26,6 +26,7 @@ router.beforeEach(async (to, from) => {
         await store.amplifyGetCurrentUser()
             .then(() => {
                 user = store.getUser
+                console.log("user: ", user)
             })
 
         if (pets == null) {
