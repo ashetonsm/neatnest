@@ -17,8 +17,14 @@ const emit = defineEmits<{
 }>();
 
 async function handleSubmit(item: Schema["Item"]["type"]) {
+  if (item.name == undefined) {
+    alert(`Hmm, nothing was selected.`);
+
+    // Close the window
+    emit("open", false);
+    return;
+  }
   const pet = JSON.parse(JSON.stringify(props.pet));
-  console.log("pet: ", pet);
   try {
     var updatedItem = item;
     var updatedPet = pet;
@@ -29,16 +35,13 @@ async function handleSubmit(item: Schema["Item"]["type"]) {
       itemWillBeDeleted = true;
     }
 
-    console.log("itemWillBeDeleted: ", itemWillBeDeleted);
     // Update the item.
     if (itemWillBeDeleted) {
       var confirmDeletion = confirm("This item will disappear after use. Continue?");
       if (confirmDeletion == true) {
         // Delete the item
         await client.models.Item.delete({ id: item.id })
-          .then((res: any) => {
-            console.log("Item deleted: ", res);
-          })
+          .then((res: any) => {})
           .then(async () => {
             await deleteStorage(item.image!);
           });
@@ -49,9 +52,7 @@ async function handleSubmit(item: Schema["Item"]["type"]) {
     } else {
       // Item will not be deleted
       // Subtract 1 from health
-      await client.models.Item.update(updatedItem).then((res: any) => {
-        console.log("Item updated: ", res);
-      });
+      await client.models.Item.update(updatedItem).then((res: any) => {});
     }
 
     // Update the pet
@@ -69,9 +70,7 @@ async function handleSubmit(item: Schema["Item"]["type"]) {
       }
     }
 
-    await client.models.Pet.update(updatedPet).then((res: any) => {
-      console.log("Pet updated: ", res);
-    });
+    await client.models.Pet.update(updatedPet).then((res: any) => {});
     router.go(0);
   } catch (error: any) {
     console.error("Error: ", error);
@@ -95,8 +94,6 @@ onMounted(async () => {
   playOptions.value = JSON.parse(
     JSON.stringify(itemFilter2.filter((item) => item.category == "entertainment"))
   );
-  console.log("foodOptions: ", foodOptions);
-  console.log("playOptions: ", playOptions);
 });
 </script>
 <template>
