@@ -40,29 +40,28 @@ onMounted(async () => {
 </script>
 
 <template>
-  <nav>
-    <v-app-bar>
-      <v-container class="d-flex align-center py-0">
-        <v-app-bar-title class="pl-0">
-          <div class="d-flex align-center">
-            <v-avatar
-              alt="NeatNest logo"
-              class="me-3"
-              image="@/assets/logo.svg"
-              rounded="0"
-            />
-            NeatNest
-          </div>
-        </v-app-bar-title>
+  <v-app-bar>
+    <v-container class="d-flex align-center">
+      <v-app-bar-title>
+        <div class="d-flex align-center">
+          <v-avatar alt="NeatNest logo" class="me-3" image="@/assets/logo.svg" />
+          NeatNest
+        </div>
+      </v-app-bar-title>
 
-        <v-spacer />
+      <v-spacer />
 
-        <RouterLink v-for="(link, i) in links" :key="link.title" :to="link.name">
-          <v-list-item width="max-content">
-            {{ link.title }}
-          </v-list-item>
-        </RouterLink>
-      </v-container>
-    </v-app-bar>
-  </nav>
+      <RouterLink v-for="(link, i) in links" :key="link.title" :to="link.name">
+        <v-btn
+          width="max-content"
+          :key="i"
+          :value="link.name"
+          color="primary"
+          rounded="xl"
+        >
+          {{ link.title }}
+        </v-btn>
+      </RouterLink>
+    </v-container>
+  </v-app-bar>
 </template>
