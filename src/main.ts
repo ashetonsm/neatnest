@@ -7,13 +7,18 @@ import App from './App.vue'
 import router from './router'
 import { createPinia } from 'pinia'
 import { userStore } from './stores/user'
+import '@mdi/font/css/materialdesignicons.css'
+import 'vuetify/styles'
+import { createVuetify } from 'vuetify'
 
 Amplify.configure(outputs)
 const pinia = createPinia()
 const app = createApp(App)
+const vuetify = createVuetify({})
 
 app.use(router)
 app.use(pinia)
+app.use(vuetify)
 app.mount('#app')
 
 // router.ts or main.ts
