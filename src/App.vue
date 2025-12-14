@@ -8,20 +8,13 @@ const store = userStore();
 </script>
 
 <template>
-  <img
-    alt="NeatNest logo"
-    class="logo"
-    src="@/assets/logo.svg"
-    width="125"
-    height="125"
-  />
   <main>
     <v-app>
-      <h1 v-if="store.getUser">Hello, {{ store.getUser.username }}</h1>
-      <h1 v-else="!store.getUser">Hello. Please sign in.</h1>
       <Navigation />
-      <RouterView :key="$route.fullPath" />
-      <button @click="() => console.log('signout')">Sign Out</button>
+      <v-container fluid>
+        <RouterView :key="$route.fullPath" />
+        <button @click="() => console.log('signout')">Sign Out</button>
+      </v-container>
     </v-app>
   </main>
 </template>
