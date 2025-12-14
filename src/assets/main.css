@@ -7,7 +7,6 @@
   font-weight: normal;
 }
 
-a,
 .green {
   text-decoration: none;
   color: hsla(160, 100%, 37%, 1);
@@ -15,12 +14,10 @@ a,
   padding: 3px;
 }
 
-
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
+a {
+  text-align: center;
 }
+
 
 body {
   display: flex;
@@ -151,10 +148,6 @@ header {
 button.color {
   height: 35px;
   padding: 0 1em;
-}
-
-button {
-  margin: .25em;
 }
 
 .container-flex {
