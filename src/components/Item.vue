@@ -87,25 +87,22 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="item-container box">
-    <div class="item-info">
-      <img
-        :src="signedSrc"
-        :alt="'an image of ' + item.name"
-        class="item-image"
-        @click="item.owner == 'NA' ? buyFlow(item) : useFlow(item)"
-      />
+  <v-card class="mx-auto" max-width="344">
+    <v-img
+      :src="signedSrc"
+      :alt="'an image of ' + item.name"
+      @click="item.owner == 'NA' ? buyFlow(item) : null"
+    ></v-img>
 
-      <h2 class="green">{{ item.name }}</h2>
-      <div v-if="item.owner != props.currentUser">
-        <h2>Price:</h2>
-        <h2 class="green">{{ item.price }}</h2>
-      </div>
-      <div v-if="item.owner == props.currentUser">
-        <h2 class="red">
-          <button @click="handleDelete(item)">Delete</button>
-        </h2>
-      </div>
-    </div>
-  </div>
+    <v-card-title class="text-center">
+      {{ item.name }}
+    </v-card-title>
+    <v-card-subtitle v-if="item.owner != props.currentUser">
+      ${{ item.price }}
+    </v-card-subtitle>
+
+    <v-card-actions v-if="item.owner == props.currentUser">
+      <v-btn @click="handleDelete(item)" text="Delete" class="mx-auto"></v-btn>
+    </v-card-actions>
+  </v-card>
 </template>
