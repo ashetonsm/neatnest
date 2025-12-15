@@ -1,22 +1,16 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import Canvas from "./Canvas.vue";
-import { generateClient } from "aws-amplify/api";
-import type { Schema } from "amplify/data/resource";
 import { useRoute } from "vue-router";
-import { createItem } from "../tools/createItem";
-import { createPet } from "../tools/createPet";
 import { userStore } from "@/stores/user";
 import CreationModal from "../CreationModal.vue";
 
-const client = generateClient<Schema>();
 const route = useRoute();
 const store = userStore();
 const open = ref(false);
 
 const color = ref<string>("rgb(0, 0, 0)");
 let thingType = route.params.type.toString();
-let thingSpecies: string | null;
 var loading = ref<boolean>(true);
 var canCreatePet = ref<boolean>(false);
 var canCreateItem = ref<boolean>(false);
@@ -53,22 +47,9 @@ async function handleSubmit(this: any, t: string) {
   switch (t) {
     case "pet":
       toggleModal(true);
-
-      // const thingPath = `images/${store.getUser.id}/${thingType}/${thingName}.png`;
-      // createPet(
-      //   thingName!,
-      //   thingSpecies!,
-      //   thingPath!,
-      //   store.getUser.id,
-      //   store.getUser,
-      //   client
-      // );
-      // alert(`You must set a species name! Please try again.`);
-      // alert(`You must name your ${thingType}! Please try again.`);
       break;
     case "item":
       toggleModal(true);
-
       break;
     default:
       console.log("Invalid route param: ", t);
