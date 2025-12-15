@@ -1,8 +1,17 @@
 <script setup lang="ts">
+import { userStore } from '@/stores/user';
+import { createItem } from './tools/createItem';
+import { createPet } from './tools/createPet';
+import { generateClient } from 'aws-amplify/api';
+import type { Schema } from 'amplify/data/resource';
+
 var name: string | null;
 var speciesName: string | null;
 var selectedItemType: string | null;
 var itemTypes: Array<string> = ["food", "entertainment"];
+const store = userStore();
+const client = generateClient<Schema>();
+
 
 const emit = defineEmits<{
   (e: "open", value: boolean): boolean;
@@ -13,9 +22,29 @@ const props = defineProps<{
 }>();
 
 async function handleSubmit() {
-        console.log("Name: ", name)
-        console.log("SpeciesName: ", speciesName)
-        console.log("SelectedItemType: ", selectedItemType)
+      const path = `images/${store.getUser.id}/${props.thing}/${name}.png`;
+
+
+        switch (props.thing) {
+          case 'item':
+            console.log("Name: ", name)
+            console.log("SelectedItemType: ", selectedItemType)
+            if (name && selectedItemType) {
+              createItem(name, path, selectedItemType, store.getUser.id, store.getUser, client)
+            }
+            break;
+          case 'pet':
+            console.log("Name: ", name)
+            console.log("SpeciesName: ", speciesName)
+            if (name && speciesName) {
+              createPet(name, speciesName, path, store.getUser.id, store.getUser, client)
+            }
+            break;
+        
+          default:
+            console.error("Invalid thing type.")
+            break;
+        }
   // Close the window
   emit("open", false);
 }
