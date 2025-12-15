@@ -13,9 +13,11 @@ var pixelSize = 0;
 
 const draw = (ctx: CanvasRenderingContext2D, e: any) => {
   if (canvasRef.value) {
+    console.log("draw ctx: ", ctx);
+    console.log(e);
     pixelSize = canvasRef.value.width / props.size;
-    const x = e.pageX - canvasRef.value.offsetLeft;
-    const y = e.pageY - canvasRef.value.offsetTop;
+    const x = e.x - canvasRef.value.offsetWidth + 16;
+    const y = e.y - canvasRef.value.offsetTop + 16;
     ctx.fillStyle = props.color;
 
     ctx.fillRect(
