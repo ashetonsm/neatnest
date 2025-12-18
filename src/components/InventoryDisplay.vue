@@ -24,24 +24,39 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="page-header">
-    <h1>Your Inventory</h1>
-    <p>This is where you view your inventory.</p>
-  </div>
-  <div class="page" id="inventoryPage">
-    <div v-if="canCreate">
-      <a href="/canvas/item" target="_blank">Launch Item Canvas</a>
-    </div>
-    <div v-if="fetchedItems.length !== 0">
-      <Item
-        v-for="(item, i) in fetchedItems"
-        :key="item.name ?? i"
-        :item="item"
-        :currentUser="store.getUser.id"
-      />
-    </div>
-  </div>
-  <div v-if="fetchedItems.length == 0">
-    <h1>Your inventory is empty</h1>
-  </div>
+  <v-sheet
+    class="d-flex align-center justify-center flex-wrap text-center mx-auto pa-4"
+    elevation="4"
+    width="100%"
+    rounded
+  >
+    <v-row>
+      <v-col md="12" class="text-center">
+        <h2 class="text-h4 font-weight-black">Your Inventory</h2>
+        <h2 v-if="fetchedItems.length == 0">Your inventory is empty</h2>
+      </v-col>
+
+      <v-col cols="4" class="mx-auto">
+        <v-row>
+          <v-btn
+            v-if="canCreate"
+            variant="text"
+            to="/canvas/item"
+            class="mb-4"
+            target="_blank"
+          >
+            Launch Canvas
+          </v-btn>
+        </v-row>
+
+        <Item
+          v-if="fetchedItems.length !== 0"
+          v-for="(item, i) in fetchedItems"
+          :key="item.name ?? i"
+          :item="item"
+          :currentUser="store.getUser.id"
+        />
+      </v-col>
+    </v-row>
+  </v-sheet>
 </template>
