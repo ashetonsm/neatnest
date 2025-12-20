@@ -32,8 +32,14 @@ onMounted(async () => {
   >
     <v-row>
       <v-col md="12" class="text-center">
-        <h2 class="text-h4 font-weight-black">Your Inventory</h2>
-        <h2 v-if="fetchedItems.length == 0">Your inventory is empty</h2>
+        <h2 class="text-h4 font-weight-black ma-4">Your Inventory</h2>
+
+        <v-alert
+          v-if="fetchedItems.length == 0"
+          title="Your inventory is empty!"
+          type="info"
+          class="ma-4"
+        ></v-alert>
       </v-col>
 
       <v-col cols="4" class="mx-auto">
@@ -44,8 +50,7 @@ onMounted(async () => {
             to="/canvas/item"
             class="mb-4"
             target="_blank"
-          >
-            Launch Canvas
+            >Launch Canvas
           </v-btn>
         </v-row>
 
