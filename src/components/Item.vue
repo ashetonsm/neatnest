@@ -92,13 +92,14 @@ onMounted(async () => {
       :src="signedSrc"
       :alt="'an image of ' + item.name"
       @click="item.owner == 'NA' ? buyFlow(item) : null"
+      :class="item.owner == 'NA' ? 'cursor-pointer' : 'cursor-default'"
     ></v-img>
 
     <v-card-title class="text-center">
       {{ item.name }}
     </v-card-title>
     <v-card-subtitle v-if="item.owner != props.currentUser">
-      ${{ item.price }}
+      Price: {{ item.price }}
     </v-card-subtitle>
 
     <v-card-actions v-if="item.owner == props.currentUser">
