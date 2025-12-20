@@ -45,17 +45,22 @@ onMounted(async () => {
     <PetItemModal :pet="pet" :items="items" @open="toggleModal(false)" />
   </div>
 
-  <div class="pet-container box">
-    <div class="pet-image">
-      <img :src="signedSrc" :alt="'an image of ' + pet.name" @click="toggleModal(true)" />
-    </div>
+  <v-card class="mx-auto" max-width="344">
+    <v-img
+      :src="signedSrc"
+      :alt="'an image of ' + pet.name"
+      @click="toggleModal(true)"
+      class="cursor-pointer"
+    ></v-img>
 
-    <div class="pet-info">
-      <h1 class="green">{{ pet.name }}</h1>
-      <h2>hunger:</h2>
-      <h2 class="green">{{ pet.hunger }}</h2>
-      <h2>mood:</h2>
-      <h3 class="green">{{ pet.mood }}</h3>
-    </div>
-  </div>
+    <v-card-title class="text-center">
+      {{ pet.name }}
+    </v-card-title>
+    <v-card-subtitle> Hunger: {{ pet.hunger }} </v-card-subtitle>
+    <v-card-subtitle> Mood: {{ pet.mood }} </v-card-subtitle>
+
+    <!-- <v-card-actions v-if="item.owner == props.currentUser">
+      <v-btn @click="handleDelete(item)" text="Delete" class="mx-auto"></v-btn>
+    </v-card-actions> -->
+  </v-card>
 </template>
