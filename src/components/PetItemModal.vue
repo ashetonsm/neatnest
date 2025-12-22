@@ -12,16 +12,9 @@ const props = defineProps<{
   items: Array<Schema["Item"]["type"]>;
 }>();
 
-const emit = defineEmits<{
-  (e: "open", value: boolean): boolean;
-}>();
-
 async function handleSubmit(item: Schema["Item"]["type"]) {
   if (item.name == undefined) {
     alert(`Hmm, nothing was selected.`);
-
-    // Close the window
-    emit("open", false);
     return;
   }
   const pet = JSON.parse(JSON.stringify(props.pet));
@@ -75,9 +68,6 @@ async function handleSubmit(item: Schema["Item"]["type"]) {
   } catch (error: any) {
     console.error("Error: ", error);
   }
-
-  // Close the window
-  emit("open", false);
 }
 
 var foodOptions = ref<Array<Schema["Item"]["type"]>>();
@@ -97,40 +87,28 @@ onMounted(async () => {
 });
 </script>
 <template>
-  <Teleport to="body">
-    <div class="modal">
-      <button class="closeButton" @click="emit('open', false)">Cancel</button>
-      <div class="info">
-        <h1>What would you like to do with {{ pet.name }}?</h1>
-      </div>
-      <div class="select-input-container">
-        <h2>Feed</h2>
-        <select v-model="selectedFoodOption">
-          <option disabled value="">Please select one</option>
-          <option v-for="item in foodOptions" :value="item">
-            {{ item.name }}
-          </option>
-        </select>
-        <button @click="handleSubmit(JSON.parse(JSON.stringify(selectedFoodOption)))">
-          Do it!
-        </button>
-      </div>
+  <div class="info">
+    <h1>What would you like to do with {{ pet.name }}?</h1>
+  </div>
+  <h2>Feed</h2>
+  <select v-model="selectedFoodOption">
+    <option disabled value="">Please select one</option>
+    <option v-for="item in foodOptions" :value="item">
+      {{ item.name }}
+    </option>
+  </select>
+  <button @click="handleSubmit(JSON.parse(JSON.stringify(selectedFoodOption)))">
+    Do it!
+  </button>
 
-      <div class="select-input-container">
-        <h2>Play</h2>
-        <select v-model="selectedPlayOption">
-          <option disabled value="">Please select one</option>
-          <option v-for="item in playOptions" :value="item">
-            {{ item.name! }}
-          </option>
-        </select>
-        <button @click="handleSubmit(JSON.parse(JSON.stringify(selectedPlayOption)))">
-          Do it!
-        </button>
-      </div>
-    </div>
-    <div id="modal-block" @scroll.prevent @touchmove.prevent @wheel.prevent>
-      You can't click on anything else
-    </div>
-  </Teleport>
+  <h2>Play</h2>
+  <select v-model="selectedPlayOption">
+    <option disabled value="">Please select one</option>
+    <option v-for="item in playOptions" :value="item">
+      {{ item.name! }}
+    </option>
+  </select>
+  <button @click="handleSubmit(JSON.parse(JSON.stringify(selectedPlayOption)))">
+    Do it!
+  </button>
 </template>

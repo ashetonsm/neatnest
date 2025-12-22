@@ -4,18 +4,13 @@ import type { Schema } from "../../amplify/data/resource";
 import { getUrl } from "aws-amplify/storage";
 import PetItemModal from "./PetItemModal.vue";
 
-const open = ref(false);
 const signedSrc = ref("null");
+const petModalRef = ref();
 
 const props = defineProps<{
   pet: Schema["Pet"]["type"];
   items: Array<Schema["Item"]["type"]>;
 }>();
-
-const toggleModal = (n: boolean) => {
-  open.value = n;
-  return open;
-};
 
 async function getFileUrl(fileName: any) {
   try {
@@ -41,15 +36,15 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="open == true">
-    <PetItemModal :pet="pet" :items="items" @open="toggleModal(false)" />
-  </div>
+  <v-dialog :activator="petModalRef" max-width="500">
+    <PetItemModal :pet="pet" :items="items" v-slot:default="{ isActive }" />
+  </v-dialog>
 
   <v-card class="mx-auto" max-width="344">
     <v-img
+      ref="petModalRef"
       :src="signedSrc"
       :alt="'an image of ' + pet.name"
-      @click="toggleModal(true)"
       class="cursor-pointer"
     ></v-img>
 
