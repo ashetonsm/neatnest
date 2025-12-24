@@ -3,9 +3,11 @@ import { onMounted, ref } from "vue";
 import type { Schema } from "../../amplify/data/resource";
 import { getUrl } from "aws-amplify/storage";
 import PetItemModal from "./PetItemModal.vue";
+import { userStore } from "@/stores/user";
 
 const signedSrc = ref("null");
 const petModalRef = ref();
+const store = userStore();
 
 const props = defineProps<{
   pet: Schema["Pet"]["type"];
@@ -36,7 +38,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <v-dialog :activator="petModalRef" max-width="500">
+  <v-dialog v-if="store.getUser.id == pet.owner" :activator="petModalRef" max-width="500">
     <PetItemModal :pet="pet" :items="items" v-slot:default="{ isActive }" />
   </v-dialog>
 
