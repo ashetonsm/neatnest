@@ -1,96 +1,81 @@
 <script setup lang="ts">
-import { userStore } from '@/stores/user';
-import { createItem } from './tools/createItem';
-import { createPet } from './tools/createPet';
-import { generateClient } from 'aws-amplify/api';
-import type { Schema } from 'amplify/data/resource';
+import { userStore } from "@/stores/user";
+import { createItem } from "./tools/createItem";
+import { createPet } from "./tools/createPet";
+import { generateClient } from "aws-amplify/api";
+import type { Schema } from "amplify/data/resource";
+import { ref } from "vue";
 
 var name: string | null;
 var speciesName: string | null;
-var selectedItemType: string | null;
+var selectedItemType = ref("");
 var itemTypes: Array<string> = ["food", "entertainment"];
 const store = userStore();
 const client = generateClient<Schema>();
 
-
-const emit = defineEmits<{
-  (e: "open", value: boolean): boolean;
-}>();
-
 const props = defineProps<{
-  thing: string | null
+  thing: string | null;
 }>();
 
 async function handleSubmit() {
-      const path = `images/${store.getUser.id}/${props.thing}/${name}.png`;
+  const path = `images/${store.getUser.id}/${props.thing}/${name}.png`;
 
+  switch (props.thing) {
+    case "item":
+      console.log("Name: ", name);
+      console.log("SelectedItemType: ", selectedItemType);
+      if (name && selectedItemType) {
+        createItem(
+          name,
+          path,
+          selectedItemType.value,
+          store.getUser.id,
+          store.getUser,
+          client
+        );
+      }
+      break;
+    case "pet":
+      console.log("Name: ", name);
+      console.log("SpeciesName: ", speciesName);
+      if (name && speciesName) {
+        createPet(name, speciesName, path, store.getUser.id, store.getUser, client);
+      }
+      break;
 
-        switch (props.thing) {
-          case 'item':
-            console.log("Name: ", name)
-            console.log("SelectedItemType: ", selectedItemType)
-            if (name && selectedItemType) {
-              createItem(name, path, selectedItemType, store.getUser.id, store.getUser, client)
-            }
-            break;
-          case 'pet':
-            console.log("Name: ", name)
-            console.log("SpeciesName: ", speciesName)
-            if (name && speciesName) {
-              createPet(name, speciesName, path, store.getUser.id, store.getUser, client)
-            }
-            break;
-        
-          default:
-            console.error("Invalid thing type.")
-            break;
-        }
-  // Close the window
-  emit("open", false);
+    default:
+      console.error("Invalid thing type.");
+      break;
+  }
 }
 </script>
 <template>
-  <Teleport to="main">
-  <template v-if="props.thing == 'item'">
-    <div class="modal">
-      <div class="info">
-        <form @submit.prevent="handleSubmit()">
-          <h3>Please name your {{ props.thing }}</h3>
-          <input v-model="name" type="text" placeholder="Enter a name"></input>
+  <v-card class="mx-auto" v-if="props.thing == 'item'">
+    <v-col class="text-center">
+      <v-card-title>Please name your {{ props.thing }}</v-card-title>
+      <v-form @submit.prevent="handleSubmit()">
+        <v-text-field v-model="name" label="Item name"></v-text-field>
 
-          <h3>Is this item food or entertainment?</h3>
-        <select v-model="selectedItemType">
-          <option disabled value="">Please select one:</option>
-          <option v-for="it in itemTypes" :value="it">
-            {{ it }}
-          </option>
-        </select>
-          <button type="submit">Create</button>
-        </form>
-      </div>
-      <div id="modal-block" @scroll.prevent @touchmove.prevent @wheel.prevent></div>
-      <button class="closeButton" @click="emit('open', false)">Cancel</button>
-    </div>
-  </template>
-  <template v-if="props.thing == 'pet'">
-    <div class="modal">
-      <div class="info">
-        <form @submit.prevent="handleSubmit()">
-          <h3>Please name your {{ props.thing }}</h3>
-          <input v-model="name" type="text" placeholder="Enter a name"></input>
+        <v-select
+          v-model="selectedItemType"
+          label="Item Type"
+          :items="itemTypes"
+          item-title="[0]"
+          single-line
+        ></v-select>
+        <v-btn class="my-2" text="Create!" type="submit"></v-btn>
+      </v-form>
+    </v-col>
+  </v-card>
 
-          <h3>What species is your pet?</h3>
-          <input v-model="speciesName" type="text" placeholder="Enter a species name"></input>
-
-          <button type="submit">Create</button>
-        </form>
-      </div>
-      <div id="modal-block" @scroll.prevent @touchmove.prevent @wheel.prevent></div>
-      <button class="closeButton" @click="emit('open', false)">Cancel</button>
-    </div>
-  </template>
-      <div id="modal-block" @scroll.prevent @touchmove.prevent @wheel.prevent>
-      You can't click on anything else
-    </div>
-  </Teleport>
+  <v-card class="mx-auto" v-if="props.thing == 'pet'">
+    <v-col class="text-center">
+      <v-card-title>Please name your {{ props.thing }}</v-card-title>
+      <v-form @submit.prevent="handleSubmit()">
+        <v-text-field v-model="name" label="Pet name"></v-text-field>
+        <v-text-field v-model="speciesName" label="Pet Species"></v-text-field>
+        <v-btn class="my-2" text="Create!" type="submit"></v-btn>
+      </v-form>
+    </v-col>
+  </v-card>
 </template>
