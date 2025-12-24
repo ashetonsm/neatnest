@@ -23,21 +23,23 @@ app.mount('#app')
 
 // router.ts or main.ts
 router.beforeEach(async (to, from) => {
-    const store = userStore()
-    var user = store.getUser
-    var pets = store.getPets
-    var inventory = store.getInventory
-    if (user == null) {
-        await store.amplifyGetCurrentUser()
+    if (to.name !== "login") {
+        const store = userStore()
+        var user = store.getUser
+        var pets = store.getPets
+        var inventory = store.getInventory
+        if (user == null) {
+            await store.amplifyGetCurrentUser()
             .then(() => {
                 user = store.getUser
             })
-
-        if (pets == null) {
-            pets = await store.fetchPets()
-        }
-        if (inventory == null) {
-            inventory = await store.fetchInventory()
+            
+            if (pets == null) {
+                pets = await store.fetchPets()
+            }
+            if (inventory == null) {
+                inventory = await store.fetchInventory()
+            }
         }
     }
 })
