@@ -81,6 +81,7 @@ async function fetchUser() {
     })
       .then((res) => {
         thisUser = res.data[0];
+        thisProfileDesc.value = thisUser?.description as string;
         console.log(thisUser);
       })
       .then(() => {
