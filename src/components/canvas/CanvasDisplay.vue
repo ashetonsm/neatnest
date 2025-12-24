@@ -7,7 +7,7 @@ import CreationModal from "../CreationModal.vue";
 
 const route = useRoute();
 const store = userStore();
-const open = ref(false);
+const createModalRef = ref();
 
 const color = ref<string>("rgb(0, 0, 0)");
 let thingType = route.params.type.toString();
@@ -15,11 +15,6 @@ var loading = ref<boolean>(true);
 var canCreatePet = ref<boolean>(false);
 var canCreateItem = ref<boolean>(false);
 var lastColor = ref<string>("rgb(0, 0, 0)");
-
-const toggleModal = (n: boolean) => {
-  open.value = n;
-  return open;
-};
 
 function resetCanvas() {
   try {
@@ -46,10 +41,8 @@ function handleColor(e: Event) {
 async function handleSubmit(this: any, t: string) {
   switch (t) {
     case "pet":
-      toggleModal(true);
       break;
     case "item":
-      toggleModal(true);
       break;
     default:
       console.log("Invalid route param: ", t);
@@ -82,13 +75,18 @@ onMounted(async () => {
       <h1>Loading...</h1>
     </template>
     <template v-if="(!loading && canCreatePet) || canCreateItem">
-      <div v-if="open == true">
-        <CreationModal @open="toggleModal(false)" :thing="thingType" />
-      </div>
+      <v-dialog :activator="createModalRef" max-width="500">
+        <CreationModal v-slot:default="{ isActive }" :thing="thingType" />
+      </v-dialog>
       <div class="navbar">
         <div>
           <button @click="resetCanvas">Reset</button>
-          <button @click="handleSubmit(route.params.type.toString())">Finish</button>
+          <button
+            ref="createModalRef"
+            @click="handleSubmit(route.params.type.toString())"
+          >
+            Finish
+          </button>
         </div>
         <div class="container-block">
           <div class="row">
