@@ -87,28 +87,37 @@ onMounted(async () => {
 });
 </script>
 <template>
-  <div class="info">
-    <h1>What would you like to do with {{ pet.name }}?</h1>
-  </div>
-  <h2>Feed</h2>
-  <select v-model="selectedFoodOption">
-    <option disabled value="">Please select one</option>
-    <option v-for="item in foodOptions" :value="item">
-      {{ item.name }}
-    </option>
-  </select>
-  <button @click="handleSubmit(JSON.parse(JSON.stringify(selectedFoodOption)))">
-    Do it!
-  </button>
-
-  <h2>Play</h2>
-  <select v-model="selectedPlayOption">
-    <option disabled value="">Please select one</option>
-    <option v-for="item in playOptions" :value="item">
-      {{ item.name! }}
-    </option>
-  </select>
-  <button @click="handleSubmit(JSON.parse(JSON.stringify(selectedPlayOption)))">
-    Do it!
-  </button>
+  <v-card class="mx-auto">
+    <v-col class="text-center">
+      <v-card-title> What would you like to do with {{ pet.name }}? </v-card-title>
+      <v-form
+        @submit.prevent="handleSubmit(JSON.parse(JSON.stringify(selectedFoodOption)))"
+      >
+        <v-select
+          v-model="selectedFoodOption"
+          label="Food"
+          :items="foodOptions"
+          item-title="name"
+          item-value="selectedFoodOption"
+          return-object
+          single-line
+        ></v-select>
+        <v-btn class="my-2" text="Feed" type="submit"></v-btn>
+      </v-form>
+      <v-form
+        @submit.prevent="handleSubmit(JSON.parse(JSON.stringify(selectedPlayOption)))"
+      >
+        <v-select
+          v-model="selectedPlayOption"
+          label="Entertainment"
+          :items="playOptions"
+          item-title="name"
+          item-value="selectedPlayOption"
+          return-object
+          single-line
+        ></v-select>
+        <v-btn class="my-2" text="Play" type="submit"></v-btn>
+      </v-form>
+    </v-col>
+  </v-card>
 </template>
