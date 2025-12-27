@@ -24,7 +24,7 @@ onMounted(async () => {
 
 <template>
   <v-sheet
-    class="d-flex align-center justify-center flex-wrap text-center mx-auto pa-4"
+    class="d-flex align-center justify-center text-center mx-auto pa-8"
     elevation="4"
     width="100%"
     rounded
@@ -45,26 +45,24 @@ onMounted(async () => {
           type="info"
           class="ma-4"
         ></v-alert>
-      </v-col>
 
-      <v-col cols="4" class="mx-auto">
-        <v-row>
-          <v-btn
-            v-if="canCreate"
-            variant="text"
-            to="/canvas/pet"
-            class="mb-4"
-            target="_blank"
-            >Launch Canvas
-          </v-btn>
+        <v-btn
+          v-if="canCreate"
+          variant="text"
+          to="/canvas/pet"
+          class="mb-4"
+          target="_blank"
+          >Launch Canvas
+        </v-btn>
+
+        <v-row class="ga-4">
+          <Pet
+            v-for="(pet, i) in fetchedPets"
+            :key="pet.name ?? i"
+            :pet="pet"
+            :items="fetchedItems"
+          />
         </v-row>
-
-        <Pet
-          v-for="(pet, i) in fetchedPets"
-          :key="pet.name ?? i"
-          :pet="pet"
-          :items="fetchedItems"
-        />
       </v-col>
     </v-row>
   </v-sheet>

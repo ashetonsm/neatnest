@@ -42,12 +42,14 @@ onMounted(async () => {
     <PetItemModal :pet="pet" :items="items" v-slot:default="{ isActive }" />
   </v-dialog>
 
-  <v-card class="mx-auto" max-width="344">
+  <v-card class="mx-auto" max-width="300px">
     <v-img
       ref="petModalRef"
       :src="signedSrc"
       :alt="'an image of ' + pet.name"
       class="cursor-pointer"
+      min-width="150px"
+      max-width="300px"
     ></v-img>
 
     <v-card-title class="text-center">
