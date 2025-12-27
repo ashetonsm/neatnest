@@ -25,7 +25,7 @@ onMounted(async () => {
 
 <template>
   <v-sheet
-    class="d-flex align-center justify-center flex-wrap text-center mx-auto pa-4"
+    class="d-flex align-center justify-center text-center mx-auto pa-8"
     elevation="4"
     width="100%"
     rounded
@@ -40,27 +40,25 @@ onMounted(async () => {
           type="info"
           class="ma-4"
         ></v-alert>
-      </v-col>
 
-      <v-col cols="4" class="mx-auto">
-        <v-row>
-          <v-btn
-            v-if="canCreate"
-            variant="text"
-            to="/canvas/item"
-            class="mb-4"
-            target="_blank"
-            >Launch Canvas
-          </v-btn>
+        <v-btn
+          v-if="canCreate"
+          color="primary"
+          to="/canvas/item"
+          class="mb-4"
+          target="_blank"
+          >Launch Canvas
+        </v-btn>
+
+        <v-row class="ga-4">
+          <Item
+            v-if="fetchedItems.length !== 0"
+            v-for="(item, i) in fetchedItems"
+            :key="item.name ?? i"
+            :item="item"
+            :currentUser="store.getUser.id"
+          />
         </v-row>
-
-        <Item
-          v-if="fetchedItems.length !== 0"
-          v-for="(item, i) in fetchedItems"
-          :key="item.name ?? i"
-          :item="item"
-          :currentUser="store.getUser.id"
-        />
       </v-col>
     </v-row>
   </v-sheet>

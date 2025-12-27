@@ -37,7 +37,7 @@ onMounted(async () => {
 
 <template>
   <v-sheet
-    class="d-flex align-center justify-center flex-wrap text-center mx-auto pa-4"
+    class="d-flex align-center justify-center text-center mx-auto pa-8"
     elevation="4"
     width="100%"
     rounded
@@ -60,7 +60,7 @@ onMounted(async () => {
         ></v-alert>
       </v-col>
 
-      <v-col cols="4" class="mx-auto">
+      <v-row class="ga-4">
         <Item
           v-if="fetchedItems.length !== 0"
           v-for="(item, i) in fetchedItems"
@@ -68,7 +68,7 @@ onMounted(async () => {
           :item="item"
           :currentUser="store.getUser.id"
         />
-      </v-col>
+      </v-row>
     </v-row>
   </v-sheet>
 </template>

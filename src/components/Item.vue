@@ -87,12 +87,15 @@ onMounted(async () => {
 </script>
 
 <template>
-  <v-card class="mx-auto" max-width="344">
+  <v-card class="mx-auto" max-width="300px">
     <v-img
       :src="signedSrc"
       :alt="'an image of ' + item.name"
       @click="item.owner == 'NA' ? buyFlow(item) : null"
       :class="item.owner == 'NA' ? 'cursor-pointer' : 'cursor-default'"
+      class="cursor-pointer"
+      min-width="150px"
+      max-width="300px"
     ></v-img>
 
     <v-card-title class="text-center">
