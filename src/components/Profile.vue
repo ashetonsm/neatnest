@@ -187,16 +187,19 @@ onMounted(async () => {
 
         <!-- Pets -->
         <v-sheet border="md" class="pa-4 text-white mx-auto rounded" color="secondary">
-          <h2 class="text-h4 font-weight-black ma-4">{{ profile }}'s Pets:</h2>
-          <div v-if="thesePets.length !== 0">
-            <Pet
-              v-for="(pet, i) in thesePets"
-              :key="pet.name ?? i"
-              :pet="pet"
-              :items="[]"
-            />
-          </div>
-          <div v-else>Aww, {{ profile }} has no pets!</div>
+          <v-row>
+            <v-col md="12" class="text-center">
+              <h2 class="text-h4 font-weight-black ma-4">{{ profile }}'s Pets:</h2>
+              <v-row class="ga-4" v-if="thesePets.length !== 0">
+                <Pet
+                  v-for="(pet, i) in thesePets"
+                  :key="pet.name ?? i"
+                  :pet="pet"
+                  :items="[]"
+                />
+              </v-row>
+            </v-col>
+          </v-row>
         </v-sheet>
 
         <!-- Friends -->
