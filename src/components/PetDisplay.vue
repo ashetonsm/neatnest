@@ -48,7 +48,7 @@ onMounted(async () => {
 
         <v-btn
           v-if="canCreate"
-          variant="text"
+          color="primary"
           to="/canvas/pet"
           class="mb-4"
           target="_blank"
