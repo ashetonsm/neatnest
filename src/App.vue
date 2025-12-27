@@ -12,8 +12,10 @@ const store = userStore();
 <template>
   <v-app>
     <v-main>
-      <Navigation />
-      <RouterView :key="$route.fullPath" />
+      <v-container>
+        <Navigation />
+        <RouterView :key="$route.fullPath" />
+      </v-container>
       <v-btn
         @click="
           async () => {
