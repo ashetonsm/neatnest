@@ -12,13 +12,12 @@ const props = defineProps<{
   items: Array<Schema["Item"]["type"]>;
 }>();
 
-const emit = defineEmits<{
-  (e: "open", value: boolean): boolean;
-}>();
-
 async function handleSubmit(item: Schema["Item"]["type"]) {
+  if (item.name == undefined) {
+    alert(`Hmm, nothing was selected.`);
+    return;
+  }
   const pet = JSON.parse(JSON.stringify(props.pet));
-  console.log("pet: ", pet);
   try {
     var updatedItem = item;
     var updatedPet = pet;
@@ -29,16 +28,13 @@ async function handleSubmit(item: Schema["Item"]["type"]) {
       itemWillBeDeleted = true;
     }
 
-    console.log("itemWillBeDeleted: ", itemWillBeDeleted);
     // Update the item.
     if (itemWillBeDeleted) {
       var confirmDeletion = confirm("This item will disappear after use. Continue?");
       if (confirmDeletion == true) {
         // Delete the item
         await client.models.Item.delete({ id: item.id })
-          .then((res: any) => {
-            console.log("Item deleted: ", res);
-          })
+          .then((res: any) => {})
           .then(async () => {
             await deleteStorage(item.image!);
           });
@@ -49,9 +45,7 @@ async function handleSubmit(item: Schema["Item"]["type"]) {
     } else {
       // Item will not be deleted
       // Subtract 1 from health
-      await client.models.Item.update(updatedItem).then((res: any) => {
-        console.log("Item updated: ", res);
-      });
+      await client.models.Item.update(updatedItem).then((res: any) => {});
     }
 
     // Update the pet
@@ -69,16 +63,11 @@ async function handleSubmit(item: Schema["Item"]["type"]) {
       }
     }
 
-    await client.models.Pet.update(updatedPet).then((res: any) => {
-      console.log("Pet updated: ", res);
-    });
+    await client.models.Pet.update(updatedPet).then((res: any) => {});
     router.go(0);
   } catch (error: any) {
     console.error("Error: ", error);
   }
-
-  // Close the window
-  emit("open", false);
 }
 
 var foodOptions = ref<Array<Schema["Item"]["type"]>>();
@@ -95,45 +84,40 @@ onMounted(async () => {
   playOptions.value = JSON.parse(
     JSON.stringify(itemFilter2.filter((item) => item.category == "entertainment"))
   );
-  console.log("foodOptions: ", foodOptions);
-  console.log("playOptions: ", playOptions);
 });
 </script>
 <template>
-  <Teleport to="body">
-    <div class="modal">
-      <button class="closeButton" @click="emit('open', false)">Cancel</button>
-      <div class="info">
-        <h1>What would you like to do with {{ pet.name }}?</h1>
-      </div>
-      <div class="select-input-container">
-        <h2>Feed</h2>
-        <select v-model="selectedFoodOption">
-          <option disabled value="">Please select one</option>
-          <option v-for="item in foodOptions" :value="item">
-            {{ item.name }}
-          </option>
-        </select>
-        <button @click="handleSubmit(JSON.parse(JSON.stringify(selectedFoodOption)))">
-          Do it!
-        </button>
-      </div>
-
-      <div class="select-input-container">
-        <h2>Play</h2>
-        <select v-model="selectedPlayOption">
-          <option disabled value="">Please select one</option>
-          <option v-for="item in playOptions" :value="item">
-            {{ item.name! }}
-          </option>
-        </select>
-        <button @click="handleSubmit(JSON.parse(JSON.stringify(selectedPlayOption)))">
-          Do it!
-        </button>
-      </div>
-    </div>
-    <div id="modal-block" @scroll.prevent @touchmove.prevent @wheel.prevent>
-      You can't click on anything else
-    </div>
-  </Teleport>
+  <v-card class="mx-auto">
+    <v-col class="text-center">
+      <v-card-title> What would you like to do with {{ pet.name }}? </v-card-title>
+      <v-form
+        @submit.prevent="handleSubmit(JSON.parse(JSON.stringify(selectedFoodOption)))"
+      >
+        <v-select
+          v-model="selectedFoodOption"
+          label="Food"
+          :items="foodOptions"
+          item-title="name"
+          item-value="selectedFoodOption"
+          return-object
+          single-line
+        ></v-select>
+        <v-btn class="my-2" text="Feed" type="submit"></v-btn>
+      </v-form>
+      <v-form
+        @submit.prevent="handleSubmit(JSON.parse(JSON.stringify(selectedPlayOption)))"
+      >
+        <v-select
+          v-model="selectedPlayOption"
+          label="Entertainment"
+          :items="playOptions"
+          item-title="name"
+          item-value="selectedPlayOption"
+          return-object
+          single-line
+        ></v-select>
+        <v-btn class="my-2" text="Play" type="submit"></v-btn>
+      </v-form>
+    </v-col>
+  </v-card>
 </template>

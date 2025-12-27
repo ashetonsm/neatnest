@@ -7,32 +7,39 @@ import App from './App.vue'
 import router from './router'
 import { createPinia } from 'pinia'
 import { userStore } from './stores/user'
+import '@mdi/font/css/materialdesignicons.css'
+import 'vuetify/styles'
+import { createVuetify } from 'vuetify'
 
 Amplify.configure(outputs)
 const pinia = createPinia()
 const app = createApp(App)
+const vuetify = createVuetify({})
 
 app.use(router)
 app.use(pinia)
+app.use(vuetify)
 app.mount('#app')
 
 // router.ts or main.ts
 router.beforeEach(async (to, from) => {
-    const store = userStore()
-    var user = store.getUser
-    var pets = store.getPets
-    var inventory = store.getInventory
-    if (user == null) {
-        await store.amplifyGetCurrentUser()
+    if (to.name !== "login") {
+        const store = userStore()
+        var user = store.getUser
+        var pets = store.getPets
+        var inventory = store.getInventory
+        if (user == null) {
+            await store.amplifyGetCurrentUser()
             .then(() => {
                 user = store.getUser
             })
-
-        if (pets == null) {
-            pets = await store.fetchPets()
-        }
-        if (inventory == null) {
-            inventory = await store.fetchInventory()
+            
+            if (pets == null) {
+                pets = await store.fetchPets()
+            }
+            if (inventory == null) {
+                inventory = await store.fetchInventory()
+            }
         }
     }
 })

@@ -1,9 +1,7 @@
 <script setup lang="ts">
+import About from "@/components/About.vue";
 </script>
 
 <template>
-  <div class="page" id="aboutPage">
-    <h1>This is an about page</h1>
-  </div>
+  <About />
 </template>
-

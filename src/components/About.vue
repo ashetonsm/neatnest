@@ -9,8 +9,8 @@
   >
     <v-row>
       <v-col md="12" class="text-center">
-        <h2 class="text-h4 font-weight-black ma-4">Home</h2>
-        <p>This is where the latest news would be.</p>
+        <h2 class="text-h4 font-weight-black ma-4">About NeatNest</h2>
+        <p>NeatNest was made by nnneato (AKA AshetonSM). That's pretty neat.</p>
       </v-col>
     </v-row>
   </v-sheet>

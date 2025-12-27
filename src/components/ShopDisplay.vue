@@ -36,24 +36,39 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="page-header">
-    <h1>{{ shopFrontName }}</h1>
-    <p>This is where you shop for things.</p>
-  </div>
-  <div class="page" id="shopPage">
-    <template v-if="!fetchedItems">
-      <h1>Loading!</h1>
-    </template>
-    <template v-if="!fetchedItems.length">
-      <h1>This shop is sold out!</h1>
-    </template>
-    <template v-else>
-      <Item
-        v-for="(item, i) in fetchedItems"
-        :key="item.name ?? i"
-        :item="item"
-        :current-user="store.getUser.id"
-      />
-    </template>
-  </div>
+  <v-sheet
+    class="d-flex align-center justify-center text-center mx-auto pa-8"
+    elevation="4"
+    width="100%"
+    rounded
+  >
+    <v-row>
+      <v-col md="12" class="text-center">
+        <h2 class="text-h4 font-weight-black ma-4">Welcome to {{ shopFrontName }}!</h2>
+
+        <v-alert
+          v-if="!fetchedItems"
+          title="Loading..."
+          type="info"
+          class="ma-4"
+        ></v-alert>
+        <v-alert
+          v-else-if="!fetchedItems.length"
+          title="This shop is sold out!"
+          type="info"
+          class="ma-4"
+        ></v-alert>
+      </v-col>
+
+      <v-row class="ga-4">
+        <Item
+          v-if="fetchedItems.length !== 0"
+          v-for="(item, i) in fetchedItems"
+          :key="item.name ?? i"
+          :item="item"
+          :currentUser="store.getUser.id"
+        />
+      </v-row>
+    </v-row>
+  </v-sheet>
 </template>

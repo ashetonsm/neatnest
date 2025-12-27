@@ -23,29 +23,47 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="page-header">
-    <h1>Your pets</h1>
-    <p>This is where you view your pets.</p>
-  </div>
-  <div class="page" id="petsPage">
-    <template v-if="canCreate">
-      <div>
-        <a href="/canvas/pet" target="_blank">Launch pet canvas</a>
-      </div>
-    </template>
-    <template v-if="!fetchedPets">
-      <h1>Loading!</h1>
-    </template>
-    <template v-else-if="!fetchedPets.length">
-      <h1>No pets found</h1>
-    </template>
-    <template v-else>
-      <Pet
-        v-for="(pet, i) in fetchedPets"
-        :key="pet.name ?? i"
-        :pet="pet"
-        :items="fetchedItems"
-      />
-    </template>
-  </div>
+  <v-sheet
+    class="d-flex align-center justify-center text-center mx-auto pa-8"
+    elevation="4"
+    width="100%"
+    rounded
+  >
+    <v-row>
+      <v-col md="12" class="text-center">
+        <h2 class="text-h4 font-weight-black ma-4">Your Pets</h2>
+
+        <v-alert
+          v-if="!fetchedPets"
+          title="Loading..."
+          type="info"
+          class="ma-4"
+        ></v-alert>
+        <v-alert
+          v-else-if="!fetchedPets.length"
+          title="Aw... you have no pets!"
+          type="info"
+          class="ma-4"
+        ></v-alert>
+
+        <v-btn
+          v-if="canCreate"
+          color="primary"
+          to="/canvas/pet"
+          class="mb-4"
+          target="_blank"
+          >Launch Canvas
+        </v-btn>
+
+        <v-row class="ga-4">
+          <Pet
+            v-for="(pet, i) in fetchedPets"
+            :key="pet.name ?? i"
+            :pet="pet"
+            :items="fetchedItems"
+          />
+        </v-row>
+      </v-col>
+    </v-row>
+  </v-sheet>
 </template>
