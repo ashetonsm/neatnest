@@ -6,7 +6,9 @@ import type { Schema } from "../../amplify/data/resource";
 import { getUrl } from "aws-amplify/storage";
 import { onMounted, ref } from "vue";
 import { deleteStorage } from "./tools/deleteStorage";
+import { userStore } from "@/stores/user";
 const route = useRoute();
+const store = userStore();
 
 var shopFrontName = route.params.id == "1" ? "Test Emporium" : "Test Shack";
 const client = generateClient<Schema>(); // use this Data client for CRUDL requests
@@ -20,15 +22,28 @@ const props = defineProps<{
 async function buyFlow(i: Schema["Item"]["type"]) {
   const choice = confirm("Buy " + i.name + " for " + i.price + "?");
   if (choice) {
-    // Set the owner to the signed in user
-    i.owner = props.currentUser;
+    // Have not fetched Credit entry yet
+    if (!store.getCredits) {
+      await store.fetchCredit();
+    }
 
-    // send the update request
-    await client.models.Item.update(i).then((res) => {
-      console.log(res);
-    });
-    // Refresh
-    router.go(0);
+    // console.log("User has ", store.getCredits.amount, " credit(s).");
+    if (store.getCredits.amount && i.price && store.getCredits.amount >= i.price) {
+      var updatedCredit = store.getCredits;
+      updatedCredit.amount = updatedCredit.amount - i.price;
+
+      // Subtract the amount.
+      await client.models.Credit.update(updatedCredit).then(async () => {
+        // Set the owner to the signed in user
+        i.owner = props.currentUser;
+        // Update the item to the current user
+        await client.models.Item.update(i).then((res) => {});
+        // Refresh
+        router.go(0);
+      });
+    } else {
+      alert("You don't have enough credits to buy this!");
+    }
   } else {
     return console.log(choice);
   }
@@ -68,16 +83,6 @@ async function handleDelete(i: Schema["Item"]["type"]) {
     router.go(0);
   } else {
     return console.log("Deletion aborted.");
-  }
-}
-
-function useFlow(i: Schema["Item"]["type"]) {
-  const choice = confirm("Use " + i.name + "?");
-  if (choice) {
-    // Do use logic
-    return console.log(choice);
-  } else {
-    return console.log(choice);
   }
 }
 
