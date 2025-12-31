@@ -12,7 +12,8 @@ const route = useRoute();
 const store = userStore();
 var profile = route.params.username;
 const thisProfileDesc = ref<String>("Lorum ipsum this is a description");
-const theseFriends = ref<Array<Schema["User"]["type"]>>([]);
+// const theseFriends = ref<Array<Schema["User"]["type"]>>([]);
+const theseFriends = ref<Array<String>>([]);
 var thisUser: Schema["User"]["type"] | null = null;
 const thesePets = ref<Array<Schema["Pet"]["type"]>>([]);
 var newUsername = "";
@@ -106,14 +107,102 @@ async function fetchPets() {
   });
 }
 
+async function addFriend() {
+  if ((thisUser?.id as string) !== store.getUser.id) {
+    await client.models.Friend.create({
+      friendA: thisUser?.id as string,
+      friendB: store.getUser.id,
+      status: "pending",
+    }).then((res) => {
+      console.log("Friend res: ", res.data);
+      router.go(0);
+    });
+  } else {
+    alert("You can't add yourself as a friend!");
+  }
+}
+async function blockFriend() {
+  if ((thisUser?.id as string) !== store.getUser.id) {
+    await client.models.Friend.create({
+      friendA: thisUser?.id as string,
+      friendB: store.getUser.id,
+      status: "blocked",
+    }).then((res) => {
+      console.log("Friend res: ", res.data);
+      router.go(0);
+    });
+  } else {
+    alert("You can't block yourself!");
+  }
+}
+
+/* This is horrible, redo it.*/
+async function fetchFriends() {
+  var friendListA: Array<Schema["User"]["type"]> = [];
+  var friendListB: Array<Schema["User"]["type"]> = [];
+  var friendList: Array<any> = [];
+
+  // Search by friendA
+  await client.models.Friend.friendByfriendA(
+    { friendA: thisUser?.id as string },
+    { authMode: "userPool" }
+  )
+    .then((res: { data: any }) => {
+      if (res.data.length) {
+        friendListA = res.data;
+      } else {
+        console.log("No friendA friends found for this user.");
+      }
+    })
+    .catch((error: any) => {
+      console.log("Error: ", error);
+    });
+
+  // Search by friendB
+  await client.models.Friend.friendByfriendB(
+    { friendB: thisUser?.id as string },
+    { authMode: "userPool" }
+  )
+    .then((res: { data: any }) => {
+      if (res.data.length) {
+        friendListB = res.data;
+      } else {
+        console.log("No friendB friends found for this user.");
+      }
+    })
+    .catch((error: any) => {
+      console.log("Error: ", error);
+    });
+
+  // Friend List filtering
+  friendList = [...friendListA, ...friendListB];
+  console.log("Raw FriendList: ", friendList);
+
+  const uniqueArray = [...new Set(friendList)];
+  friendList = Array.from(uniqueArray);
+  console.log("Setified FriendList: ", friendList);
+
+  friendList.forEach(async (friend) => {
+    console.log(friend.friendA);
+    await client.models.User.get({ id: friend.friendA }).then((res) => {
+      if (res.data?.username) {
+        theseFriends.value.push(res.data.username);
+      }
+    });
+  });
+}
+
 onMounted(async () => {
   if (store.getUser.username !== profile) {
-    fetchUser();
+    await fetchUser();
+    await fetchFriends();
   } else {
     thisUser = store.getUser;
     thisProfileDesc.value = thisUser?.description as string;
     thesePets.value = store.getPets;
-    theseFriends.value = [];
+    await store.fetchFriends().then(() => {
+      theseFriends.value = store.getFriends;
+    });
   }
 });
 </script>
@@ -134,6 +223,9 @@ onMounted(async () => {
           type="error"
           class="ma-4"
         ></v-alert>
+
+        <v-btn class="mt-2" color="primary" text="Add Friend" @click="addFriend"></v-btn>
+        <v-btn class="mt-2" color="error" text="Block" @click="blockFriend"></v-btn>
       </v-col>
 
       <v-col class="mx-auto" v-if="store.getUser.username == profile">
@@ -205,9 +297,14 @@ onMounted(async () => {
         <!-- Friends -->
         <v-sheet border="md" class="pa-4 text-white mx-auto rounded" color="purple">
           <h2 class="text-h4 font-weight-black ma-4">{{ profile }}'s Friends:</h2>
-          <div v-if="theseFriends.length !== 0">
-            <!-- <Pet v-for="(pet, i) in thesePets" :key="pet.name ?? i" :pet="pet" :items="[]" /> -->
-          </div>
+          <v-list v-if="theseFriends.length">
+            <v-list-item
+              v-for="n in theseFriends"
+              :key="'Friend: ' + n"
+              :title="n.toString()"
+              :to="'/profile/' + n"
+            ></v-list-item>
+          </v-list>
           <div v-else>Aww, {{ profile }} has no friends!</div>
         </v-sheet>
       </v-col>
