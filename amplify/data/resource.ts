@@ -109,7 +109,8 @@ const schema = a.schema({
   Friend: a
     .model({
       friendA: a.string(),
-      friendB: a.string()
+      friendB: a.string(),
+      status: a.string()
     })
     .secondaryIndexes((index) => [
       index("friendA")
