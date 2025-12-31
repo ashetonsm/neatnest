@@ -3,8 +3,7 @@ import { defineStore } from 'pinia';
 import { generateClient } from 'aws-amplify/api';
 import type { Schema } from '../../amplify/data/resource'
 import { getCurrentUser } from 'aws-amplify/auth';
-import type { Nullable } from 'node_modules/@aws-amplify/data-schema/dist/esm/ModelField';
-
+import {batchGetUsernames} from '@/components/tools/batchGetUsernames'
 export const userStore = defineStore('user', {
     state: () => ({
         user: ref<any>(null),
@@ -116,9 +115,6 @@ export const userStore = defineStore('user', {
         async fetchFriends() {
             const client = generateClient<Schema>();
             await this.amplifyGetCurrentUser()
-
-            var friendListA: Array<Schema["User"]["type"]> = []
-            var friendListB: Array<Schema["User"]["type"]> = []
             var friendList: Array<any> = []
 
             // Search by friendA
@@ -128,7 +124,7 @@ export const userStore = defineStore('user', {
             )
                 .then((res: { data: any; }) => {
                     if (res.data.length) {
-                        friendListA = res.data
+                        friendList = res.data
                     } else {
                         console.log("No friendA friends found for this user.")
                     }
@@ -144,7 +140,7 @@ export const userStore = defineStore('user', {
             )
                 .then((res: { data: any; }) => {
                     if (res.data.length) {
-                        friendListB = res.data
+                        friendList = [...friendList, ...res.data]
                     } else {
                         console.log("No friendB friends found for this user.")
                     }
@@ -153,25 +149,38 @@ export const userStore = defineStore('user', {
                     console.log("Error: ", error)
                 });
 
-            // Friend List filtering
-            friendList = [...friendListA, ...friendListB]
-            console.log("Raw FriendList: ", friendList)
+            // Filter for unique objects
+            friendList.filter((obj, index, theArray) => index === theArray.findIndex((item) => item.id === obj.id)
+);
+            console.log("Deduplicated FriendList: ", friendList)
+            var usernameList: String[] = []
 
-            const uniqueArray = [...new Set(friendList)];
-            friendList = Array.from(uniqueArray)
-            console.log("Setified FriendList: ", friendList)
-            
+            friendList.forEach(async pair => {
+                // If friend A is NOT the current user
+                if (pair.friendA !== this.user.id) {
+                    // Push the ID to the list.
+                    usernameList.push(pair.friendA)
+                } else {
+                    // Push friend B to the list.
+                    usernameList.push(pair.friendB)
+                }
+            })
 
-            friendList.forEach(async friend => {
-                console.log(friend.friendA)
-                await client.models.User.get({ id: friend.friendA })
+            console.log("usernameList: ", usernameList)
+
+            // This is a horribly expensive query for long friend lists, don't do this.
+            usernameList.forEach(async (un) => {
+                await client.models.User.get(
+                    { id: un as string },
+                    { authMode: "userPool", })
                     .then((res) => {
-                        console.log(res.data)
-                        if (res.data?.username) {
-                            this.friends.push(res.data!.username)
-                        }
-                        });
+                        this.friends.push(res.data?.username as string)
                     })
+            })
+
+            // Todo: Figure out how to make this a batch query instead
+            // console.log(batchGetUsernames("User-table", "usernameList"))
+
         }
     }
 });

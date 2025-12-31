@@ -138,8 +138,6 @@ async function blockFriend() {
 
 /* This is horrible, redo it.*/
 async function fetchFriends() {
-  var friendListA: Array<Schema["User"]["type"]> = [];
-  var friendListB: Array<Schema["User"]["type"]> = [];
   var friendList: Array<any> = [];
 
   // Search by friendA
@@ -149,7 +147,7 @@ async function fetchFriends() {
   )
     .then((res: { data: any }) => {
       if (res.data.length) {
-        friendListA = res.data;
+        friendList = res.data;
       } else {
         console.log("No friendA friends found for this user.");
       }
@@ -165,7 +163,7 @@ async function fetchFriends() {
   )
     .then((res: { data: any }) => {
       if (res.data.length) {
-        friendListB = res.data;
+        friendList = [...friendList, ...res.data];
       } else {
         console.log("No friendB friends found for this user.");
       }
@@ -174,21 +172,33 @@ async function fetchFriends() {
       console.log("Error: ", error);
     });
 
-  // Friend List filtering
-  friendList = [...friendListA, ...friendListB];
-  console.log("Raw FriendList: ", friendList);
+  // Filter for unique objects
+  friendList.filter(
+    (obj, index, theArray) => index === theArray.findIndex((item) => item.id === obj.id)
+  );
+  console.log("Deduplicated FriendList: ", friendList);
+  var usernameList: String[] = [];
 
-  const uniqueArray = [...new Set(friendList)];
-  friendList = Array.from(uniqueArray);
-  console.log("Setified FriendList: ", friendList);
+  friendList.forEach(async (pair) => {
+    // If friend A is NOT the current user
+    if (pair.friendA !== thisUser?.id) {
+      // Push the ID to the list.
+      usernameList.push(pair.friendA);
+    } else {
+      // Push friend B to the list.
+      usernameList.push(pair.friendB);
+    }
+  });
 
-  friendList.forEach(async (friend) => {
-    console.log(friend.friendA);
-    await client.models.User.get({ id: friend.friendA }).then((res) => {
-      if (res.data?.username) {
-        theseFriends.value.push(res.data.username);
+  console.log("usernameList: ", usernameList);
+
+  // This is a horribly expensive query for long friend lists, don't do this.
+  usernameList.forEach(async (un) => {
+    await client.models.User.get({ id: un as string }, { authMode: "userPool" }).then(
+      (res) => {
+        theseFriends.value.push(res.data?.username as string);
       }
-    });
+    );
   });
 }
 
