@@ -89,6 +89,42 @@ const schema = a.schema({
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
+  Credit: a
+    .model({
+      owner: a.string(),
+      amount: a.integer()
+    })
+    .secondaryIndexes((index) => [
+      index("owner")
+        .queryField("cashByOwner")
+    ])
+    .authorization((allow) => [
+      allow.authenticated('identityPool'),
+      allow.authenticated('userPools'),
+      // Allow owners
+      allow.ownerDefinedIn("owner"),
+      // Users in the admin group have full permissions
+      allow.groups(['admin'])
+    ]),
+  Friend: a
+    .model({
+      friendA: a.string(),
+      friendB: a.string()
+    })
+    .secondaryIndexes((index) => [
+      index("friendA")
+        .queryField("friendByfriendA"),
+      index("friendB")
+        .queryField("friendByfriendB"),
+    ])
+    .authorization((allow) => [
+      allow.authenticated('identityPool'),
+      allow.authenticated('userPools'),
+      // Allow owners
+      allow.ownerDefinedIn("owner"),
+      // Users in the admin group have full permissions
+      allow.groups(['admin'])
+    ]),
 })
 
 export type Schema = ClientSchema<typeof schema>;
