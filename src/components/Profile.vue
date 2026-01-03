@@ -177,29 +177,48 @@ async function fetchFriends() {
     (obj, index, theArray) => index === theArray.findIndex((item) => item.id === obj.id)
   );
   console.log("Deduplicated FriendList: ", friendList);
-  var usernameList: String[] = [];
+  var idList: Object[] = [];
 
   friendList.forEach(async (pair) => {
     // If friend A is NOT the current user
     if (pair.friendA !== thisUser?.id) {
       // Push the ID to the list.
-      usernameList.push(pair.friendA);
+      idList.push({
+        id: {
+          S: pair.friendA,
+        },
+      });
     } else {
       // Push friend B to the list.
-      usernameList.push(pair.friendB);
+      idList.push({
+        id: {
+          S: pair.friendB,
+        },
+      });
     }
   });
-
-  console.log("usernameList: ", usernameList);
-
-  // This is a horribly expensive query for long friend lists, don't do this.
-  usernameList.forEach(async (un) => {
-    await client.models.User.get({ id: un as string }, { authMode: "userPool" }).then(
-      (res) => {
-        theseFriends.value.push(res.data?.username as string);
-      }
-    );
+  const b = JSON.stringify({
+    userIds: idList,
+    tableName: import.meta.env.VITE_USER_TABLE,
+    httpMethod: "POST",
   });
+
+  const res = await fetch(`${import.meta.env.VITE_BATCH_USERNAME_LAMBDA}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: b,
+  });
+  if (res.ok) {
+    var data = await res.json();
+    data = JSON.parse(data.body);
+    console.log("User store found these friends: ", data.usernames);
+
+    theseFriends.value = data.usernames;
+  } else {
+    console.error("Error: ", res.status);
+  }
 }
 
 onMounted(async () => {
