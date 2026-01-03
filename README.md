@@ -8,21 +8,21 @@ Play [here](https://main.d2aw0idn5nx6cg.amplifyapp.com)!
 
 ### To do:
 
-- [ ] - Create friend system
-- [ ] - Create comment system
-- [ ] - Create user stores
-- [ ] - Seed default shops on a timer
-- [ ] - Seed pet and item creations on a timer (2x a month, max 5 available)
-- [ ] - Delete owned pets
-- [ ] - Trade pets
-- [ ] - Add pet profile pages
-- [ ] - Add form input to item/pet creation
+- [ ] Create comment system
+- [ ] Create user stores
+- [ ] Seed default shops on a timer
+- [ ] Seed pet and item creations on a timer (2x a month, max 5 available)
+- [ ] Delete owned pets
+- [ ] Trade pets
+- [ ] Add pet profile pages
 - [ ] Add tests (90% coverage)
-- [x] - Update canvas to draw while holding mouse down
-- [x] - Add user profile pages
+- [x] Create friend system
+- [x] Add form input to item/pet creation
+- [x] Update canvas to draw while holding mouse down
+- [x] Add user profile pages
 - [ ] Add premium features
-    - [ ] Add color support for premium members
-    - [ ] Buy more pet and item creations
+    [ ] Add color support for premium members
+    [ ] Buy more pet and item creations
 
 
 ## Technology Used:
