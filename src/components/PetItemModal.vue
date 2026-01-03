@@ -12,8 +12,8 @@ const props = defineProps<{
   items: Array<Schema["Item"]["type"]>;
 }>();
 
-async function handleSubmit(item: Schema["Item"]["type"]) {
-  if (item.name == undefined) {
+async function handleSubmit(item: Schema["Item"]["type"] | null | undefined) {
+  if (item == undefined || !item) {
     alert(`Hmm, nothing was selected.`);
     return;
   }
@@ -72,8 +72,8 @@ async function handleSubmit(item: Schema["Item"]["type"]) {
 
 var foodOptions = ref<Array<Schema["Item"]["type"]>>();
 var playOptions = ref<Array<Schema["Item"]["type"]>>();
-var selectedFoodOption = ref("");
-var selectedPlayOption = ref("");
+var selectedFoodOption = ref<Schema["Item"]["type"]>();
+var selectedPlayOption = ref<Schema["Item"]["type"]>();
 
 onMounted(async () => {
   const itemFilter1 = props.items;
@@ -90,9 +90,7 @@ onMounted(async () => {
   <v-card class="mx-auto">
     <v-col class="text-center">
       <v-card-title> What would you like to do with {{ pet.name }}? </v-card-title>
-      <v-form
-        @submit.prevent="handleSubmit(JSON.parse(JSON.stringify(selectedFoodOption)))"
-      >
+      <v-form @submit.prevent="handleSubmit(selectedFoodOption)">
         <v-select
           v-model="selectedFoodOption"
           label="Food"
@@ -104,9 +102,7 @@ onMounted(async () => {
         ></v-select>
         <v-btn class="my-2" text="Feed" type="submit"></v-btn>
       </v-form>
-      <v-form
-        @submit.prevent="handleSubmit(JSON.parse(JSON.stringify(selectedPlayOption)))"
-      >
+      <v-form @submit.prevent="handleSubmit(selectedPlayOption)">
         <v-select
           v-model="selectedPlayOption"
           label="Entertainment"
