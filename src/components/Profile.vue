@@ -5,6 +5,7 @@ import type { Schema } from "amplify/data/resource";
 import { generateClient } from "aws-amplify/api";
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+import { secret } from "@aws-amplify/backend";
 import Pet from "./Pet.vue";
 
 const client = generateClient<Schema>();
@@ -199,11 +200,11 @@ async function fetchFriends() {
   });
   const b = JSON.stringify({
     userIds: idList,
-    tableName: import.meta.env.VITE_USER_TABLE,
+    tableName: secret("VITE_USER_TABLE"),
     httpMethod: "POST",
   });
 
-  const res = await fetch(`${import.meta.env.VITE_BATCH_USERNAME_LAMBDA}`, {
+  const res = await fetch(`${secret("VITE_BATCH_UN_LAMBDA")}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
