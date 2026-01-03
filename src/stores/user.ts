@@ -3,6 +3,7 @@ import { defineStore } from 'pinia';
 import { generateClient } from 'aws-amplify/api';
 import type { Schema } from '../../amplify/data/resource'
 import { getCurrentUser } from 'aws-amplify/auth';
+import { secret } from '@aws-amplify/backend';
 
 export const userStore = defineStore('user', {
     state: () => ({
@@ -10,7 +11,7 @@ export const userStore = defineStore('user', {
         pets: ref<any>(null),
         inventory: ref<any>(null),
         credits: ref<any>(null),
-        friends: ref<any>(null),
+        friends: ref<String[]>([]),
     }),
     getters: {
         getUser: (state: { user: any }) => state.user,
@@ -40,7 +41,9 @@ export const userStore = defineStore('user', {
 
         async fetchPets() {
             const client = generateClient<Schema>();
-            await this.amplifyGetCurrentUser()
+            if (!this.user) {
+                await this.amplifyGetCurrentUser()
+            }
 
             try {
                 await client.models.Pet.listPetsByOwnerAndName(
@@ -56,7 +59,9 @@ export const userStore = defineStore('user', {
 
         async fetchInventory() {
             const client = generateClient<Schema>();
-            await this.amplifyGetCurrentUser()
+            if (!this.user) {
+                await this.amplifyGetCurrentUser()
+            }
 
             await client.models.Item.listItemsByOwnerAndName(
                 {
@@ -83,50 +88,120 @@ export const userStore = defineStore('user', {
 
         async fetchCredit() {
             const client = generateClient<Schema>();
-            await this.amplifyGetCurrentUser()
+            if (!this.user) {
+                await this.amplifyGetCurrentUser()
+            }
 
             await client.models.Credit.cashByOwner(
-                {owner: this.user.id},
-                {authMode: 'userPool'}
+                { owner: this.user.id },
+                { authMode: 'userPool' }
             )
                 .then(async (res: { data: any; }) => {
                     if (res.data.length) {
                         console.log("Found existing Credit.")
                         return this.credits = res.data[0]
                     } else {
-                    console.log("No Credit found for this user. Creating an entry...")
-                    await client.models.Credit.create(
-                        {
-                            owner: this.user.id,
-                            amount: 0
-                        }
-                    )
-                    .then((res: { data: any; }) => {
-                        return this.credits = res.data
-                    })
-                }
+                        console.log("No Credit found for this user. Creating an entry...")
+                        await client.models.Credit.create(
+                            {
+                                owner: this.user.id,
+                                amount: 0
+                            }
+                        )
+                            .then((res: { data: any; }) => {
+                                return this.credits = res.data
+                            })
+                    }
                 })
                 .catch(async (error: any) => {
                     console.error("Oops, something went wrong!")
                     console.error("Error: ", error)
                 });
-            },
+        },
 
         async fetchFriends() {
             const client = generateClient<Schema>();
-            await this.amplifyGetCurrentUser()
+            if (!this.user) {
+                await this.amplifyGetCurrentUser()
+            }            
+            
+            var friendList: Array<any> = []
 
+            // Search by friendA
             await client.models.Friend.friendByfriendA(
-                {friendA: this.user.id},
-                {authMode: 'userPool'}
+                { friendA: this.user.id },
+                { authMode: 'userPool' }
             )
                 .then((res: { data: any; }) => {
-                    return this.friends = res.data
+                    if (res.data.length) {
+                        friendList = res.data
+                    }
                 })
                 .catch((error: any) => {
-                    console.log("No friends found for this user.")
-                    return this.friends = null
+                    console.log("Error: ", error)
                 });
+
+            // Search by friendB
+            await client.models.Friend.friendByfriendB(
+                { friendB: this.user.id },
+                { authMode: 'userPool' }
+            )
+                .then((res: { data: any; }) => {
+                    if (res.data.length) {
+                        friendList = [...friendList, ...res.data]
+                    }
+                })
+                .catch((error: any) => {
+                    console.log("Error: ", error)
+                });
+
+            // Filter for unique objects
+            friendList.filter((obj, index, theArray) => index === theArray.findIndex((item) => item.id === obj.id)
+            );
+            console.log("Deduplicated FriendList: ", friendList)
+            var idList: Object[] = []
+
+            friendList.forEach(async pair => {
+                // If friend A is NOT the current user
+                if (pair.friendA !== this.user.id) {
+                    // Push the ID to the list.
+                    idList.push({
+                        id: {
+                            S: pair.friendA
+                        }
+                    })
+                } else {
+                    // Push friend B to the list.
+                    idList.push({
+                        id: {
+                            S: pair.friendB
+                        }
+                    })
+                }
+            })
+            const b = JSON.stringify({
+                userIds: idList,
+                tableName: secret('VITE_USER_TABLE'),
+                httpMethod: "POST"
+            })
+
+            const res = await fetch(`${secret('VITE_BATCH_UN_LAMBDA')}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: b
+            })
+            if (res.ok) {
+                var data = await res.json();
+                data = JSON.parse(data.body)
+                console.log("User store found these friends: ", data.usernames)
+
+                this.friends = data.usernames
+
+            } else {
+                console.error("Error: ", res.status)
+            }
         }
     }
 });
