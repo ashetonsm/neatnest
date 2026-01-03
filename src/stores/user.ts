@@ -3,7 +3,6 @@ import { defineStore } from 'pinia';
 import { generateClient } from 'aws-amplify/api';
 import type { Schema } from '../../amplify/data/resource'
 import { getCurrentUser } from 'aws-amplify/auth';
-import { secret } from '@aws-amplify/backend';
 
 export const userStore = defineStore('user', {
     state: () => ({
@@ -181,11 +180,11 @@ export const userStore = defineStore('user', {
             })
             const b = JSON.stringify({
                 userIds: idList,
-                tableName: secret('VITE_USER_TABLE'),
+                tableName: import.meta.env.VITE_USER_TABLE,
                 httpMethod: "POST"
             })
 
-            const res = await fetch(`${secret('VITE_BATCH_UN_LAMBDA')}`, {
+            const res = await fetch(`${import.meta.env.VITE_BATCH_UN_LAMBDA}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
