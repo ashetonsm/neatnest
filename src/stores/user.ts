@@ -118,17 +118,14 @@ export const userStore = defineStore('user', {
                 });
         },
 
-        async fetchFriends() {
-            const client = generateClient<Schema>();
-            if (!this.user) {
-                await this.amplifyGetCurrentUser()
-            }            
+        async fetchFriends(inputUserID: string) {
+            const client = generateClient<Schema>(); 
             
             var friendList: Array<any> = []
 
             // Search by friendA
             await client.models.Friend.friendByfriendA(
-                { friendA: this.user.id },
+                { friendA: inputUserID },
                 { authMode: 'userPool' }
             )
                 .then((res: { data: any; }) => {
@@ -142,7 +139,7 @@ export const userStore = defineStore('user', {
 
             // Search by friendB
             await client.models.Friend.friendByfriendB(
-                { friendB: this.user.id },
+                { friendB: inputUserID },
                 { authMode: 'userPool' }
             )
                 .then((res: { data: any; }) => {
@@ -153,16 +150,14 @@ export const userStore = defineStore('user', {
                 .catch((error: any) => {
                     console.log("Error: ", error)
                 });
-
+                
+                var idList: Object[] = []
+                
             // Filter for unique objects
-            friendList.filter((obj, index, theArray) => index === theArray.findIndex((item) => item.id === obj.id)
-            );
-            console.log("Deduplicated FriendList: ", friendList)
-            var idList: Object[] = []
-
             friendList.forEach(async pair => {
+                console.log(pair)
                 // If friend A is NOT the current user
-                if (pair.friendA !== this.user.id) {
+                if (pair.friendA !== inputUserID) {
                     // Push the ID to the list.
                     idList.push({
                         id: {
@@ -196,7 +191,11 @@ export const userStore = defineStore('user', {
                 data = JSON.parse(data.body)
                 console.log("User store found these friends: ", data.usernames)
 
-                this.friends = data.usernames
+                if (inputUserID == this.user.id) {
+                    this.friends = data.usernames
+                }
+
+                return data.usernames
 
             } else {
                 console.error("Error: ", res.status)
