@@ -134,103 +134,18 @@ async function blockFriend() {
   }
 }
 
-/* This is horrible, redo it.*/
-async function fetchFriends() {
-  var friendList: Array<any> = [];
-
-  // Search by friendA
-  await client.models.Friend.friendByfriendA(
-    { friendA: thisUser?.id as string },
-    { authMode: "userPool" }
-  )
-    .then((res: { data: any }) => {
-      if (res.data.length) {
-        friendList = res.data;
-      } else {
-        console.log("No friendA friends found for this user.");
-      }
-    })
-    .catch((error: any) => {
-      console.log("Error: ", error);
-    });
-
-  // Search by friendB
-  await client.models.Friend.friendByfriendB(
-    { friendB: thisUser?.id as string },
-    { authMode: "userPool" }
-  )
-    .then((res: { data: any }) => {
-      if (res.data.length) {
-        friendList = [...friendList, ...res.data];
-      } else {
-        console.log("No friendB friends found for this user.");
-      }
-    })
-    .catch((error: any) => {
-      console.log("Error: ", error);
-    });
-
-  // Filter for unique objects
-  friendList.filter(
-    (obj, index, theArray) => index === theArray.findIndex((item) => item.id === obj.id)
-  );
-  console.log("Deduplicated FriendList: ", friendList);
-  var idList: Object[] = [];
-
-  friendList.forEach(async (pair) => {
-    // If friend A is NOT the current user
-    if (pair.friendA !== thisUser?.id) {
-      // Push the ID to the list.
-      idList.push({
-        id: {
-          S: pair.friendA,
-        },
-      });
-    } else {
-      // Push friend B to the list.
-      idList.push({
-        id: {
-          S: pair.friendB,
-        },
-      });
-    }
-  });
-  const b = JSON.stringify({
-    userIds: idList,
-    tableName: import.meta.env.VITE_USER_TABLE,
-    httpMethod: "POST",
-  });
-
-  const res = await fetch(`${import.meta.env.VITE_BATCH_UN_LAMBDA}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: b,
-  });
-  if (res.ok) {
-    var data = await res.json();
-    data = JSON.parse(data.body);
-    console.log("User store found these friends: ", data.usernames);
-
-    theseFriends.value = data.usernames;
-  } else {
-    console.error("Error: ", res.status);
-  }
-}
-
 onMounted(async () => {
+  // Not viewing logged in user's profile
   if (store.getUser.username !== profile) {
     await fetchUser();
-    await fetchFriends();
   } else {
+    // Viewing logged in user's profile
     thisUser = store.getUser;
     thisProfileDesc.value = thisUser?.description as string;
     thesePets.value = store.getPets;
-    await store.fetchFriends().then(() => {
-      theseFriends.value = store.getFriends;
-    });
   }
+  // Either way, the friends are determined in the store.
+  theseFriends.value = await store.fetchFriends(thisUser!.id);
 });
 </script>
 
