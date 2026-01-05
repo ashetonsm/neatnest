@@ -10,7 +10,7 @@ export const userStore = defineStore('user', {
         pets: ref<any>(null),
         inventory: ref<any>(null),
         credits: ref<any>(null),
-        friends: ref<String[]>([]),
+        friends: ref<Array<{username: string, status: string, id: string}>>([]),
     }),
     getters: {
         getUser: (state: { user: any }) => state.user,
@@ -151,28 +151,35 @@ export const userStore = defineStore('user', {
                     console.log("Error: ", error)
                 });
                 
-                var idList: Object[] = []
+            var idSet: Set<{id: {S: String}}> = new Set()
                 
             // Filter for unique objects
             friendList.forEach(async pair => {
-                console.log(pair)
+                var entry = {
+                    id: {
+                        S: pair.friendA,
+                        status: pair.status,
+                        id: pair.id
+                    }
+                }
                 // If friend A is NOT the current user
                 if (pair.friendA !== inputUserID) {
-                    // Push the ID to the list.
-                    idList.push({
-                        id: {
-                            S: pair.friendA
-                        }
-                    })
+                    // This entry isn't already in the set
+                    if (!idSet.has(entry)) {
+                        // Add it to the set.
+                        idSet.add(entry)
+                    }
                 } else {
-                    // Push friend B to the list.
-                    idList.push({
-                        id: {
-                            S: pair.friendB
-                        }
-                    })
+                    // Replace with friend B.
+                    entry.id.S = pair.friendB
+                    // This entry isn't already in the set
+                    if (!idSet.has(entry)) {
+                        // Add it to the set.
+                        idSet.add(entry)
+                    }
                 }
             })
+            const idList = Array.from(idSet)
             const b = JSON.stringify({
                 userIds: idList,
                 tableName: import.meta.env.VITE_USER_TABLE,
@@ -189,13 +196,13 @@ export const userStore = defineStore('user', {
             if (res.ok) {
                 var data = await res.json();
                 data = JSON.parse(data.body)
-                console.log("User store found these friends: ", data.usernames)
+                console.log("User store found these friends: ", data.friends)
 
                 if (inputUserID == this.user.id) {
-                    this.friends = data.usernames
+                    this.friends = data.friends
                 }
 
-                return data.usernames
+                return data.friends
 
             } else {
                 console.error("Error: ", res.status)
