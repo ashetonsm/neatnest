@@ -6,14 +6,14 @@ import { getCurrentUser } from 'aws-amplify/auth';
 
 export const userStore = defineStore('user', {
     state: () => ({
-        user: ref<any>(null),
+        user: ref<Schema["User"]["type"] | undefined | null>(null),
         pets: ref<any>(null),
         inventory: ref<any>(null),
         credits: ref<any>(null),
-        friends: ref<Array<{username: string, status: string, id: string}>>([]),
+        friends: ref<Array<{username: string, friendObject: Schema["Friend"]["type"]}>>([]),
     }),
     getters: {
-        getUser: (state: { user: any }) => state.user,
+        getUser: (state: { user: Schema["User"]["type"] | undefined | null }) => state.user,
         getPets: (state: { pets: any }) => state.pets,
         getInventory: (state: { inventory: any }) => state.inventory,
         getCredits: (state: { credits: any }) => state.credits,
@@ -31,7 +31,7 @@ export const userStore = defineStore('user', {
                 await client.models.User.get({ id: userId })
                     .then((u) => {
                         // Needs an exclaimation point otherwise you get a nullable error
-                        this.user = u.data!
+                        this.user! = u.data!
                     });
             } catch (error: any) {
                 console.error(error)
@@ -40,13 +40,13 @@ export const userStore = defineStore('user', {
 
         async fetchPets() {
             const client = generateClient<Schema>();
-            if (!this.user) {
+            if (!this.user!) {
                 await this.amplifyGetCurrentUser()
             }
 
             try {
                 await client.models.Pet.listPetsByOwnerAndName(
-                    { owner: this.user.id, },
+                    { owner: this.user!.id, },
                     { authMode: "userPool", })
                     .then((res) => {
                         this.pets = res.data
@@ -58,13 +58,13 @@ export const userStore = defineStore('user', {
 
         async fetchInventory() {
             const client = generateClient<Schema>();
-            if (!this.user) {
+            if (!this.user!) {
                 await this.amplifyGetCurrentUser()
             }
 
             await client.models.Item.listItemsByOwnerAndName(
                 {
-                    owner: this.user.id
+                    owner: this.user!.id
                 },
                 {
                     headers: {
@@ -87,12 +87,12 @@ export const userStore = defineStore('user', {
 
         async fetchCredit() {
             const client = generateClient<Schema>();
-            if (!this.user) {
+            if (!this.user!) {
                 await this.amplifyGetCurrentUser()
             }
 
             await client.models.Credit.cashByOwner(
-                { owner: this.user.id },
+                { owner: this.user!.id },
                 { authMode: 'userPool' }
             )
                 .then(async (res: { data: any; }) => {
@@ -103,7 +103,7 @@ export const userStore = defineStore('user', {
                         console.log("No Credit found for this user. Creating an entry...")
                         await client.models.Credit.create(
                             {
-                                owner: this.user.id,
+                                owner: this.user!.id,
                                 amount: 0
                             }
                         )
@@ -158,8 +158,7 @@ export const userStore = defineStore('user', {
                 var entry = {
                     id: {
                         S: pair.friendA,
-                        status: pair.status,
-                        id: pair.id
+                        friendObject: pair
                     }
                 }
                 // If friend A is NOT the current user
@@ -198,7 +197,7 @@ export const userStore = defineStore('user', {
                 data = JSON.parse(data.body)
                 console.log("User store found these friends: ", data.friends)
 
-                if (inputUserID == this.user.id) {
+                if (inputUserID == this.user!.id) {
                     this.friends = data.friends
                 }
 
