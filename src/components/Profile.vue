@@ -12,10 +12,13 @@ const route = useRoute();
 const store = userStore();
 var profile = route.params.username;
 const thisProfileDesc = ref<String>("Lorum ipsum this is a description");
-// const theseFriends = ref<Array<Schema["User"]["type"]>>([]);
-const theseFriends = ref<Array<String>>([]);
+const thisFriend = ref<{ username: string; status: string; id: string }>();
+const theseFriends = ref<Array<{ username: string; status: string; id: string }>>([]);
 var thisUser: Schema["User"]["type"] | null = null;
 const thesePets = ref<Array<Schema["Pet"]["type"]>>([]);
+const cannotFriend = ref(true);
+const cannotBlock = ref(true);
+const canUnblock = ref(false);
 var newUsername = "";
 var newProfileDesc = "";
 
@@ -100,7 +103,6 @@ async function fetchPets() {
   await client.models.Pet.listPetsByOwnerAndName({
     owner: thisUser?.id as string,
   }).then((res) => {
-    console.log("Pet res: ", res.data);
     thesePets.value = res.data;
   });
 }
@@ -112,6 +114,7 @@ async function addFriend() {
       friendB: store.getUser.id,
       status: "pending",
     }).then((res) => {
+      cannotFriend.value = true;
       console.log("Friend res: ", res.data);
       router.go(0);
     });
@@ -126,11 +129,28 @@ async function blockFriend() {
       friendB: store.getUser.id,
       status: "blocked",
     }).then((res) => {
+      cannotBlock.value = true;
       console.log("Friend res: ", res.data);
       router.go(0);
     });
   } else {
     alert("You can't block yourself!");
+  }
+}
+
+async function unBlockFriend(blockedFriend: any) {
+  if ((thisUser?.id as string) !== store.getUser.id) {
+    var updatedFriend = thisFriend.value;
+    updatedFriend!.status = "accepted";
+
+    await client.models.Friend.update(updatedFriend!).then((res) => {
+      cannotBlock.value = false;
+      canUnblock.value = false;
+      console.log("Friend res: ", res.data);
+      router.go(0);
+    });
+  } else {
+    alert("You can't unblock yourself!");
   }
 }
 
@@ -166,8 +186,27 @@ onMounted(async () => {
           class="ma-4"
         ></v-alert>
 
-        <v-btn class="mt-2" color="primary" text="Add Friend" @click="addFriend"></v-btn>
-        <v-btn class="mt-2" color="error" text="Block" @click="blockFriend"></v-btn>
+        <v-btn
+          :disabled="cannotFriend"
+          class="mt-2"
+          color="primary"
+          text="Add Friend"
+          @click="addFriend"
+        ></v-btn>
+        <v-btn
+          :disabled="cannotBlock"
+          class="mt-2"
+          color="error"
+          text="Block"
+          @click="blockFriend"
+        ></v-btn>
+        <v-btn
+          v-if="canUnblock"
+          class="mt-2"
+          color="error"
+          text="Block"
+          @click="unBlockFriend"
+        ></v-btn>
       </v-col>
 
       <v-col class="mx-auto" v-if="store.getUser.username == profile">
@@ -232,6 +271,7 @@ onMounted(async () => {
                   :items="[]"
                 />
               </v-row>
+              <div v-else>Aww, {{ profile }} has no pets!</div>
             </v-col>
           </v-row>
         </v-sheet>
@@ -242,9 +282,9 @@ onMounted(async () => {
           <v-list v-if="theseFriends.length">
             <v-list-item
               v-for="n in theseFriends"
-              :key="'Friend: ' + n"
-              :title="n.toString()"
-              :to="'/profile/' + n"
+              :key="'Friend: ' + n.username"
+              :title="n.username.toString()"
+              :to="'/profile/' + n.username"
             ></v-list-item>
           </v-list>
           <div v-else>Aww, {{ profile }} has no friends!</div>
