@@ -12,17 +12,12 @@ const route = useRoute();
 const store = userStore();
 var profile = route.params.username;
 const thisProfileDesc = ref<String>("Lorum ipsum this is a description");
-const thisFriend = ref<Schema["Friend"]["type"]>();
+const thisFriend = ref<Schema["Friend"]["type"] | any>(null);
 const theseFriends = ref<
   Array<{ username: string; friendObject: Schema["Friend"]["type"] }>
 >([]);
 var thisUser: Schema["User"]["type"] | null = null;
 const thesePets = ref<Array<Schema["Pet"]["type"]>>([]);
-const cannotFriend = ref(true);
-const cannotBlock = ref(true);
-const canUnblock = ref(false);
-const canRemove = ref(false);
-const canAccept = ref(false);
 var newUsername = "";
 var newProfileDesc = "";
 
@@ -118,8 +113,7 @@ async function addFriend() {
       friendB: store.getUser!.id,
       status: "pending",
     }).then((res) => {
-      cannotFriend.value = true;
-      console.log("Friend res: ", res.data);
+      console.log("Updated friend res: ", res.data);
       router.go(0);
     });
   } else {
@@ -127,51 +121,43 @@ async function addFriend() {
   }
 }
 
-// Todo: account for entries that already exist
-async function blockFriend() {
-  if ((thisUser?.id as string) !== store.getUser!.id) {
-    await client.models.Friend.create({
-      friendA: thisUser?.id as string,
-      friendB: store.getUser!.id,
-      status: "blocked",
-    }).then((res) => {
-      cannotBlock.value = true;
-      console.log("Friend res: ", res.data);
-      router.go(0);
-    });
-  } else {
-    alert("You can't block yourself!");
-  }
+/** Used for both delete friend and unblock */
+async function deleteFriend() {
+  await client.models.Friend.delete({ id: thisFriend.value?.id }).then((res) => {
+    console.log("Deleted friend res: ", res.data);
+    router.go(0);
+  });
 }
 
+/** Used to block and accept friends */
 async function updateFriend(action: string) {
   var updatedFriend: any = {};
   updatedFriend!.id = thisFriend.value?.id;
 
   switch (action) {
+    case "block":
+      updatedFriend!.status = "blocked";
+      break;
     case "accept":
       updatedFriend!.status = "accepted";
-      break;
-    case "unblock":
-      // Todo: delete the entry
-      updatedFriend!.status = "pending";
-
-      // You can now block this person (again)
-      cannotBlock.value = false;
-
-      // You cannot see the unblock option (they are not blocked)
-      canUnblock.value = false;
-
       break;
     default:
       console.log("Invalid friend action");
       break;
   }
-
-  console.log(updatedFriend);
-
-  await client.models.Friend.update(updatedFriend!).then((res) => {
-    console.log("Friend res: ", res.data);
+  await client.models.Friend.update(updatedFriend).then(async (res) => {
+    if (res.data == null) {
+      console.log("No friend found. Creating new friend to block.");
+      await client.models.Friend.create({
+        friendA: thisUser?.id as string,
+        friendB: store.getUser!.id,
+        status: "blocked",
+      }).then((res) => {
+        console.log("Blocked with new friend created: ", res.data);
+      });
+    } else {
+      console.log("Updated existing friend: ", res.data);
+    }
     router.go(0);
   });
 }
@@ -190,36 +176,23 @@ onMounted(async () => {
   theseFriends.value = await store.fetchFriends(thisUser!.id);
 
   console.log("theseFriends: ", theseFriends);
-  const filteredFriends = theseFriends.value.filter((friend) => {
-    console.log(friend.friendObject);
-    console.log(
-      "friend.username and store.getUser!.username",
-      friend.username,
-      store.getUser!.username
-    );
+  if (theseFriends.value) {
+    theseFriends.value.filter((friend) => {
+      console.log(friend.friendObject);
+      console.log(
+        "friend.username and store.getUser!.username",
+        friend.username,
+        store.getUser!.username
+      );
 
-    // Logged in user has a friend entry with the current profile
-    if (friend.username === store.getUser!.username) {
-      thisFriend.value = friend.friendObject;
-
-      switch (thisFriend.value!.status) {
-        case "blocked":
-          canUnblock.value = true;
-          break;
-        case "pending":
-          canAccept.value = true;
-          break;
-        case "accepted":
-          canRemove.value = true;
-          break;
-
-        default:
-          break;
+      // Logged in user has a friend entry with the current profile
+      if (friend.username === store.getUser!.username) {
+        thisFriend.value = JSON.parse(JSON.stringify(friend.friendObject));
       }
-    }
-  });
-
-  console.log("thisFriend: ", thisFriend.value);
+      console.log("friend.friendObject: ", friend.friendObject);
+      console.log("thisFriend: ", thisFriend.value);
+    });
+  }
 });
 </script>
 
@@ -241,35 +214,34 @@ onMounted(async () => {
         ></v-alert>
 
         <v-btn
-          :disabled="cannotFriend"
+          :disabled="
+            profile == store.getUser?.username ||
+            ['accepted', 'pending', 'blocked'].includes(thisFriend?.status!)
+              ? true
+              : false
+          "
           class="mt-2"
           color="primary"
           text="Add Friend"
-          @click="addFriend"
+          @click="addFriend()"
         ></v-btn>
         <v-btn
-          v-if="canAccept"
+          v-if="thisFriend !== null && thisFriend.status !== 'blocked'"
+          :disabled="profile == store.getUser?.username ? true : false"
           class="mt-2"
           color="primary"
-          text="Accept Request"
-          @click="updateFriend('accept')"
+          :text="thisFriend?.status == 'pending' ? 'Accept Request' : 'Remove Friend'"
+          @click="
+            thisFriend?.status == 'pending' ? updateFriend('accept') : deleteFriend()
+          "
         ></v-btn>
         <!-- Always display -->
         <v-btn
-          :disabled="cannotBlock"
+          :disabled="profile == store.getUser?.username ? true : false"
           class="mt-2"
           color="error"
-          text="Block"
-          @click="blockFriend"
-        ></v-btn>
-
-        <!-- Display if friend can be unblocked -->
-        <v-btn
-          v-if="canUnblock"
-          class="mt-2"
-          color="error"
-          text="Block"
-          @click="updateFriend('unblock')"
+          :text="['accepted', 'pending', undefined].includes(thisFriend?.status!) ? 'Block' : 'Unblock'"
+          @click="(!thisFriend || ['accepted', 'pending'].includes(thisFriend?.status!)) ? updateFriend('block') : deleteFriend()"
         ></v-btn>
       </v-col>
 
@@ -343,7 +315,7 @@ onMounted(async () => {
         <!-- Friends -->
         <v-sheet border="md" class="pa-4 text-white mx-auto rounded" color="purple">
           <h2 class="text-h4 font-weight-black ma-4">{{ profile }}'s Friends:</h2>
-          <v-list v-if="theseFriends.length">
+          <v-list v-if="theseFriends">
             <v-list-item
               v-for="n in theseFriends"
               :key="'Friend: ' + n.username"
