@@ -6,14 +6,14 @@ import { getCurrentUser } from 'aws-amplify/auth';
 
 export const userStore = defineStore('user', {
     state: () => ({
-        user: ref<Schema["User"]["type"] | undefined | null>(null),
+        user: ref<Schema["User"]["type"] | null>(null),
         pets: ref<any>(null),
         inventory: ref<any>(null),
         credits: ref<any>(null),
         friends: ref<Array<{username: string, friendObject: Schema["Friend"]["type"]}>>([]),
     }),
     getters: {
-        getUser: (state: { user: Schema["User"]["type"] | undefined | null }) => state.user,
+        getUser: (state: { user: Schema["User"]["type"] | null }) => state.user,
         getPets: (state: { pets: any }) => state.pets,
         getInventory: (state: { inventory: any }) => state.inventory,
         getCredits: (state: { credits: any }) => state.credits,
