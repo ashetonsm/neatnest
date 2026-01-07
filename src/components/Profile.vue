@@ -12,8 +12,10 @@ const route = useRoute();
 const store = userStore();
 var profile = route.params.username;
 const thisProfileDesc = ref<String>("Lorum ipsum this is a description");
-// const theseFriends = ref<Array<Schema["User"]["type"]>>([]);
-const theseFriends = ref<Array<String>>([]);
+const thisFriend = ref<Schema["Friend"]["type"] | any>(null);
+const theseFriends = ref<
+  Array<{ username: string; friendObject: Schema["Friend"]["type"] }>
+>([]);
 var thisUser: Schema["User"]["type"] | null = null;
 const thesePets = ref<Array<Schema["Pet"]["type"]>>([]);
 var newUsername = "";
@@ -22,7 +24,7 @@ var newProfileDesc = "";
 async function changeDescription(newDesc: Event) {
   console.log("Changing description to: ", newProfileDesc);
 
-  var updatedUser = store.getUser;
+  var updatedUser = store.getUser!;
   try {
     updatedUser.description = newProfileDesc;
     client.models.User.update(updatedUser)
@@ -48,7 +50,7 @@ async function checkDescription() {
 async function changeUsername(newUN: Event) {
   console.log("Changing username to: ", newUsername);
 
-  var updatedUser = store.getUser;
+  var updatedUser = store.getUser!;
   try {
     updatedUser.username = newUsername;
     client.models.User.update(updatedUser)
@@ -100,135 +102,95 @@ async function fetchPets() {
   await client.models.Pet.listPetsByOwnerAndName({
     owner: thisUser?.id as string,
   }).then((res) => {
-    console.log("Pet res: ", res.data);
     thesePets.value = res.data;
   });
 }
 
 async function addFriend() {
-  if ((thisUser?.id as string) !== store.getUser.id) {
+  if ((thisUser?.id as string) !== store.getUser!.id) {
     await client.models.Friend.create({
       friendA: thisUser?.id as string,
-      friendB: store.getUser.id,
+      friendB: store.getUser!.id,
       status: "pending",
     }).then((res) => {
-      console.log("Friend res: ", res.data);
+      console.log("Updated friend res: ", res.data);
       router.go(0);
     });
   } else {
     alert("You can't add yourself as a friend!");
   }
 }
-async function blockFriend() {
-  if ((thisUser?.id as string) !== store.getUser.id) {
-    await client.models.Friend.create({
-      friendA: thisUser?.id as string,
-      friendB: store.getUser.id,
-      status: "blocked",
-    }).then((res) => {
-      console.log("Friend res: ", res.data);
-      router.go(0);
-    });
-  } else {
-    alert("You can't block yourself!");
-  }
+
+/** Used for both delete friend and unblock */
+async function deleteFriend() {
+  await client.models.Friend.delete({ id: thisFriend.value?.id }).then((res) => {
+    console.log("Deleted friend res: ", res.data);
+    router.go(0);
+  });
 }
 
-/* This is horrible, redo it.*/
-async function fetchFriends() {
-  var friendList: Array<any> = [];
+/** Used to block and accept friends */
+async function updateFriend(action: string) {
+  var updatedFriend: any = {};
+  updatedFriend!.id = thisFriend.value?.id;
 
-  // Search by friendA
-  await client.models.Friend.friendByfriendA(
-    { friendA: thisUser?.id as string },
-    { authMode: "userPool" }
-  )
-    .then((res: { data: any }) => {
-      if (res.data.length) {
-        friendList = res.data;
-      } else {
-        console.log("No friendA friends found for this user.");
-      }
-    })
-    .catch((error: any) => {
-      console.log("Error: ", error);
-    });
-
-  // Search by friendB
-  await client.models.Friend.friendByfriendB(
-    { friendB: thisUser?.id as string },
-    { authMode: "userPool" }
-  )
-    .then((res: { data: any }) => {
-      if (res.data.length) {
-        friendList = [...friendList, ...res.data];
-      } else {
-        console.log("No friendB friends found for this user.");
-      }
-    })
-    .catch((error: any) => {
-      console.log("Error: ", error);
-    });
-
-  // Filter for unique objects
-  friendList.filter(
-    (obj, index, theArray) => index === theArray.findIndex((item) => item.id === obj.id)
-  );
-  console.log("Deduplicated FriendList: ", friendList);
-  var idList: Object[] = [];
-
-  friendList.forEach(async (pair) => {
-    // If friend A is NOT the current user
-    if (pair.friendA !== thisUser?.id) {
-      // Push the ID to the list.
-      idList.push({
-        id: {
-          S: pair.friendA,
-        },
+  switch (action) {
+    case "block":
+      updatedFriend!.status = "blocked";
+      break;
+    case "accept":
+      updatedFriend!.status = "accepted";
+      break;
+    default:
+      console.log("Invalid friend action");
+      break;
+  }
+  await client.models.Friend.update(updatedFriend).then(async (res) => {
+    if (res.data == null) {
+      console.log("No friend found. Creating new friend to block.");
+      await client.models.Friend.create({
+        friendA: thisUser?.id as string,
+        friendB: store.getUser!.id,
+        status: "blocked",
+      }).then((res) => {
+        console.log("Blocked with new friend created: ", res.data);
       });
     } else {
-      // Push friend B to the list.
-      idList.push({
-        id: {
-          S: pair.friendB,
-        },
-      });
+      console.log("Updated existing friend: ", res.data);
     }
+    router.go(0);
   });
-  const b = JSON.stringify({
-    userIds: idList,
-    tableName: import.meta.env.VITE_USER_TABLE,
-    httpMethod: "POST",
-  });
-
-  const res = await fetch(`${import.meta.env.VITE_BATCH_UN_LAMBDA}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: b,
-  });
-  if (res.ok) {
-    var data = await res.json();
-    data = JSON.parse(data.body);
-    console.log("User store found these friends: ", data.usernames);
-
-    theseFriends.value = data.usernames;
-  } else {
-    console.error("Error: ", res.status);
-  }
 }
 
 onMounted(async () => {
-  if (store.getUser.username !== profile) {
+  // Not viewing logged in user's profile
+  if (store.getUser!.username !== profile) {
     await fetchUser();
-    await fetchFriends();
   } else {
-    thisUser = store.getUser;
+    // Viewing logged in user's profile
+    thisUser = store.getUser!;
     thisProfileDesc.value = thisUser?.description as string;
     thesePets.value = store.getPets;
-    await store.fetchFriends().then(() => {
-      theseFriends.value = store.getFriends;
+  }
+  // Either way, the friends are determined in the store.
+  theseFriends.value = await store.fetchFriends(thisUser!.id);
+
+  console.log("theseFriends: ", theseFriends);
+  if (theseFriends.value) {
+    theseFriends.value.filter((friend) => {
+      console.log(friend.friendObject);
+      console.log(
+        "friend.username and store.getUser!.username",
+        friend.username,
+        store.getUser!.username
+      );
+
+      // Logged in user has a friend entry with the current profile
+      if (friend.username === store.getUser!.username) {
+        thisFriend.value = JSON.parse(JSON.stringify(friend.friendObject));
+      }
+      console.log("friend.friendObject: ", friend.friendObject);
+      console.log("thisFriend: ", thisFriend.value);
     });
   }
 });
@@ -251,11 +213,62 @@ onMounted(async () => {
           class="ma-4"
         ></v-alert>
 
-        <v-btn class="mt-2" color="primary" text="Add Friend" @click="addFriend"></v-btn>
-        <v-btn class="mt-2" color="error" text="Block" @click="blockFriend"></v-btn>
+        <v-btn
+          :disabled="
+            profile == store.getUser?.username ||
+            ['accepted', 'pending', 'blocked'].includes(thisFriend?.status!)
+              ? true
+              : false
+          "
+          class="mt-2"
+          color="primary"
+          text="Add Friend"
+          @click="addFriend()"
+        ></v-btn>
+
+        <!-- Accept Request is available if Friend status is pending and 
+        you are NOT the owner of the Friend record 
+        Otherwise, display "Pending" and disable the button.
+        -->
+        <v-btn
+          v-if="thisFriend !== null && thisFriend.status !== 'blocked'"
+          :disabled="profile == store.getUser?.username ? true : false"
+          class="mt-2"
+          color="primary"
+          :text="
+            thisFriend?.status == 'pending' && thisFriend?.owner !== store.getUser?.id
+              ? 'Accept Request'
+              : thisFriend?.status == 'pending'
+              ? 'Cancel Request'
+              : 'Remove Friend'
+          "
+          @click="
+            thisFriend?.status == 'pending' && thisFriend?.owner !== store.getUser?.id
+              ? updateFriend('accept')
+              : deleteFriend()
+          "
+        ></v-btn>
+        <!-- Always display -->
+        <v-btn
+          :disabled="
+            profile == store.getUser?.username
+              ? true
+              : thisFriend?.status == 'blocked' && thisFriend?.owner !== store.getUser?.id
+              ? true
+              : false
+          "
+          class="mt-2"
+          color="error"
+          :text="['accepted', 'pending', undefined].includes(thisFriend?.status!) ? 
+          'Block' : thisFriend?.status == 'blocked' && thisFriend?.owner !== store.getUser?.id ?
+          'Block' :
+          'Unblock'
+          "
+          @click="(!thisFriend || ['accepted', 'pending'].includes(thisFriend?.status!)) ? updateFriend('block') : deleteFriend()"
+        ></v-btn>
       </v-col>
 
-      <v-col class="mx-auto" v-if="store.getUser.username == profile">
+      <v-col class="mx-auto" v-if="store.getUser!.username == profile">
         <!-- Change your username -->
         <v-expansion-panels>
           <v-expansion-panel>
@@ -267,7 +280,7 @@ onMounted(async () => {
                 <v-text-field
                   v-model="newUsername"
                   label="Username"
-                  :placeholder="store.getUser.username"
+                  :placeholder="store.getUser!.username"
                 ></v-text-field>
                 <v-btn class="mt-2" text="Submit" type="submit"></v-btn>
               </v-form>
@@ -286,7 +299,7 @@ onMounted(async () => {
                 <v-text-field
                   v-model="newProfileDesc"
                   label="Description"
-                  :placeholder="store.getUser.description"
+                  :placeholder="store.getUser!.description!"
                 ></v-text-field>
                 <v-btn class="mt-2" text="Submit" type="submit"></v-btn>
               </v-form>
@@ -317,6 +330,7 @@ onMounted(async () => {
                   :items="[]"
                 />
               </v-row>
+              <div v-else>Aww, {{ profile }} has no pets!</div>
             </v-col>
           </v-row>
         </v-sheet>
@@ -324,13 +338,22 @@ onMounted(async () => {
         <!-- Friends -->
         <v-sheet border="md" class="pa-4 text-white mx-auto rounded" color="purple">
           <h2 class="text-h4 font-weight-black ma-4">{{ profile }}'s Friends:</h2>
-          <v-list v-if="theseFriends.length">
-            <v-list-item
-              v-for="n in theseFriends"
-              :key="'Friend: ' + n"
-              :title="n.toString()"
-              :to="'/profile/' + n"
-            ></v-list-item>
+          <v-list
+            v-if="
+              theseFriends &&
+              theseFriends.filter((f) => f.friendObject.status == 'accepted').length !== 0
+            "
+          >
+            <template
+              v-for="n in theseFriends.filter((f) => f.friendObject.status == 'accepted')"
+            >
+              <v-list-item
+                v-if="n"
+                :key="'Friend: ' + n.username"
+                :title="n.username.toString()"
+                :to="'/profile/' + n.username"
+              ></v-list-item>
+            </template>
           </v-list>
           <div v-else>Aww, {{ profile }} has no friends!</div>
         </v-sheet>

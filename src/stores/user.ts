@@ -6,14 +6,14 @@ import { getCurrentUser } from 'aws-amplify/auth';
 
 export const userStore = defineStore('user', {
     state: () => ({
-        user: ref<any>(null),
+        user: ref<Schema["User"]["type"] | undefined | null>(null),
         pets: ref<any>(null),
         inventory: ref<any>(null),
         credits: ref<any>(null),
-        friends: ref<String[]>([]),
+        friends: ref<Array<{username: string, friendObject: Schema["Friend"]["type"]}>>([]),
     }),
     getters: {
-        getUser: (state: { user: any }) => state.user,
+        getUser: (state: { user: Schema["User"]["type"] | undefined | null }) => state.user,
         getPets: (state: { pets: any }) => state.pets,
         getInventory: (state: { inventory: any }) => state.inventory,
         getCredits: (state: { credits: any }) => state.credits,
@@ -31,7 +31,7 @@ export const userStore = defineStore('user', {
                 await client.models.User.get({ id: userId })
                     .then((u) => {
                         // Needs an exclaimation point otherwise you get a nullable error
-                        this.user = u.data!
+                        this.user! = u.data!
                     });
             } catch (error: any) {
                 console.error(error)
@@ -40,13 +40,13 @@ export const userStore = defineStore('user', {
 
         async fetchPets() {
             const client = generateClient<Schema>();
-            if (!this.user) {
+            if (!this.user!) {
                 await this.amplifyGetCurrentUser()
             }
 
             try {
                 await client.models.Pet.listPetsByOwnerAndName(
-                    { owner: this.user.id, },
+                    { owner: this.user!.id, },
                     { authMode: "userPool", })
                     .then((res) => {
                         this.pets = res.data
@@ -58,13 +58,13 @@ export const userStore = defineStore('user', {
 
         async fetchInventory() {
             const client = generateClient<Schema>();
-            if (!this.user) {
+            if (!this.user!) {
                 await this.amplifyGetCurrentUser()
             }
 
             await client.models.Item.listItemsByOwnerAndName(
                 {
-                    owner: this.user.id
+                    owner: this.user!.id
                 },
                 {
                     headers: {
@@ -87,12 +87,12 @@ export const userStore = defineStore('user', {
 
         async fetchCredit() {
             const client = generateClient<Schema>();
-            if (!this.user) {
+            if (!this.user!) {
                 await this.amplifyGetCurrentUser()
             }
 
             await client.models.Credit.cashByOwner(
-                { owner: this.user.id },
+                { owner: this.user!.id },
                 { authMode: 'userPool' }
             )
                 .then(async (res: { data: any; }) => {
@@ -103,7 +103,7 @@ export const userStore = defineStore('user', {
                         console.log("No Credit found for this user. Creating an entry...")
                         await client.models.Credit.create(
                             {
-                                owner: this.user.id,
+                                owner: this.user!.id,
                                 amount: 0
                             }
                         )
@@ -118,17 +118,14 @@ export const userStore = defineStore('user', {
                 });
         },
 
-        async fetchFriends() {
-            const client = generateClient<Schema>();
-            if (!this.user) {
-                await this.amplifyGetCurrentUser()
-            }            
+        async fetchFriends(inputUserID: string) {
+            const client = generateClient<Schema>(); 
             
             var friendList: Array<any> = []
 
             // Search by friendA
             await client.models.Friend.friendByfriendA(
-                { friendA: this.user.id },
+                { friendA: inputUserID },
                 { authMode: 'userPool' }
             )
                 .then((res: { data: any; }) => {
@@ -142,7 +139,7 @@ export const userStore = defineStore('user', {
 
             // Search by friendB
             await client.models.Friend.friendByfriendB(
-                { friendB: this.user.id },
+                { friendB: inputUserID },
                 { authMode: 'userPool' }
             )
                 .then((res: { data: any; }) => {
@@ -153,31 +150,35 @@ export const userStore = defineStore('user', {
                 .catch((error: any) => {
                     console.log("Error: ", error)
                 });
-
+                
+            var idSet: Set<{id: {S: String}}> = new Set()
+                
             // Filter for unique objects
-            friendList.filter((obj, index, theArray) => index === theArray.findIndex((item) => item.id === obj.id)
-            );
-            console.log("Deduplicated FriendList: ", friendList)
-            var idList: Object[] = []
-
             friendList.forEach(async pair => {
+                var entry = {
+                    id: {
+                        S: pair.friendA,
+                        friendObject: pair
+                    }
+                }
                 // If friend A is NOT the current user
-                if (pair.friendA !== this.user.id) {
-                    // Push the ID to the list.
-                    idList.push({
-                        id: {
-                            S: pair.friendA
-                        }
-                    })
+                if (pair.friendA !== inputUserID) {
+                    // This entry isn't already in the set
+                    if (!idSet.has(entry)) {
+                        // Add it to the set.
+                        idSet.add(entry)
+                    }
                 } else {
-                    // Push friend B to the list.
-                    idList.push({
-                        id: {
-                            S: pair.friendB
-                        }
-                    })
+                    // Replace with friend B.
+                    entry.id.S = pair.friendB
+                    // This entry isn't already in the set
+                    if (!idSet.has(entry)) {
+                        // Add it to the set.
+                        idSet.add(entry)
+                    }
                 }
             })
+            const idList = Array.from(idSet)
             const b = JSON.stringify({
                 userIds: idList,
                 tableName: import.meta.env.VITE_USER_TABLE,
@@ -194,9 +195,13 @@ export const userStore = defineStore('user', {
             if (res.ok) {
                 var data = await res.json();
                 data = JSON.parse(data.body)
-                console.log("User store found these friends: ", data.usernames)
+                console.log("User store found these friends: ", data.friends)
 
-                this.friends = data.usernames
+                if (inputUserID == this.user!.id) {
+                    this.friends = data.friends
+                }
+
+                return data.friends
 
             } else {
                 console.error("Error: ", res.status)
