@@ -66,7 +66,7 @@ onMounted(async () => {
           v-for="(item, i) in fetchedItems"
           :key="item.name ?? i"
           :item="item"
-          :currentUser="store.getUser.id"
+          :currentUser="store.getUser?.id!"
         />
       </v-row>
     </v-row>

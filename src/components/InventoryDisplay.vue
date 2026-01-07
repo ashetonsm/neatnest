@@ -12,7 +12,7 @@ const fetchedItems: any = ref<Array<Schema["Item"]["type"]>>([]);
 var canCreate = true;
 
 async function setCreation() {
-  if (store.getUser.itemsRemaining > 0) {
+  if (store.getUser?.itemsRemaining! > 0) {
     canCreate = true;
   }
 }
@@ -56,7 +56,7 @@ onMounted(async () => {
             v-for="(item, i) in fetchedItems"
             :key="item.name ?? i"
             :item="item"
-            :currentUser="store.getUser.id"
+            :currentUser="store.getUser?.id!"
           />
         </v-row>
       </v-col>

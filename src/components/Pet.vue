@@ -38,7 +38,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <v-dialog v-if="store.getUser.id == pet.owner" :activator="petModalRef" max-width="500">
+  <v-dialog v-if="store.getUser?.id! == pet.owner" :activator="petModalRef" max-width="500">
     <PetItemModal :pet="pet" :items="items" v-slot:default="{ isActive }" />
   </v-dialog>
 

@@ -10,7 +10,7 @@ const fetchedItems = ref<Array<Schema["Item"]["type"]>>([]);
 var canCreate = true;
 
 async function setCreation() {
-  if (store.getUser.petsRemaining > 0) {
+  if (store.getUser?.petsRemaining! > 0) {
     canCreate = true;
   }
 }

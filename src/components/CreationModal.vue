@@ -18,7 +18,7 @@ const props = defineProps<{
 }>();
 
 async function handleSubmit() {
-  const path = `images/${store.getUser.id}/${props.thing}/${name}.png`;
+  const path = `images/${store.getUser?.id!}/${props.thing}/${name}.png`;
 
   switch (props.thing) {
     case "item":
@@ -29,7 +29,7 @@ async function handleSubmit() {
           name,
           path,
           selectedItemType.value,
-          store.getUser.id,
+          store.getUser?.id!,
           store.getUser,
           client
         );
@@ -39,7 +39,7 @@ async function handleSubmit() {
       console.log("Name: ", name);
       console.log("SpeciesName: ", speciesName);
       if (name && speciesName) {
-        createPet(name, speciesName, path, store.getUser.id, store.getUser, client);
+        createPet(name, speciesName, path, store.getUser?.id!, store.getUser, client);
       }
       break;
 

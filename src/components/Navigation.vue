@@ -4,28 +4,27 @@ import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 
 const myProfile = ref("");
+const store = userStore();
 
 const links = ref<Array<{ title: string; name: string }>>([
   { title: "Home", name: "/" },
   { title: "The Emporium", name: "/shop/1" },
   { title: "The Shack", name: "/shop/2" },
   { title: "Inventory", name: "/inventory" },
-  { title: "Profile", name: `/profile/null` },
+  {
+    title: "Profile",
+    name: `/profile/${store.getUser?.username}` as any | `/profile/null`,
+  },
   { title: "Pets", name: "/pets" },
   { title: "About", name: "/about" },
 ]);
-
-const store = userStore();
 
 onMounted(async () => {
   store.$subscribe((mutation, state) => {
     // Perform actions here when the state changes
 
     if (mutation.storeId == "user") {
-      const un = store.getUser.username;
-      myProfile.value = un.toString();
-
-      links.value[4].name = `/profile/${myProfile.value}`;
+      links.value[4].name = `/profile/${store.getUser?.username}`;
     }
   });
 });
