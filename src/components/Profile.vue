@@ -89,7 +89,6 @@ async function fetchUser() {
       .then(() => {
         // get the pets via id
         if (thisUser) {
-          console.log("There is a user");
           fetchPets();
         }
       });
@@ -174,22 +173,12 @@ onMounted(async () => {
   }
   // Either way, the friends are determined in the store.
   theseFriends.value = await store.fetchFriends(thisUser!.id);
-
-  console.log("theseFriends: ", theseFriends);
   if (theseFriends.value) {
     theseFriends.value.filter((friend) => {
-      console.log(friend.friendObject);
-      console.log(
-        "friend.username and store.getUser!.username",
-        friend.username,
-        store.getUser!.username
-      );
-
       // Logged in user has a friend entry with the current profile
       if (friend.username === store.getUser!.username) {
         thisFriend.value = JSON.parse(JSON.stringify(friend.friendObject));
       }
-      console.log("friend.friendObject: ", friend.friendObject);
       console.log("thisFriend: ", thisFriend.value);
     });
   }
