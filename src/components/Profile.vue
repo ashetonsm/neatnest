@@ -225,22 +225,45 @@ onMounted(async () => {
           text="Add Friend"
           @click="addFriend()"
         ></v-btn>
+
+        <!-- Accept Request is available if Friend status is pending and 
+        you are NOT the owner of the Friend record 
+        Otherwise, display "Pending" and disable the button.
+        -->
         <v-btn
           v-if="thisFriend !== null && thisFriend.status !== 'blocked'"
           :disabled="profile == store.getUser?.username ? true : false"
           class="mt-2"
           color="primary"
-          :text="thisFriend?.status == 'pending' ? 'Accept Request' : 'Remove Friend'"
+          :text="
+            thisFriend?.status == 'pending' && thisFriend?.owner !== store.getUser?.id
+              ? 'Accept Request'
+              : thisFriend?.status == 'pending'
+              ? 'Cancel Request'
+              : 'Remove Friend'
+          "
           @click="
-            thisFriend?.status == 'pending' ? updateFriend('accept') : deleteFriend()
+            thisFriend?.status == 'pending' && thisFriend?.owner !== store.getUser?.id
+              ? updateFriend('accept')
+              : deleteFriend()
           "
         ></v-btn>
         <!-- Always display -->
         <v-btn
-          :disabled="profile == store.getUser?.username ? true : false"
+          :disabled="
+            profile == store.getUser?.username
+              ? true
+              : thisFriend?.status == 'blocked' && thisFriend?.owner !== store.getUser?.id
+              ? true
+              : false
+          "
           class="mt-2"
           color="error"
-          :text="['accepted', 'pending', undefined].includes(thisFriend?.status!) ? 'Block' : 'Unblock'"
+          :text="['accepted', 'pending', undefined].includes(thisFriend?.status!) ? 
+          'Block' : thisFriend?.status == 'blocked' && thisFriend?.owner !== store.getUser?.id ?
+          'Block' :
+          'Unblock'
+          "
           @click="(!thisFriend || ['accepted', 'pending'].includes(thisFriend?.status!)) ? updateFriend('block') : deleteFriend()"
         ></v-btn>
       </v-col>
@@ -315,13 +338,22 @@ onMounted(async () => {
         <!-- Friends -->
         <v-sheet border="md" class="pa-4 text-white mx-auto rounded" color="purple">
           <h2 class="text-h4 font-weight-black ma-4">{{ profile }}'s Friends:</h2>
-          <v-list v-if="theseFriends">
-            <v-list-item
-              v-for="n in theseFriends"
-              :key="'Friend: ' + n.username"
-              :title="n.username.toString()"
-              :to="'/profile/' + n.username"
-            ></v-list-item>
+          <v-list
+            v-if="
+              theseFriends &&
+              theseFriends.filter((f) => f.friendObject.status == 'accepted').length !== 0
+            "
+          >
+            <template
+              v-for="n in theseFriends.filter((f) => f.friendObject.status == 'accepted')"
+            >
+              <v-list-item
+                v-if="n"
+                :key="'Friend: ' + n.username"
+                :title="n.username.toString()"
+                :to="'/profile/' + n.username"
+              ></v-list-item>
+            </template>
           </v-list>
           <div v-else>Aww, {{ profile }} has no friends!</div>
         </v-sheet>
