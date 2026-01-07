@@ -21,8 +21,8 @@ Play [here](https://main.d2aw0idn5nx6cg.amplifyapp.com)!
 - [x] Update canvas to draw while holding mouse down
 - [x] Add user profile pages
 - [ ] Add premium features
-    [ ] Add color support for premium members
-    [ ] Buy more pet and item creations
+    - [ ] Add color support for premium members
+    - [ ] Buy more pet and item creations
 
 
 ## Technology Used:

@@ -17,7 +17,7 @@ const draw = (ctx: CanvasRenderingContext2D, e: any) => {
     if (touch.value) {
       pixelSize = canvasRef.value.width / props.size;
       const x = e.touches[0].pageX - canvasBoundingRect.value.left;
-      const y = e.touches[0].pageY - canvasBoundingRect.value.height;
+      const y = e.touches[0].pageY - canvasBoundingRect.value.top;
       ctx.fillStyle = props.color;
 
       ctx.fillRect(
@@ -29,7 +29,7 @@ const draw = (ctx: CanvasRenderingContext2D, e: any) => {
     } else {
       pixelSize = canvasRef.value.width / props.size;
       const x = e.pageX - canvasBoundingRect.value.left;
-      const y = e.pageY - canvasBoundingRect.value.height;
+      const y = e.pageY - canvasBoundingRect.value.top;
       ctx.fillStyle = props.color;
 
       ctx.fillRect(
