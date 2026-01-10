@@ -26,53 +26,50 @@ const auth = authStore();
 const user = userStore();
 
 router.beforeEach(async (to) => {
-    // Check for auth once
-    if (!auth.getAuth && ["login", "about", "home"].includes(to.name as string)) {
-        console.log("no auth required")
-        return
+    var authenticated = false;
+    // There is no auth. Check once.
+    if (!auth.getAuth) {
+        console.log("Checking auth")
+        authenticated = await auth.checkAuth()
     } else {
-        var authenticated = false;
-        console.log("auth required")
-        if (auth.getAuth) {
-            console.log("Already authenticated")
-            authenticated = true;
-        } else {
-            console.log("Checking auth")
-            authenticated = await auth.checkAuth()
-        }
-        if (authenticated) {
-            console.log("Auth successful")
-            switch (to.name) {
-                case "inventory":
+        authenticated = true;
+    }
+    if (authenticated) {
+        console.log("Auth successful")
+        switch (to.name) {
+            case "inventory":
+                await user.fetchInventory()
+                return
+            case "shop":
+                await user.fetchCredit()
+                return
+            case "profile":
+                if (!user.getPets) {
+                    await user.fetchPets()
+                }
+                if (!user.getFriends) {
+                    await user.fetchFriends(auth.getUserId as string)
+                }
+                return
+            case "pets":
+                if (!user.getPets) {
+                    await user.fetchPets()
+                }
+                if (!user.getInventory) {
                     await user.fetchInventory()
-                    return
-                case "shop":
-                    await user.fetchCredit()
-                    return
-                case "profile":
-                    if (!user.getPets) {
-                        await user.fetchPets()
-                    } 
-                    if (!user.getFriends) {
-                        await user.fetchFriends(auth.getUserId as string)
-                    } 
-                    return
-                case "pets":
-                    if (!user.getPets) {
-                        await user.fetchPets()
-                    }
-                    if (!user.getInventory) {
-                        await user.fetchInventory()
-                    }
-                    return
-                default:
-                    console.log("Default switch")
-                    // Return the page (no extra prep is required)
-                    return
-            }
+                }
+                return
+            default:
+                console.log("Default switch")
+                // Return the page (no extra prep is required)
+                return
+        }
+    } else {
+        console.log("Auth not found.")
+        if (["login", "about", "home"].includes(to.name as string)) {
+            return
         } else {
-            console.log("Auth not found.")
-            return {name: 'login'}
+            return { name: 'login' }
         }
     }
 }
