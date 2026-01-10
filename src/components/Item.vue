@@ -8,7 +8,7 @@ import { onMounted, ref } from "vue";
 import { deleteStorage } from "./tools/deleteStorage";
 import { userStore } from "@/stores/user";
 const route = useRoute();
-const store = userStore();
+const user = userStore();
 
 var shopFrontName = route.params.id == "1" ? "Test Emporium" : "Test Shack";
 const client = generateClient<Schema>(); // use this Data client for CRUDL requests
@@ -23,13 +23,13 @@ async function buyFlow(i: Schema["Item"]["type"]) {
   const choice = confirm("Buy " + i.name + " for " + i.price + "?");
   if (choice) {
     // Have not fetched Credit entry yet
-    if (!store.getCredits) {
-      await store.fetchCredit();
+    if (!user.getCredits) {
+      await user.fetchCredit();
     }
 
-    // console.log("User has ", store.getCredits.amount, " credit(s).");
-    if (store.getCredits.amount && i.price && store.getCredits.amount >= i.price) {
-      var updatedCredit = store.getCredits;
+    // console.log("User has ", user.getCredits.amount, " credit(s).");
+    if (user.getCredits.amount && i.price && user.getCredits.amount >= i.price) {
+      var updatedCredit = user.getCredits;
       updatedCredit.amount = updatedCredit.amount - i.price;
 
       // Subtract the amount.

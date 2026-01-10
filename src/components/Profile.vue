@@ -9,7 +9,7 @@ import Pet from "./Pet.vue";
 
 const client = generateClient<Schema>();
 const route = useRoute();
-const store = userStore();
+const user = userStore();
 var profile = route.params.username;
 const thisProfileDesc = ref<String>("Lorum ipsum this is a description");
 const thisFriend = ref<Schema["Friend"]["type"] | any>(null);
@@ -24,7 +24,7 @@ var newProfileDesc = "";
 async function changeDescription(newDesc: Event) {
   console.log("Changing description to: ", newProfileDesc);
 
-  var updatedUser = store.getUser!;
+  var updatedUser = user.getUser!;
   try {
     updatedUser.description = newProfileDesc;
     client.models.User.update(updatedUser)
@@ -50,7 +50,7 @@ async function checkDescription() {
 async function changeUsername(newUN: Event) {
   console.log("Changing username to: ", newUsername);
 
-  var updatedUser = store.getUser!;
+  var updatedUser = user.getUser!;
   try {
     updatedUser.username = newUsername;
     client.models.User.update(updatedUser)
@@ -106,10 +106,10 @@ async function fetchPets() {
 }
 
 async function addFriend() {
-  if ((thisUser?.id as string) !== store.getUser!.id) {
+  if ((thisUser?.id as string) !== user.getUser!.id) {
     await client.models.Friend.create({
       friendA: thisUser?.id as string,
-      friendB: store.getUser!.id,
+      friendB: user.getUser!.id,
       status: "pending",
     }).then((res) => {
       console.log("Updated friend res: ", res.data);
@@ -149,7 +149,7 @@ async function updateFriend(action: string) {
       console.log("No friend found. Creating new friend to block.");
       await client.models.Friend.create({
         friendA: thisUser?.id as string,
-        friendB: store.getUser!.id,
+        friendB: user.getUser!.id,
         status: "blocked",
       }).then((res) => {
         console.log("Blocked with new friend created: ", res.data);
@@ -163,20 +163,20 @@ async function updateFriend(action: string) {
 
 onMounted(async () => {
   // Not viewing logged in user's profile
-  if (store.getUser!.username !== profile) {
+  if (user.getUser!.username !== profile) {
     await fetchUser();
   } else {
     // Viewing logged in user's profile
-    thisUser = store.getUser!;
+    thisUser = user.getUser!;
     thisProfileDesc.value = thisUser?.description as string;
-    thesePets.value = store.getPets;
+    thesePets.value = user.getPets;
   }
-  // Either way, the friends are determined in the store.
-  theseFriends.value = await store.fetchFriends(thisUser!.id);
+  // Either way, the friends are determined in the user.
+  theseFriends.value = await user.fetchFriends(thisUser!.id);
   if (theseFriends.value) {
     theseFriends.value.filter((friend) => {
       // Logged in user has a friend entry with the current profile
-      if (friend.username === store.getUser!.username) {
+      if (friend.username === user.getUser!.username) {
         thisFriend.value = JSON.parse(JSON.stringify(friend.friendObject));
       }
       console.log("thisFriend: ", thisFriend.value);
@@ -204,7 +204,7 @@ onMounted(async () => {
 
         <v-btn
           :disabled="
-            profile == store.getUser?.username ||
+            profile == user.getUser?.username ||
             ['accepted', 'pending', 'blocked'].includes(thisFriend?.status!)
               ? true
               : false
@@ -221,18 +221,18 @@ onMounted(async () => {
         -->
         <v-btn
           v-if="thisFriend !== null && thisFriend.status !== 'blocked'"
-          :disabled="profile == store.getUser?.username ? true : false"
+          :disabled="profile == user.getUser?.username ? true : false"
           class="mt-2"
           color="primary"
           :text="
-            thisFriend?.status == 'pending' && thisFriend?.owner !== store.getUser?.id
+            thisFriend?.status == 'pending' && thisFriend?.owner !== user.getUser?.id
               ? 'Accept Request'
               : thisFriend?.status == 'pending'
               ? 'Cancel Request'
               : 'Remove Friend'
           "
           @click="
-            thisFriend?.status == 'pending' && thisFriend?.owner !== store.getUser?.id
+            thisFriend?.status == 'pending' && thisFriend?.owner !== user.getUser?.id
               ? updateFriend('accept')
               : deleteFriend()
           "
@@ -240,16 +240,16 @@ onMounted(async () => {
         <!-- Always display -->
         <v-btn
           :disabled="
-            profile == store.getUser?.username
+            profile == user.getUser?.username
               ? true
-              : thisFriend?.status == 'blocked' && thisFriend?.owner !== store.getUser?.id
+              : thisFriend?.status == 'blocked' && thisFriend?.owner !== user.getUser?.id
               ? true
               : false
           "
           class="mt-2"
           color="error"
           :text="['accepted', 'pending', undefined].includes(thisFriend?.status!) ? 
-          'Block' : thisFriend?.status == 'blocked' && thisFriend?.owner !== store.getUser?.id ?
+          'Block' : thisFriend?.status == 'blocked' && thisFriend?.owner !== user.getUser?.id ?
           'Block' :
           'Unblock'
           "
@@ -257,7 +257,7 @@ onMounted(async () => {
         ></v-btn>
       </v-col>
 
-      <v-col class="mx-auto" v-if="store.getUser!.username == profile">
+      <v-col class="mx-auto" v-if="user.getUser!.username == profile">
         <!-- Change your username -->
         <v-expansion-panels>
           <v-expansion-panel>
@@ -269,7 +269,7 @@ onMounted(async () => {
                 <v-text-field
                   v-model="newUsername"
                   label="Username"
-                  :placeholder="store.getUser!.username"
+                  :placeholder="user.getUser!.username"
                 ></v-text-field>
                 <v-btn class="mt-2" text="Submit" type="submit"></v-btn>
               </v-form>
@@ -288,7 +288,7 @@ onMounted(async () => {
                 <v-text-field
                   v-model="newProfileDesc"
                   label="Description"
-                  :placeholder="store.getUser!.description!"
+                  :placeholder="user.getUser!.description!"
                 ></v-text-field>
                 <v-btn class="mt-2" text="Submit" type="submit"></v-btn>
               </v-form>

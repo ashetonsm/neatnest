@@ -7,7 +7,7 @@ import { userStore } from "@/stores/user";
 
 const signedSrc = ref("null");
 const petModalRef = ref();
-const store = userStore();
+const user = userStore();
 
 const props = defineProps<{
   pet: Schema["Pet"]["type"];
@@ -38,7 +38,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <v-dialog v-if="store.getUser?.id! == pet.owner" :activator="petModalRef" max-width="500">
+  <v-dialog v-if="user.getUser?.id! == pet.owner" :activator="petModalRef" max-width="500">
     <PetItemModal :pet="pet" :items="items" v-slot:default="{ isActive }" />
   </v-dialog>
 

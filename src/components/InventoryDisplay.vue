@@ -5,21 +5,21 @@ import type { Schema } from "../../amplify/data/resource";
 import { userStore } from "@/stores/user";
 
 // These should be items where the owner is the logged in user
-const store = userStore();
+const user = userStore();
 
 // create a reactive reference to Item[]
 const fetchedItems: any = ref<Array<Schema["Item"]["type"]>>([]);
 var canCreate = true;
 
 async function setCreation() {
-  if (store.getUser?.itemsRemaining! > 0) {
+  if (user.getUser?.itemsRemaining! > 0) {
     canCreate = true;
   }
 }
 
 onMounted(async () => {
   await setCreation();
-  fetchedItems.value = JSON.parse(JSON.stringify(store.getInventory));
+  fetchedItems.value = JSON.parse(JSON.stringify(user.getInventory));
 });
 </script>
 
@@ -56,7 +56,7 @@ onMounted(async () => {
             v-for="(item, i) in fetchedItems"
             :key="item.name ?? i"
             :item="item"
-            :currentUser="store.getUser?.id!"
+            :currentUser="user.getUser?.id!"
           />
         </v-row>
       </v-col>

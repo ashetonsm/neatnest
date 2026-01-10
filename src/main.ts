@@ -23,7 +23,7 @@ app.use(vuetify)
 app.mount('#app')
 
 const auth = authStore();
-const store = userStore();
+const user = userStore();
 
 router.beforeEach(async (to) => {
     // Check for auth once
@@ -36,25 +36,25 @@ router.beforeEach(async (to) => {
         if (authenticated) {
             switch (to.name) {
                 case "inventory":
-                    await store.fetchInventory()
+                    await user.fetchInventory()
                     return
-                case "store":
-                    await store.fetchCredit()
+                case "shop":
+                    await user.fetchCredit()
                     return
                 case "profile":
-                    if (!store.getPets) {
-                        await store.fetchPets()
+                    if (!user.getPets) {
+                        await user.fetchPets()
                     } 
-                    if (!store.getFriends) {
-                        await store.fetchFriends(auth.getUserId as string)
+                    if (!user.getFriends) {
+                        await user.fetchFriends(auth.getUserId as string)
                     } 
                     return
                 case "pets":
-                    if (!store.getPets) {
-                        await store.fetchPets()
+                    if (!user.getPets) {
+                        await user.fetchPets()
                     }
-                    if (!store.getInventory) {
-                        await store.fetchInventory()
+                    if (!user.getInventory) {
+                        await user.fetchInventory()
                     }
                     return
                 default:

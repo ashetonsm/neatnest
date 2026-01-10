@@ -7,7 +7,7 @@ import type { Schema } from "../../amplify/data/resource";
 import { userStore } from "@/stores/user";
 
 // These should be items that are freely in the pool for this shop
-const store = userStore();
+const user = userStore();
 const route = useRoute();
 
 // TODO: Determine shop name based on number from route
@@ -66,7 +66,7 @@ onMounted(async () => {
           v-for="(item, i) in fetchedItems"
           :key="item.name ?? i"
           :item="item"
-          :currentUser="store.getUser?.id!"
+          :currentUser="user.getUser?.id!"
         />
       </v-row>
     </v-row>

@@ -6,7 +6,7 @@ import { userStore } from "./stores/user";
 import { signOut } from "aws-amplify/auth";
 import router from "@/router";
 
-const store = userStore();
+const user = userStore();
 </script>
 
 <template>
