@@ -2,11 +2,8 @@
 import { RouterView } from "vue-router";
 import "@aws-amplify/ui-vue/styles.css";
 import Navigation from "./components/Navigation.vue";
-import { userStore } from "./stores/user";
 import { signOut } from "aws-amplify/auth";
 import router from "@/router";
-
-const user = userStore();
 </script>
 
 <template>

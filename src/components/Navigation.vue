@@ -3,7 +3,6 @@ import { userStore } from "@/stores/user";
 import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 
-const myProfile = ref("");
 const user = userStore();
 
 const links = ref<Array<{ title: string; name: string }>>([
@@ -20,7 +19,7 @@ const links = ref<Array<{ title: string; name: string }>>([
 ]);
 
 onMounted(async () => {
-  user.$subscribe((mutation, state) => {
+  user.$subscribe((mutation) => {
     // Perform actions here when the state changes
 
     if (mutation.storeId == "user") {
