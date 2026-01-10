@@ -27,13 +27,21 @@ const user = userStore();
 
 router.beforeEach(async (to) => {
     // Check for auth once
-    if (auth.getUserId == null && ["login", "about", "home"].includes(to.name as string)) {
+    if (!auth.getAuth && ["login", "about", "home"].includes(to.name as string)) {
         console.log("no auth required")
         return
     } else {
+        var authenticated = false;
         console.log("auth required")
-        const authenticated = await auth.checkAuth()
+        if (auth.getAuth) {
+            console.log("Already authenticated")
+            authenticated = true;
+        } else {
+            console.log("Checking auth")
+            authenticated = await auth.checkAuth()
+        }
         if (authenticated) {
+            console.log("Auth successful")
             switch (to.name) {
                 case "inventory":
                     await user.fetchInventory()
@@ -62,6 +70,9 @@ router.beforeEach(async (to) => {
                     // Return the page (no extra prep is required)
                     return
             }
+        } else {
+            console.log("Auth not found.")
+            return {name: 'login'}
         }
     }
 }
