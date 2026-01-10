@@ -12,10 +12,10 @@ Play [here](https://main.d2aw0idn5nx6cg.amplifyapp.com)!
 - [ ] Create user stores
 - [ ] Seed default shops on a timer
 - [ ] Seed pet and item creations on a timer (2x a month, max 5 available)
-- [ ] Delete owned pets
 - [ ] Trade pets
 - [ ] Add pet profile pages
 - [ ] Add tests (90% coverage)
+- [x] Delete owned pets
 - [x] Create friend system
 - [x] Add form input to item/pet creation
 - [x] Update canvas to draw while holding mouse down
