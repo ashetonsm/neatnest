@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import { generateClient } from 'aws-amplify/api';
 import type { Schema } from '../../amplify/data/resource'
-import { getCurrentUser } from 'aws-amplify/auth';
+import { authStore } from './auth';
 
 export const userStore = defineStore('user', {
     state: () => ({
@@ -20,29 +20,25 @@ export const userStore = defineStore('user', {
         getFriends: (state: { friends: any }) => state.friends,
     },
     actions: {
-        async amplifyGetCurrentUser() {
+        async fetchUser() {
+            const auth = authStore()
             try {
-                // This isn't null. It's verified fine to use.
-                const { userId } = await getCurrentUser();
-
                 // If you define this before userStore, you'll get the Amplify Not Configured error.
                 const client = generateClient<Schema>();
 
-                await client.models.User.get({ id: userId })
+                await client.models.User.get({ id: auth.getUserId as string})
                     .then((u) => {
                         // Needs an exclaimation point otherwise you get a nullable error
                         this.user! = u.data!
                     });
             } catch (error: any) {
-                console.error(error)
+                console.error("User not authenticated. Cannot fetch info.")
+                // console.error(error)
             }
         },
 
         async fetchPets() {
             const client = generateClient<Schema>();
-            if (!this.user!) {
-                await this.amplifyGetCurrentUser()
-            }
 
             try {
                 await client.models.Pet.listPetsByOwnerAndName(
@@ -58,9 +54,6 @@ export const userStore = defineStore('user', {
 
         async fetchInventory() {
             const client = generateClient<Schema>();
-            if (!this.user!) {
-                await this.amplifyGetCurrentUser()
-            }
 
             await client.models.Item.listItemsByOwnerAndName(
                 {
@@ -87,9 +80,6 @@ export const userStore = defineStore('user', {
 
         async fetchCredit() {
             const client = generateClient<Schema>();
-            if (!this.user!) {
-                await this.amplifyGetCurrentUser()
-            }
 
             await client.models.Credit.cashByOwner(
                 { owner: this.user!.id },
