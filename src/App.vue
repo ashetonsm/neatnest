@@ -17,15 +17,14 @@ import router from "@/router";
         @click="
           async () => {
             await signOut().then(() => {
-              router.push({ name: 'home' });
-              router.go(1);
+              router.go(0);
             });
           }
         "
       >
         Log Out
       </v-btn>
-      <v-btn to="/login"> Log in </v-btn>
+      <v-btn to="/login">Log in</v-btn>
     </v-main>
   </v-app>
 </template>
