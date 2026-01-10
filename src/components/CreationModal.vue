@@ -10,7 +10,7 @@ var name: string | null;
 var speciesName: string | null;
 var selectedItemType = ref("");
 var itemTypes: Array<string> = ["food", "entertainment"];
-const store = userStore();
+const user = userStore();
 const client = generateClient<Schema>();
 
 const props = defineProps<{
@@ -18,7 +18,7 @@ const props = defineProps<{
 }>();
 
 async function handleSubmit() {
-  const path = `images/${store.getUser?.id!}/${props.thing}/${name}.png`;
+  const path = `images/${user.getUser?.id!}/${props.thing}/${name}.png`;
 
   switch (props.thing) {
     case "item":
@@ -29,8 +29,8 @@ async function handleSubmit() {
           name,
           path,
           selectedItemType.value,
-          store.getUser?.id!,
-          store.getUser,
+          user.getUser?.id!,
+          user.getUser,
           client
         );
       }
@@ -39,7 +39,7 @@ async function handleSubmit() {
       console.log("Name: ", name);
       console.log("SpeciesName: ", speciesName);
       if (name && speciesName) {
-        createPet(name, speciesName, path, store.getUser?.id!, store.getUser, client);
+        createPet(name, speciesName, path, user.getUser?.id!, user.getUser, client);
       }
       break;
 

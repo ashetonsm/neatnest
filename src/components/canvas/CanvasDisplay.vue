@@ -6,7 +6,7 @@ import { userStore } from "@/stores/user";
 import CreationModal from "../CreationModal.vue";
 
 const route = useRoute();
-const store = userStore();
+const user = userStore();
 const createModalRef = ref();
 
 const color = ref<string>("rgb(0, 0, 0)");
@@ -51,10 +51,10 @@ async function handleSubmit(this: any, t: string) {
 }
 
 async function setCreation() {
-  if (store.getUser?.itemsRemaining! > 0) {
+  if (user.getUser?.itemsRemaining! > 0) {
     canCreateItem.value = true;
   }
-  if (store.getUser?.petsRemaining! > 0) {
+  if (user.getUser?.petsRemaining! > 0) {
     canCreatePet.value = true;
   }
   loading.value = false;
