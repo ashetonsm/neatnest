@@ -12,17 +12,18 @@ const links = ref<Array<{ title: string; name: string }>>([
   { title: "Inventory", name: "/inventory" },
   {
     title: "Profile",
-    name: `/profile/${user.getUser?.username}` as any | `/profile/null`,
+    name: `/profile/null`,
   },
   { title: "Pets", name: "/pets" },
   { title: "About", name: "/about" },
 ]);
 
 onMounted(async () => {
+  console.log("Nav's user: ", user.getUser?.username);
   user.$subscribe((mutation) => {
     // Perform actions here when the state changes
 
-    if (mutation.storeId == "user") {
+    if (mutation.storeId == "user" && user.getUser?.username !== undefined) {
       links.value[4].name = `/profile/${user.getUser?.username}`;
     }
   });
