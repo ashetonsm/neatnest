@@ -111,7 +111,13 @@ onMounted(async () => {
     </v-card-subtitle>
 
     <v-card-actions v-if="item.owner == props.currentUser">
-      <v-btn @click="handleDelete(item)" text="Delete" class="mx-auto"></v-btn>
+      <v-btn
+        @click="handleDelete(item)"
+        text="Obliterate"
+        class="mx-auto"
+        variant="elevated"
+        color="error"
+      ></v-btn>
     </v-card-actions>
   </v-card>
 </template>
