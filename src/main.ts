@@ -58,6 +58,8 @@ router.beforeEach(async (to) => {
                 if (!user.getInventory) {
                     await user.fetchInventory()
                 }
+                // Get friends for trading
+                await user.fetchFriends(auth.getUserId as string)
                 return
             default:
                 console.log("Default switch")
