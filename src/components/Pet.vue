@@ -63,7 +63,7 @@ onMounted(async () => {
 
 <template>
   <v-dialog
-    v-if="user.getUser?.id! == pet.owner"
+    v-if="pet.owner == user.getUser?.id && route.name == 'pets'"
     :activator="petModalRef"
     max-width="500"
   >
