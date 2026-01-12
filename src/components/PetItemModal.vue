@@ -96,9 +96,9 @@ var playOptions = ref<Array<Schema["Item"]["type"]>>();
 var selectedFoodOption = ref<Schema["Item"]["type"]>();
 var selectedPlayOption = ref<Schema["Item"]["type"]>();
 var selectedFriendOption = ref<Schema["Friend"]["type"]>();
-const friendOptions = user.getFriends as ref<
+var friendOptions = ref<
   Array<{ username: string; friendObject: Schema["Friend"]["type"] }>
->;
+>(user.getFriends);
 const itemFilter1 = props.items;
 const itemFilter2 = props.items;
 foodOptions.value = JSON.parse(
@@ -114,7 +114,7 @@ playOptions.value = JSON.parse(
       <v-card-title> What would you like to do with {{ pet.name }}? </v-card-title>
       <v-form
         v-if="friendOptions.length !== 0"
-        @submit.prevent="handleTrade(selectedFriendOption)"
+        @submit.prevent="handleTrade(selectedFriendOption as any)"
       >
         <v-select
           v-model="selectedFriendOption"
