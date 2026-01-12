@@ -87,7 +87,13 @@ onMounted(async () => {
     <v-card-subtitle> Mood: {{ pet.mood }} </v-card-subtitle>
 
     <v-card-actions v-if="pet.owner == user.getUser?.id && route.name == 'pets'">
-      <v-btn @click="handleDelete(pet)" text="Obliterate" class="mx-auto"></v-btn>
+      <v-btn
+        @click="handleDelete(pet)"
+        text="Obliterate"
+        class="mx-auto"
+        variant="elevated"
+        color="error"
+      ></v-btn>
     </v-card-actions>
   </v-card>
 </template>
