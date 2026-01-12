@@ -4,8 +4,10 @@ import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../amplify/data/resource";
 import { onMounted, ref } from "vue";
 import { deleteStorage } from "./tools/deleteStorage";
+import { userStore } from "@/stores/user";
 
 const client = generateClient<Schema>();
+const user = userStore();
 
 const props = defineProps<{
   pet: Schema["Pet"]["type"];
@@ -70,10 +72,33 @@ async function handleSubmit(item: Schema["Item"]["type"] | null | undefined) {
   }
 }
 
+async function handleTrade(
+  friend: { username: string; friendObject: Schema["Friend"]["type"] } | null | undefined
+) {
+  if (friend == undefined || !friend) {
+    alert(`Hmm, nothing was selected.`);
+    return;
+  }
+  const pet = JSON.parse(JSON.stringify(props.pet));
+  try {
+    var updatedPet = pet;
+    // Update the pet
+    updatedPet.owner = user.getUser?.id;
+    await client.models.Pet.update(updatedPet).then((res: any) => {});
+    router.go(0);
+  } catch (error: any) {
+    console.error("Error: ", error);
+  }
+}
+
 var foodOptions = ref<Array<Schema["Item"]["type"]>>();
 var playOptions = ref<Array<Schema["Item"]["type"]>>();
 var selectedFoodOption = ref<Schema["Item"]["type"]>();
 var selectedPlayOption = ref<Schema["Item"]["type"]>();
+var selectedFriendOption = ref<Schema["Friend"]["type"]>();
+const friendOptions = user.getFriends as ref<
+  Array<{ username: string; friendObject: Schema["Friend"]["type"] }>
+>;
 const itemFilter1 = props.items;
 const itemFilter2 = props.items;
 foodOptions.value = JSON.parse(
@@ -87,6 +112,21 @@ playOptions.value = JSON.parse(
   <v-card class="mx-auto">
     <v-col class="text-center">
       <v-card-title> What would you like to do with {{ pet.name }}? </v-card-title>
+      <v-form
+        v-if="friendOptions.length !== 0"
+        @submit.prevent="handleTrade(selectedFriendOption)"
+      >
+        <v-select
+          v-model="selectedFriendOption"
+          label="Friends"
+          :items="friendOptions"
+          item-title="username"
+          item-value="friendOptions.friendObject"
+          return-object
+          single-line
+        ></v-select>
+        <v-btn class="my-2" text="Trade" type="submit"></v-btn>
+      </v-form>
       <v-form @submit.prevent="handleSubmit(selectedFoodOption)">
         <v-select
           v-model="selectedFoodOption"
