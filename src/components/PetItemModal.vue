@@ -74,17 +74,14 @@ var foodOptions = ref<Array<Schema["Item"]["type"]>>();
 var playOptions = ref<Array<Schema["Item"]["type"]>>();
 var selectedFoodOption = ref<Schema["Item"]["type"]>();
 var selectedPlayOption = ref<Schema["Item"]["type"]>();
-
-onMounted(async () => {
-  const itemFilter1 = props.items;
-  const itemFilter2 = props.items;
-  foodOptions.value = JSON.parse(
-    JSON.stringify(itemFilter1.filter((item) => item.category == "food"))
-  );
-  playOptions.value = JSON.parse(
-    JSON.stringify(itemFilter2.filter((item) => item.category == "entertainment"))
-  );
-});
+const itemFilter1 = props.items;
+const itemFilter2 = props.items;
+foodOptions.value = JSON.parse(
+  JSON.stringify(itemFilter1.filter((item) => item.category == "food"))
+);
+playOptions.value = JSON.parse(
+  JSON.stringify(itemFilter2.filter((item) => item.category == "entertainment"))
+);
 </script>
 <template>
   <v-card class="mx-auto">
