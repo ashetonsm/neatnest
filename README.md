@@ -15,6 +15,8 @@ Play [here](https://main.d2aw0idn5nx6cg.amplifyapp.com)!
 - [ ] Trade pets
 - [ ] Add pet profile pages
 - [ ] Add tests (90% coverage)
+- [ ] Add notification system
+- [ ] Display credit amounts for logged in users
 - [x] Delete owned pets
 - [x] Create friend system
 - [x] Add form input to item/pet creation
