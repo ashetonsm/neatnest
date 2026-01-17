@@ -9,7 +9,7 @@ export const userStore = defineStore('user', {
         user: ref<Schema["User"]["type"] | null>(null),
         pets: ref<any>(null),
         inventory: ref<any>(null),
-        credits: ref<any>(null),
+        credits: ref<any>(0),
         friends: ref<Array<{username: string, friendObject: Schema["Friend"]["type"]}>>([]),
     }),
     getters: {
@@ -88,7 +88,7 @@ export const userStore = defineStore('user', {
                 .then(async (res: { data: any; }) => {
                     if (res.data.length) {
                         console.log("Found existing Credit.")
-                        return this.credits = res.data[0]
+                        return this.credits = parseInt(res.data[0].amount)
                     } else {
                         console.log("No Credit found for this user. Creating an entry...")
                         await client.models.Credit.create(
@@ -98,7 +98,7 @@ export const userStore = defineStore('user', {
                             }
                         )
                             .then((res: { data: any; }) => {
-                                return this.credits = res.data
+                                return this.credits = parseInt(res.data.amount)
                             })
                     }
                 })

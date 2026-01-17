@@ -44,6 +44,7 @@ router.beforeEach(async (to) => {
                 await user.fetchCredit()
                 return
             case "profile":
+                await user.fetchCredit()
                 if (!user.getPets) {
                     await user.fetchPets()
                 }
