@@ -126,6 +126,30 @@ const schema = a.schema({
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
+  Trade: a
+    .model({
+      recipient: a.string(),  // Who is receiving the pet?
+      sender: a.string(),     // Who is sending the pet?
+      status: a.string(),     // What is the status of this trade?
+      pet: a.string(),        // The pet to be traded
+
+    })
+    .secondaryIndexes((index) => [
+      index("pet")
+        .queryField("tradeByPet"),
+      index("recipient")
+        .queryField("tradeByRecipient"),
+      index("sender")
+        .queryField("tradeBySender")
+    ])
+    .authorization((allow) => [
+      allow.authenticated('identityPool'),
+      allow.authenticated('userPools'),
+      // Allow owners
+      allow.ownerDefinedIn("owner"),
+      // Users in the admin group have full permissions
+      allow.groups(['admin'])
+    ]),
 })
 
 export type Schema = ClientSchema<typeof schema>;
