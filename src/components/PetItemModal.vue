@@ -83,9 +83,17 @@ async function handleTrade(
   try {
     var updatedPet = pet;
     // Update the pet
-    updatedPet.owner = user.getUser?.id;
-    await client.models.Pet.update(updatedPet).then((res: any) => {});
-    router.go(0);
+    updatedPet.owner = friend.friendObject.id;
+
+    await client.models.Trade.create({
+      recipient: friend.friendObject.id,
+      sender: user.getUser?.id,
+      status: "pending",
+      pet: pet,
+    }).then((res: any) => {
+      console.log(res);
+    });
+    // router.go(0);
   } catch (error: any) {
     console.error("Error: ", error);
   }
