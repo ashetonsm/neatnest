@@ -202,6 +202,13 @@ onMounted(async () => {
           class="ma-4"
         ></v-alert>
 
+        <!-- Stuff to display for the logged in user -->
+        <template v-if="profile == user.getUser?.username"> 
+        <v-btn text="Trade Requests" to="/trades"></v-btn>
+        <h2 class="text-h4 font-weight-black ma-4">
+        Credits: {{ user.getCredits > 0 ? user.getCredits : 0 }}</h2>
+        </template>
+
         <v-btn
           :disabled="
             profile == user.getUser?.username ||
