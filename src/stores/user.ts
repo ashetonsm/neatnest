@@ -10,6 +10,7 @@ export const userStore = defineStore('user', {
         pets: ref<any>(null),
         inventory: ref<any>(null),
         credits: ref<any>(0),
+        trades: ref<Array<Schema["Trade"]["type"]>>([]),
         friends: ref<Array<{username: string, friendObject: Schema["Friend"]["type"]}>>([]),
     }),
     getters: {
@@ -17,6 +18,7 @@ export const userStore = defineStore('user', {
         getPets: (state: { pets: any }) => state.pets,
         getInventory: (state: { inventory: any }) => state.inventory,
         getCredits: (state: { credits: any }) => state.credits,
+        getTrades: (state: { trades: Array<Schema["Trade"]["type"]>}) => state.trades,
         getFriends: (state: { friends: any }) => state.friends,
     },
     actions: {
@@ -49,6 +51,23 @@ export const userStore = defineStore('user', {
                     })
             } catch (error: any) {
                 console.error(error)
+            }
+        },
+
+        async fetchTrades() {
+            const client = generateClient<Schema>();
+
+            try {
+                await client.models.Trade.tradeByRecipient(
+                    { recipient: this.user!.id, },
+                    { authMode: "userPool", })
+                    .then((res) => {
+                        res.data ? this.trades = res.data : this.trades = []
+                    })
+            } catch (error: any) {
+                this.trades = []
+                console.error(error)
+                console.error(this.trades)
             }
         },
 
