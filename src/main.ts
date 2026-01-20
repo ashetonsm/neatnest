@@ -37,6 +37,9 @@ router.beforeEach(async (to) => {
     if (authenticated) {
         console.log("Auth successful")
         switch (to.name) {
+            case "trades":
+                await user.fetchTrades()
+                return
             case "inventory":
                 await user.fetchInventory()
                 return
