@@ -1,37 +1,20 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import type { Schema } from "../../amplify/data/resource";
-import { getUrl } from "aws-amplify/storage";
-import { userStore } from "@/stores/user";
-import { generateClient } from "aws-amplify/api";
-import { useRoute } from "vue-router";
 
-const route = useRoute();
-const signedSrc = ref("null");
-const petModalRef = ref();
-const user = userStore();
-const client = generateClient<Schema>(); // use this Data client for CRUDL requests
+const petData = ref<Schema["Pet"]["type"] | any>("")
 
 const props = defineProps<{
   trade: Schema["Trade"]["type"];
+  pet: Schema["Pet"]["type"] | any;
 }>();
 
-async function getFileUrl(fileName: any) {
-  try {
-    const result = await getUrl({
-      path: fileName, // Adjust path as needed (e.g., private/, protected/)
-      options: {
-        expiresIn: 3600, // URL valid for 1 hour
-        validateObjectExistence: true,
-      },
-    });
-    signedSrc.value = result.url.toString();
-  } catch (error) {
-    console.error("Error getting URL:", error);
-    return null;
-  }
-  return;
-}
+onMounted(async () => {
+  console.log(props.trade)
+  petData.value = await JSON.parse(props.pet) as Schema["Pet"]["type"]
+  console.log(petData.value)
+})
+
 
 async function handleTrade(t: Schema["Trade"]["type"], action: string) {
   const choice = confirm(`${action} this trade?`);
@@ -59,19 +42,20 @@ async function handleTrade(t: Schema["Trade"]["type"], action: string) {
 
 <template>
   <v-card class="mx-auto" max-width="300px">
-    <v-card-title class="text-center">{{ trade.createdAt }}</v-card-title>
-    <v-card-subtitle>{{ `Trade between ${trade.sender} and ${trade.recipient}` }}</v-card-subtitle>
-
+    <v-card-title class="text-center">{{ new Date(props.trade.createdAt) }}</v-card-title>
+    <v-card-subtitle>{{ `Trade between ${props.trade.sender} and ${props.trade.recipient}` }}</v-card-subtitle>
+    
+          <h3>Name: {{ petData.name }}</h3>
     <!-- <v-card-actions v-if="trade.owner == user.getUser?.id && route.name == 'trades'"> -->
       <v-btn
-        @click="handleTrade(trade, 'accept')"
+        @click="handleTrade(props.trade, 'accept')"
         text="Accept"
         class="mx-auto"
         variant="elevated"
         color="success"
       ></v-btn>
       <v-btn
-        @click="handleTrade(trade, 'reject')"
+        @click="handleTrade(props.trade, 'reject')"
         text="Reject"
         class="mx-auto"
         variant="elevated"
