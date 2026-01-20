@@ -55,6 +55,13 @@ onMounted(async () => {
           >Launch Canvas
         </v-btn>
 
+        <v-btn
+          color="secondary"
+          to="/trades"
+          class="mb-4"
+          >Your Trades
+        </v-btn>
+
         <v-row class="ga-4">
           <Pet
             v-for="(pet, i) in fetchedPets"
