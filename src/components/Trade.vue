@@ -33,17 +33,50 @@ async function getFileUrl(fileName: any) {
   return;
 }
 
+async function handleTrade(t: Schema["Trade"]["type"], action: string) {
+  const choice = confirm(`${action} this trade?`);
+  if (choice) {
+    switch (action) {
+      case "accept":
+        console.log("Accept trade.");
+        console.log(t);
+        break;
+      case "reject":
+        console.log("Reject trade.");
+        console.log(t);
+        break;
+      default:
+        console.log("Invalid trade action.");
+        break;
+    }
+    // Refresh
+    // router.go(0);
+  } else {
+    return console.log(`Trade aborted.`);
+  }
+}
 </script>
 
 <template>
-
   <v-card class="mx-auto" max-width="300px">
-    <v-card-title class="text-center">
-    </v-card-title>
-    <v-card-subtitle></v-card-subtitle>
+    <v-card-title class="text-center">{{ trade.createdAt }}</v-card-title>
+    <v-card-subtitle>{{ `Trade between ${trade.sender} and ${trade.recipient}` }}</v-card-subtitle>
 
-    <v-card-actions v-if="trade.owner == user.getUser?.id && route.name == 'pets'">
-
-    </v-card-actions>
+    <!-- <v-card-actions v-if="trade.owner == user.getUser?.id && route.name == 'trades'"> -->
+      <v-btn
+        @click="handleTrade(trade, 'accept')"
+        text="Accept"
+        class="mx-auto"
+        variant="elevated"
+        color="success"
+      ></v-btn>
+      <v-btn
+        @click="handleTrade(trade, 'reject')"
+        text="Reject"
+        class="mx-auto"
+        variant="elevated"
+        color="error"
+      ></v-btn>
+    <!-- </v-card-actions> -->
   </v-card>
 </template>
