@@ -131,12 +131,10 @@ const schema = a.schema({
       recipient: a.string(),  // Who is receiving the pet?
       sender: a.string(),     // Who is sending the pet?
       status: a.string(),     // What is the status of this trade?
-      pet: a.string(),        // The pet to be traded
+      pet: a.json()           // The pet to be traded
 
     })
     .secondaryIndexes((index) => [
-      index("pet")
-        .queryField("tradeByPet"),
       index("recipient")
         .queryField("tradeByRecipient"),
       index("sender")
