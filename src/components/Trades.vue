@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import Pet from "./Pet.vue";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import type { Schema } from "../../amplify/data/resource";
 import { userStore } from "@/stores/user";
+import Trade from "./Trade.vue";
 const user = userStore();
 
-const fetchedTrades = ref<Array<Schema["Pet"]["type"]>>([]);
-const fetchedItems = ref<Array<Schema["Item"]["type"]>>([]);
+const fetchedTrades = ref<Array<Schema["Trade"]["type"]>>([]);
+
+onMounted(() => {
+  fetchedTrades.value = user.getTrades
+})
 
 </script>
 
@@ -35,11 +38,10 @@ const fetchedItems = ref<Array<Schema["Item"]["type"]>>([]);
         ></v-alert>
 
         <v-row class="ga-4">
-          <Pet
-            v-for="(pet, i) in fetchedTrades"
-            :key="pet.name ?? i"
-            :pet="pet"
-            :items="fetchedItems"
+          <Trade
+            v-for="(trade, i) in fetchedTrades"
+            :key="trade?.id ?? i"
+            :trade="trade"
           />
         </v-row>
       </v-col>
