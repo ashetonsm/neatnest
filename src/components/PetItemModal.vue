@@ -79,17 +79,12 @@ async function handleTrade(
     alert(`Hmm, nothing was selected.`);
     return;
   }
-  const pet = JSON.parse(JSON.stringify(props.pet));
   try {
-    var updatedPet = pet;
-    // Update the pet
-    updatedPet.owner = friend.friendObject.id;
-
     await client.models.Trade.create({
       recipient: friend.friendObject.friendA! !== user.getUser!.id ? friend.friendObject.friendA : friend.friendObject.friendB,
       sender: user.getUser?.id,
       status: "pending",
-      pet: pet,
+      pet: JSON.stringify(props.pet),
     }).then((res: any) => {
       console.log(res);
     });
