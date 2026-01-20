@@ -42,6 +42,7 @@ onMounted(() => {
             v-for="(trade, i) in fetchedTrades"
             :key="trade?.id ?? i"
             :trade="trade"
+            :pet="trade.pet"
           />
         </v-row>
       </v-col>
