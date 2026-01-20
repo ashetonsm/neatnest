@@ -86,7 +86,7 @@ async function handleTrade(
     updatedPet.owner = friend.friendObject.id;
 
     await client.models.Trade.create({
-      recipient: friend.friendObject.id,
+      recipient: friend.friendObject.friendA! !== user.getUser!.id ? friend.friendObject.friendA : friend.friendObject.friendB,
       sender: user.getUser?.id,
       status: "pending",
       pet: pet,
