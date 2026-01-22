@@ -42,7 +42,7 @@ export function createPet(
           species: species,
           hunger: 0,
           mood: 5,
-          owner: userID,
+          ownerId: userID,
           health: 100,
           image: imgPath
         }).then(() => {
