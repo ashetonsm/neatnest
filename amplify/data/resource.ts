@@ -6,6 +6,7 @@ const schema = a.schema({
       name: a.string(),
       price: a.integer(),
       shopfront: a.string(),
+      owner: a.string(),
       ownerId: a.string(),
       category: a.string(),
       health: a.integer(),
@@ -29,7 +30,7 @@ const schema = a.schema({
       // Authenticated users can read and write (change item values)
       allow.authenticated('userPools').to(['read', 'update', 'create']),
       // Owners can delete their items
-      allow.ownerDefinedIn("ownerId").to(['delete']),
+      allow.owner().to(['delete']),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
@@ -39,6 +40,7 @@ const schema = a.schema({
       species: a.string(),
       hunger: a.integer(),
       mood: a.integer(),
+      owner: a.string(),
       ownerId: a.string(),
       health: a.integer(),
       image: a.string()
@@ -60,7 +62,7 @@ const schema = a.schema({
       // Authenticated users can read and write (change item values)
       allow.authenticated('userPools').to(['read', 'update', 'create']),
       // Owners can delete their pets
-      allow.ownerDefinedIn("ownerId").to(['delete']),
+      allow.owner(),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
@@ -69,6 +71,7 @@ const schema = a.schema({
       email: a.string(),
       username: a.string(),
       ownerId: a.string(),
+      owner: a.string(),
       description: a.string(),
       itemsRemaining: a.integer(),
       petsRemaining: a.integer(),
@@ -85,14 +88,15 @@ const schema = a.schema({
       allow.authenticated('identityPool'),
       allow.authenticated('userPools'),
       // Allow owners
-      allow.ownerDefinedIn("ownerId"),
+      allow.owner(),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
   Credit: a
     .model({
       ownerId: a.string(),
-      amount: a.integer()
+      amount: a.integer(),
+      owner: a.string()
     })
     .secondaryIndexes((index) => [
       index("ownerId")
@@ -102,7 +106,7 @@ const schema = a.schema({
       allow.authenticated('identityPool'),
       allow.authenticated('userPools'),
       // Allow owners
-      allow.ownerDefinedIn("ownerId"),
+      allow.owner(),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
@@ -110,7 +114,8 @@ const schema = a.schema({
     .model({
       friendA: a.string(),
       friendB: a.string(),
-      status: a.string()
+      status: a.string(),
+      owner: a.string()
     })
     .secondaryIndexes((index) => [
       index("friendA")
@@ -122,7 +127,7 @@ const schema = a.schema({
       allow.authenticated('identityPool'),
       allow.authenticated('userPools'),
       // Allow owners
-      allow.ownerDefinedIn("ownerId"),
+      allow.owner(),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
@@ -131,8 +136,8 @@ const schema = a.schema({
       recipient: a.string(),  // Who is receiving the pet?
       sender: a.string(),     // Who is sending the pet?
       status: a.string(),     // What is the status of this trade?
-      pet: a.json()           // The pet to be traded
-
+      pet: a.json(),          // The pet to be traded
+      owner: a.string()
     })
     .secondaryIndexes((index) => [
       index("recipient")
@@ -144,7 +149,7 @@ const schema = a.schema({
       allow.authenticated('identityPool'),
       allow.authenticated('userPools'),
       // Allow owners
-      allow.ownerDefinedIn("ownerId"),
+      allow.owner(),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
