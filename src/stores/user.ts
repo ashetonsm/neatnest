@@ -44,7 +44,7 @@ export const userStore = defineStore('user', {
 
             try {
                 await client.models.Pet.listPetsByOwnerAndName(
-                    { owner: this.user!.id, },
+                    { ownerId: this.user!.id, },
                     { authMode: "userPool", })
                     .then((res) => {
                         this.pets = res.data
@@ -76,7 +76,7 @@ export const userStore = defineStore('user', {
 
             await client.models.Item.listItemsByOwnerAndName(
                 {
-                    owner: this.user!.id
+                    ownerId: this.user!.id
                 },
                 {
                     headers: {
@@ -101,7 +101,7 @@ export const userStore = defineStore('user', {
             const client = generateClient<Schema>();
 
             await client.models.Credit.cashByOwner(
-                { owner: this.user!.id },
+                { ownerId: this.user!.id },
                 { authMode: 'userPool' }
             )
                 .then(async (res: { data: any; }) => {
@@ -112,7 +112,7 @@ export const userStore = defineStore('user', {
                         console.log("No Credit found for this user. Creating an entry...")
                         await client.models.Credit.create(
                             {
-                                owner: this.user!.id,
+                                ownerId: this.user!.id,
                                 amount: 0
                             }
                         )

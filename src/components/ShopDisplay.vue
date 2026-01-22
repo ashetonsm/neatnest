@@ -19,7 +19,7 @@ async function fetchItems() {
   const { data: items } = await client.models.Item.listItemsByShopfrontAndOwner(
     {
       shopfront: shopFrontName,
-      owner: {
+      ownerId: {
         eq: "NA",
       },
     },

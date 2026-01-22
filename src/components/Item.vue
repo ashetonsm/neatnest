@@ -35,7 +35,7 @@ async function buyFlow(i: Schema["Item"]["type"]) {
       // Subtract the amount.
       await client.models.Credit.update(updatedCredit).then(async () => {
         // Set the owner to the signed in user
-        i.owner = props.currentUser;
+        i.ownerId = props.currentUser;
         // Update the item to the current user
         await client.models.Item.update(i).then((res) => {});
         // Refresh
@@ -96,8 +96,8 @@ onMounted(async () => {
     <v-img
       :src="signedSrc"
       :alt="'an image of ' + item.name"
-      @click="item.owner == 'NA' ? buyFlow(item) : null"
-      :class="item.owner == 'NA' ? 'cursor-pointer' : 'cursor-default'"
+      @click="item.ownerId == 'NA' ? buyFlow(item) : null"
+      :class="item.ownerId == 'NA' ? 'cursor-pointer' : 'cursor-default'"
       class="cursor-pointer"
       min-width="150px"
       max-width="300px"
@@ -106,11 +106,11 @@ onMounted(async () => {
     <v-card-title class="text-center">
       {{ item.name }}
     </v-card-title>
-    <v-card-subtitle v-if="item.owner != props.currentUser">
+    <v-card-subtitle v-if="item.ownerId != props.currentUser">
       Price: {{ item.price }}
     </v-card-subtitle>
 
-    <v-card-actions v-if="item.owner == props.currentUser">
+    <v-card-actions v-if="item.ownerId == props.currentUser">
       <v-btn
         @click="handleDelete(item)"
         text="Obliterate"

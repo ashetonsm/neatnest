@@ -63,7 +63,7 @@ onMounted(async () => {
 
 <template>
   <v-dialog
-    v-if="pet.owner == user.getUser?.id && route.name == 'pets'"
+    v-if="pet.ownerId == user.getUser?.id && route.name == 'pets'"
     :activator="petModalRef"
     max-width="500"
   >
@@ -86,7 +86,7 @@ onMounted(async () => {
     <v-card-subtitle> Hunger: {{ pet.hunger }} </v-card-subtitle>
     <v-card-subtitle> Mood: {{ pet.mood }} </v-card-subtitle>
 
-    <v-card-actions v-if="pet.owner == user.getUser?.id && route.name == 'pets'">
+    <v-card-actions v-if="pet.ownerId == user.getUser?.id && route.name == 'pets'">
       <v-btn
         @click="handleDelete(pet)"
         text="Obliterate"

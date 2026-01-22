@@ -99,7 +99,7 @@ async function fetchUser() {
 
 async function fetchPets() {
   await client.models.Pet.listPetsByOwnerAndName({
-    owner: thisUser?.id as string,
+    ownerId: thisUser?.id as string,
   }).then((res) => {
     thesePets.value = res.data;
   });

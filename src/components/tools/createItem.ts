@@ -42,7 +42,7 @@ export function createItem(
           category: itemCat,
           price: 1,
           shopfront: "NA",
-          owner: userID,
+          ownerId: userID,
           health: 99,
           rarity: 1,
           image: imgPath

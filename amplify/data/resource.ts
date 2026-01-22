@@ -6,7 +6,7 @@ const schema = a.schema({
       name: a.string(),
       price: a.integer(),
       shopfront: a.string(),
-      owner: a.string(),
+      ownerId: a.string(),
       category: a.string(),
       health: a.integer(),
       rarity: a.integer(),
@@ -14,13 +14,13 @@ const schema = a.schema({
     })
     .secondaryIndexes((index) => [
       index("name")
-        .sortKeys(["owner"])
+        .sortKeys(["ownerId"])
         .queryField("listItemsByNameAndOwner"),
-      index("owner")
+      index("ownerId")
         .sortKeys(["name"])
         .queryField("listItemsByOwnerAndName"),
       index("shopfront")
-        .sortKeys(["owner"])
+        .sortKeys(["ownerId"])
         .queryField("listItemsByShopfrontAndOwner")
     ])
     .authorization((allow) => [
@@ -29,7 +29,7 @@ const schema = a.schema({
       // Authenticated users can read and write (change item values)
       allow.authenticated('userPools').to(['read', 'update', 'create']),
       // Owners can delete their items
-      allow.owner().to(['delete']),
+      allow.ownerDefinedIn("ownerId").to(['delete']),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
@@ -39,12 +39,12 @@ const schema = a.schema({
       species: a.string(),
       hunger: a.integer(),
       mood: a.integer(),
-      owner: a.string(),
+      ownerId: a.string(),
       health: a.integer(),
       image: a.string()
     })
     .secondaryIndexes((index) => [
-      index("owner")
+      index("ownerId")
         .sortKeys(["name"])
         .queryField("listPetsByOwnerAndName"),
       index("species")
@@ -60,7 +60,7 @@ const schema = a.schema({
       // Authenticated users can read and write (change item values)
       allow.authenticated('userPools').to(['read', 'update', 'create']),
       // Owners can delete their pets
-      allow.owner().to(['delete']),
+      allow.ownerDefinedIn("ownerId").to(['delete']),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
@@ -68,7 +68,7 @@ const schema = a.schema({
     .model({
       email: a.string(),
       username: a.string(),
-      owner: a.string(),
+      ownerId: a.string(),
       description: a.string(),
       itemsRemaining: a.integer(),
       petsRemaining: a.integer(),
@@ -85,24 +85,24 @@ const schema = a.schema({
       allow.authenticated('identityPool'),
       allow.authenticated('userPools'),
       // Allow owners
-      allow.ownerDefinedIn("owner"),
+      allow.ownerDefinedIn("ownerId"),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
   Credit: a
     .model({
-      owner: a.string(),
+      ownerId: a.string(),
       amount: a.integer()
     })
     .secondaryIndexes((index) => [
-      index("owner")
+      index("ownerId")
         .queryField("cashByOwner")
     ])
     .authorization((allow) => [
       allow.authenticated('identityPool'),
       allow.authenticated('userPools'),
       // Allow owners
-      allow.ownerDefinedIn("owner"),
+      allow.ownerDefinedIn("ownerId"),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
@@ -122,7 +122,7 @@ const schema = a.schema({
       allow.authenticated('identityPool'),
       allow.authenticated('userPools'),
       // Allow owners
-      allow.ownerDefinedIn("owner"),
+      allow.ownerDefinedIn("ownerId"),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
@@ -144,7 +144,7 @@ const schema = a.schema({
       allow.authenticated('identityPool'),
       allow.authenticated('userPools'),
       // Allow owners
-      allow.ownerDefinedIn("owner"),
+      allow.ownerDefinedIn("ownerId"),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
