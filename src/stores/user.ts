@@ -56,14 +56,52 @@ export const userStore = defineStore('user', {
 
         async fetchTrades() {
             const client = generateClient<Schema>();
-
             try {
+                var tradeArray: Array<any> = []
+                // Get trades where this user is the recipient
                 await client.models.Trade.tradeByRecipient(
                     { recipient: this.user!.id, },
                     { authMode: "userPool", })
-                    .then((res) => {
-                        res.data ? this.trades = res.data : this.trades = []
-                    })
+                .then((res: { data: any; }) => {
+                    if (res.data.length) {
+                        tradeArray = res.data
+                    }
+                })
+
+                // Get trades where this user is the sender
+                await client.models.Trade.tradeBySender(
+                    { sender: this.user!.id, },
+                    { authMode: "userPool", })
+                .then((res: { data: any; }) => {
+                    if (res.data.length) {
+                        tradeArray = [...tradeArray, ...res.data]
+                    }
+                })
+
+
+            var idSet: Set<Schema["Trade"]["type"]> = new Set()
+                
+            // Filter for unique objects
+            tradeArray.forEach(async entry => {
+                // If the trade's recipient is NOT the current user
+                if (entry.recipient !== this.user?.id) {
+                    // This entry isn't already in the set
+                    if (!idSet.has(entry)) {
+                        // Add it to the set.
+                        idSet.add(entry)
+                    }
+                } else {
+                    // This entry isn't already in the set
+                    if (!idSet.has(entry)) {
+                        // Add it to the set.
+                        idSet.add(entry)
+                    }
+                }
+            })
+            const tradeList = Array.from(idSet)
+
+            this.trades = tradeList
+                    
             } catch (error: any) {
                 this.trades = []
                 console.error(error)
