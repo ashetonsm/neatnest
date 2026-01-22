@@ -88,7 +88,7 @@ async function handleTrade(
     }).then((res: any) => {
       console.log(res);
     });
-    // router.go(0);
+    router.go(0);
   } catch (error: any) {
     console.error("Error: ", error);
   }
