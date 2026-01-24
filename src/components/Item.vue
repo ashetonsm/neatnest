@@ -7,10 +7,8 @@ import { getUrl } from "aws-amplify/storage";
 import { onMounted, ref } from "vue";
 import { deleteStorage } from "./tools/deleteStorage";
 import { userStore } from "@/stores/user";
-const route = useRoute();
 const user = userStore();
 
-var shopFrontName = route.params.id == "1" ? "Test Emporium" : "Test Shack";
 const client = generateClient<Schema>(); // use this Data client for CRUDL requests
 const signedSrc = ref("null");
 
@@ -37,7 +35,7 @@ async function buyFlow(i: Schema["Item"]["type"]) {
         // Set the owner to the signed in user
         i.ownerId = props.currentUser;
         // Update the item to the current user
-        await client.models.Item.update(i).then((res) => {});
+        await client.models.Item.update(i).then(() => {});
         // Refresh
         router.go(0);
       });
@@ -96,7 +94,7 @@ onMounted(async () => {
     <v-img
       :src="signedSrc"
       :alt="'an image of ' + item.name"
-      @click="item.ownerId == 'NA' ? buyFlow(item) : null"
+      @click="item.ownerId !== user.getUser?.id ? buyFlow(item) : null"
       :class="item.ownerId == 'NA' ? 'cursor-pointer' : 'cursor-default'"
       class="cursor-pointer"
       min-width="150px"
