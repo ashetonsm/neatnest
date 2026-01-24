@@ -5,7 +5,8 @@ const schema = a.schema({
     .model({
       name: a.string(),
       price: a.integer(),
-      shopfront: a.string(),
+      shopId: a.string(),
+      creator: a.string(),
       owner: a.string(),
       ownerId: a.string(),
       category: a.string(),
@@ -20,9 +21,9 @@ const schema = a.schema({
       index("ownerId")
         .sortKeys(["name"])
         .queryField("listItemsByOwnerAndName"),
-      index("shopfront")
+      index("shopId")
         .sortKeys(["ownerId"])
-        .queryField("listItemsByShopfrontAndOwner")
+        .queryField("listItemsByShopIdAndOwner")
     ])
     .authorization((allow) => [
       // Guests are read only
@@ -144,6 +145,27 @@ const schema = a.schema({
         .queryField("tradeByRecipient"),
       index("sender")
         .queryField("tradeBySender")
+    ])
+    .authorization((allow) => [
+      allow.authenticated('identityPool'),
+      allow.authenticated('userPools'),
+      // Allow owners
+      allow.owner(),
+      // Users in the admin group have full permissions
+      allow.groups(['admin'])
+    ]),
+  Shop: a
+    .model({
+      name: a.string(),
+      owner: a.string(),
+      ownerId: a.string(),
+      items: a.json()
+    })
+    .secondaryIndexes((index) => [
+      index("ownerId")
+        .queryField("shopByOwnerId"),
+      index("name")
+        .queryField("shopByName")
     ])
     .authorization((allow) => [
       allow.authenticated('identityPool'),
