@@ -11,23 +11,26 @@ const user = userStore();
 const route = useRoute();
 
 // TODO: Determine shop name based on number from route
-var shopFrontName = route.params.id == "1" ? "Test Emporium" : "Test Shack";
 const client = generateClient<Schema>();
 const fetchedItems = ref<Array<Schema["Item"]["type"]>>([]);
 
 async function fetchItems() {
-  const { data: items } = await client.models.Item.listItemsByShopfrontAndOwner(
-    {
-      shopfront: shopFrontName,
-      ownerId: {
-        eq: "NA",
+  try {
+    const { data: items } = await client.models.Item.listItemsByShopIdAndOwner(
+      {
+        shopId: route.params.id.toString(),
+        ownerId: {
+          ne: user.getUser?.id
+        },
       },
-    },
-    {
-      authMode: "userPool",
-    }
-  );
-  fetchedItems.value = items;
+      {
+        authMode: "userPool",
+      }
+    );
+    fetchedItems.value = items;
+  } catch (error: any) {
+    console.log("No items found!")
+  }
 }
 
 onMounted(async () => {
@@ -44,7 +47,7 @@ onMounted(async () => {
   >
     <v-row>
       <v-col md="12" class="text-center">
-        <h2 class="text-h4 font-weight-black ma-4">Welcome to {{ shopFrontName }}!</h2>
+        <h2 class="text-h4 font-weight-black ma-4">Welcome to shop #{{ route.params.id.toString() }} !</h2>
 
         <v-alert
           v-if="!fetchedItems"
