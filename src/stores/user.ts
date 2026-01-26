@@ -7,6 +7,7 @@ import { authStore } from './auth';
 export const userStore = defineStore('user', {
     state: () => ({
         user: ref<Schema["User"]["type"] | null>(null),
+        shop: ref<Schema["Shop"]["type"] | null>(null),
         pets: ref<any>(null),
         inventory: ref<any>(null),
         credits: ref<any>(0),
@@ -15,6 +16,7 @@ export const userStore = defineStore('user', {
     }),
     getters: {
         getUser: (state: { user: Schema["User"]["type"] | null }) => state.user,
+        getShop: (state: { shop: Schema["Shop"]["type"] | null }) => state.shop,
         getPets: (state: { pets: any }) => state.pets,
         getInventory: (state: { inventory: any }) => state.inventory,
         getCredits: (state: { credits: any }) => state.credits,
@@ -36,6 +38,22 @@ export const userStore = defineStore('user', {
             } catch (error: any) {
                 console.error("User not authenticated. Cannot fetch info.")
                 // console.error(error)
+            }
+        },
+
+        async fetchShop() {
+            const auth = authStore()
+            try {
+                const client = generateClient<Schema>();
+                await client.models.Shop.shopByOwnerId({ ownerId: auth.getUserId as string})
+                    .then((res) => {
+                        this.shop = res.data as unknown as Schema["Shop"]["type"]
+                    })
+                    .then(() => {
+                        console.log(this.shop)
+                    })
+            } catch (error: any) {
+                console.error("Shop not found.")
             }
         },
 
