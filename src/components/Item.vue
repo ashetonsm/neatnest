@@ -7,7 +7,9 @@ import { getUrl } from "aws-amplify/storage";
 import { onMounted, ref } from "vue";
 import { deleteStorage } from "./tools/deleteStorage";
 import { userStore } from "@/stores/user";
+import ItemModal from "./ItemModal.vue";
 const user = userStore();
+const itemModalRef = ref();
 
 const client = generateClient<Schema>(); // use this Data client for CRUDL requests
 const signedSrc = ref("null");
@@ -90,11 +92,19 @@ onMounted(async () => {
 </script>
 
 <template>
+  <v-dialog
+    v-if="item.ownerId == user.getUser?.id && $route.name == 'inventory'"
+    :activator="itemModalRef"
+    max-width="500"
+  >
+    <item-modal :item="item" v-slot:default="{ isActive }" />
+  </v-dialog>
+  
   <v-card class="mx-auto" max-width="300px">
     <v-img
+      ref="itemModalRef"
       :src="signedSrc"
       :alt="'an image of ' + item.name"
-      @click="item.ownerId !== user.getUser?.id ? buyFlow(item) : null"
       :class="item.ownerId == 'NA' ? 'cursor-pointer' : 'cursor-default'"
       class="cursor-pointer"
       min-width="150px"
