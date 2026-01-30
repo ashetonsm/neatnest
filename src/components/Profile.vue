@@ -53,11 +53,22 @@ async function changeUsername(newUN: Event) {
   var updatedUser = user.getUser!;
   try {
     updatedUser.username = newUsername;
-    client.models.User.update(updatedUser)
+    await client.models.User.update(updatedUser)
       .then((res: any) => {
         console.log("Username updated: ", res);
       })
-      .then(() => {
+      .then(async () => {
+        var updatedShop = user.getShop!;
+        updatedShop.name = newUsername
+        console.log("user.getShop", user.getShop!)
+        console.log("updatedShop", updatedShop)
+        await client.models.Shop.update(updatedShop)
+        .then((res: any) => {
+          console.log("Shop name updated: ", res)
+        })
+      })
+      .then(async () => {
+        await router.push(`/profile/${newUsername}`);
         router.go(0);
       });
   } catch (error: any) {
@@ -204,7 +215,7 @@ onMounted(async () => {
 
         <v-btn 
         color="secondary" 
-        :to="profile == user.getUser?.username ? '/shop/'+ user.getUser?.id : '/shop/'+ thisUser?.id" 
+        :to="'/shop/' + profile" 
         class="mb-4">
         {{profile == user.getUser?.username ? 'Your Shop' : profile + "'s Shop"}}
         </v-btn>
