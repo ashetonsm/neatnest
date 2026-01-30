@@ -48,9 +48,15 @@ router.beforeEach(async (to) => {
                 await user.fetchInventory()
                 return
             case "shop":
+                if (!user.getShop) {
+                    await user.fetchShop()
+                }
                 await user.fetchCredit()
                 return
             case "profile":
+                if (!user.getShop) {
+                    await user.fetchShop()
+                }
                 await user.fetchCredit()
                 if (!user.getPets) {
                     await user.fetchPets()
