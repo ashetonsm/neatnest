@@ -49,7 +49,7 @@ export const userStore = defineStore('user', {
                     .then(async (res: { data: any; }) => {
                         if (res.data.length) {
                             console.log("Found existing Shop.")
-                            return this.shop = res.data as unknown as Schema["Shop"]["type"]
+                            return this.shop = res.data[0] as unknown as Schema["Shop"]["type"]
                     } else {
                         console.log("No Shop found for this user. Creating a shop...")
                         await client.models.Shop.create(
@@ -59,7 +59,7 @@ export const userStore = defineStore('user', {
                             }
                         )
                         .then((res: { data: any; }) => {
-                            return this.shop = res.data as unknown as Schema["Shop"]["type"]
+                            return this.shop = res.data[0] as unknown as Schema["Shop"]["type"]
                         })
                     }
                 })
