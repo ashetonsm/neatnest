@@ -46,15 +46,30 @@ export const userStore = defineStore('user', {
             try {
                 const client = generateClient<Schema>();
                 await client.models.Shop.shopByOwnerId({ ownerId: auth.getUserId as string})
-                    .then((res) => {
-                        this.shop = res.data as unknown as Schema["Shop"]["type"]
-                    })
-                    .then(() => {
-                        console.log(this.shop)
-                    })
+                    .then(async (res: { data: any; }) => {
+                        if (res.data.length) {
+                            console.log("Found existing Shop.")
+                            return this.shop = res.data as unknown as Schema["Shop"]["type"]
+                    } else {
+                        console.log("No Shop found for this user. Creating a shop...")
+                        await client.models.Shop.create(
+                            {
+                                ownerId: this.user!.id,
+                                name: this.user?.username
+                            }
+                        )
+                        .then((res: { data: any; }) => {
+                            return this.shop = res.data as unknown as Schema["Shop"]["type"]
+                        })
+                    }
+                })
+                .then(() => {
+                    console.log(this.shop)
+                })
             } catch (error: any) {
-                console.error("Shop not found.")
-            }
+                    console.error("Oops, something went wrong!")
+                    console.error("Error: ", error)
+                }
         },
 
         async fetchPets() {
