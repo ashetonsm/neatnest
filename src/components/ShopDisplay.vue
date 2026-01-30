@@ -47,7 +47,7 @@ onMounted(async () => {
   >
     <v-row>
       <v-col md="12" class="text-center">
-        <h2 class="text-h4 font-weight-black ma-4">Welcome to shop #{{ route.params.id.toString() }} !</h2>
+        <h2 class="text-h4 font-weight-black ma-4">Welcome to {{ route.params.id.toString() }}'s shop!</h2>
 
         <v-alert
           v-if="!fetchedItems"
