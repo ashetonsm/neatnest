@@ -16,30 +16,30 @@ const fetchedItems = ref<Array<Schema["Item"]["type"]>>([]);
 
 async function fetchItems() {
   try {
-    const { data: items } = await client.models.Item.listItemsByShopIdAndOwner(
+    const { data: shop } = await client.models.Shop.shopByName(
       {
-        shopId: route.params.id.toString(),
-        ownerId: {
-          ne: user.getUser?.id
-        },
+        name: route.params.id.toString(),
       },
       {
         authMode: "userPool",
       }
     );
-    fetchedItems.value = items;
+
+  const stringItems = await JSON.parse(shop[0].items as string) as Array<Schema["Item"]["type"]>;
+  fetchedItems.value = stringItems
   } catch (error: any) {
-    console.log("No items found!")
+    console.log("No items found!");
   }
 }
 
 onMounted(async () => {
   await fetchItems();
-});
+  }
+);
 </script>
 
 <template>
-  <v-sheet
+<v-sheet
     class="d-flex align-center justify-center text-center mx-auto pa-8"
     elevation="4"
     width="100%"
@@ -47,7 +47,9 @@ onMounted(async () => {
   >
     <v-row>
       <v-col md="12" class="text-center">
-        <h2 class="text-h4 font-weight-black ma-4">Welcome to {{ route.params.id.toString() }}'s shop!</h2>
+        <h2 class="text-h4 font-weight-black ma-4">
+          Welcome to {{ route.params.id.toString() }}'s shop!
+        </h2>
 
         <v-alert
           v-if="!fetchedItems"
@@ -57,7 +59,7 @@ onMounted(async () => {
         ></v-alert>
         <v-alert
           v-else-if="!fetchedItems.length"
-          title="This shop is sold out!"
+          title="This shop is empty!"
           type="info"
           class="ma-4"
         ></v-alert>
