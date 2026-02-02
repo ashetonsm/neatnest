@@ -55,7 +55,8 @@ export const userStore = defineStore('user', {
                         await client.models.Shop.create(
                             {
                                 ownerId: this.user!.id,
-                                name: this.user?.username
+                                name: this.user?.username,
+                                items: JSON.stringify([])
                             }
                         )
                         .then((res: { data: any; }) => {
