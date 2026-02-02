@@ -31,7 +31,7 @@ const schema = a.schema({
       // Authenticated users can read and write (change item values)
       allow.authenticated('userPools').to(['read', 'update', 'create']),
       // Owners can delete their items
-      allow.owner().to(['delete']),
+      allow.owner(),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
