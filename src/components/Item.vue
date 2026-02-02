@@ -100,7 +100,11 @@ onMounted(async () => {
     <item-modal :item="item" v-slot:default="{ isActive }" />
   </v-dialog>
   
-  <v-card class="mx-auto" max-width="300px">
+  <v-card 
+  class="mx-auto" 
+  max-width="300px"
+  :color="item.shopId == user.getShop?.id ? 'light-green-lighten-5' : 'none'"
+  >
     <v-img
       ref="itemModalRef"
       :src="signedSrc"
@@ -111,11 +115,18 @@ onMounted(async () => {
       max-width="300px"
     ></v-img>
 
-    <v-card-title class="text-center">
+    <v-card-title class="text-center"
+    >
       {{ item.name }}
     </v-card-title>
     <v-card-subtitle v-if="item.ownerId != props.currentUser">
       Price: {{ item.price }}
+    </v-card-subtitle>
+    <template>
+    
+    </template v-if="item.ownerId == props.currentUser">
+    <v-card-subtitle v-if="item.shopId == user.getShop?.id">
+      Selling
     </v-card-subtitle>
 
     <v-card-actions v-if="item.ownerId == props.currentUser">
