@@ -41,15 +41,19 @@ export const userStore = defineStore('user', {
             }
         },
 
-        async fetchShop() {
+        async fetchShop(inputOwnerId: string) {
             const auth = authStore()
             try {
                 const client = generateClient<Schema>();
-                await client.models.Shop.shopByOwnerId({ ownerId: auth.getUserId as string})
+                await client.models.Shop.shopByOwnerId({ ownerId: inputOwnerId as string})
                     .then(async (res: { data: any; }) => {
                         if (res.data.length) {
                             console.log("Found existing Shop.")
-                            return this.shop = res.data[0] as unknown as Schema["Shop"]["type"]
+                            if (inputOwnerId as string == this.getUser?.id) {
+                                this.shop = res.data[0] as unknown as Schema["Shop"]["type"]
+                            }
+                            console.log(res.data[0])
+                            return res.data[0] as unknown as Schema["Shop"]["type"]
                     } else {
                         console.log("No Shop found for this user. Creating a shop...")
                         await client.models.Shop.create(
@@ -60,12 +64,14 @@ export const userStore = defineStore('user', {
                             }
                         )
                         .then((res: { data: any; }) => {
-                            return this.shop = res.data[0] as unknown as Schema["Shop"]["type"]
+                            if (inputOwnerId as string == this.getUser?.id) {
+                                this.shop = res.data[0] as unknown as Schema["Shop"]["type"]
+                            }
+                            console.log(res.data[0])
+
+                            return res.data[0] as unknown as Schema["Shop"]["type"]
                         })
                     }
-                })
-                .then(() => {
-                    console.log(this.shop)
                 })
             } catch (error: any) {
                     console.error("Oops, something went wrong!")
