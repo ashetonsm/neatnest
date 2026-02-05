@@ -27,6 +27,9 @@ async function buyFlow(i: Schema["Item"]["type"]) {
       await user.fetchCredit();
     }
 
+    // const shopItems = await user.fetchShop(i.ownerId as string)
+    // console.log(shopItems)
+
     // console.log("User has ", user.getCredits.amount, " credit(s).");
     if (user.getCredits.amount && i.price && user.getCredits.amount >= i.price) {
       var updatedCredit = user.getCredits;
@@ -103,7 +106,7 @@ onMounted(async () => {
   <v-card 
   class="mx-auto" 
   max-width="300px"
-  :color="item.shopId == user.getShop?.id ? 'light-green-lighten-5' : 'none'"
+  :color="item.shopId == user.getShop?.id && $route.name == 'inventory'? 'light-green-lighten-5' : 'none'"
   >
     <v-img
       ref="itemModalRef"
@@ -119,17 +122,14 @@ onMounted(async () => {
     >
       {{ item.name }}
     </v-card-title>
-    <v-card-subtitle v-if="item.ownerId != props.currentUser">
-      Price: {{ item.price }}
-    </v-card-subtitle>
-    <template>
     
-    </template v-if="item.ownerId == props.currentUser">
+  <!-- Items owned by the user and on the inventory page-->
+  <template v-if="item.ownerId == props.currentUser && $route.name == 'inventory'">
     <v-card-subtitle v-if="item.shopId == user.getShop?.id">
-      Selling
+      🛒
     </v-card-subtitle>
 
-    <v-card-actions v-if="item.ownerId == props.currentUser">
+    <v-card-actions>
       <v-btn
         @click="handleDelete(item)"
         text="Obliterate"
@@ -138,5 +138,22 @@ onMounted(async () => {
         color="error"
       ></v-btn>
     </v-card-actions>
+    </template>
+  <template v-else>
+    <v-card-subtitle>
+      Price: {{ item.price }}
+    </v-card-subtitle>
+
+    <v-card-actions>
+      <v-btn
+        @click="buyFlow(item)"
+        text="Buy"
+        class="mx-auto"
+        variant="elevated"
+        color="success"
+      ></v-btn>
+    </v-card-actions>
+    </template>
   </v-card>
+  
 </template>
