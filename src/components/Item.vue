@@ -7,10 +7,10 @@ import { getUrl } from "aws-amplify/storage";
 import { onMounted, ref } from "vue";
 import { deleteStorage } from "./tools/deleteStorage";
 import { userStore } from "@/stores/user";
-const route = useRoute();
+import ItemModal from "./ItemModal.vue";
 const user = userStore();
+const itemModalRef = ref();
 
-var shopFrontName = route.params.id == "1" ? "Test Emporium" : "Test Shack";
 const client = generateClient<Schema>(); // use this Data client for CRUDL requests
 const signedSrc = ref("null");
 
@@ -27,6 +27,9 @@ async function buyFlow(i: Schema["Item"]["type"]) {
       await user.fetchCredit();
     }
 
+    // const shopItems = await user.fetchShop(i.ownerId as string)
+    // console.log(shopItems)
+
     // console.log("User has ", user.getCredits.amount, " credit(s).");
     if (user.getCredits.amount && i.price && user.getCredits.amount >= i.price) {
       var updatedCredit = user.getCredits;
@@ -35,9 +38,9 @@ async function buyFlow(i: Schema["Item"]["type"]) {
       // Subtract the amount.
       await client.models.Credit.update(updatedCredit).then(async () => {
         // Set the owner to the signed in user
-        i.owner = props.currentUser;
+        i.ownerId = props.currentUser;
         // Update the item to the current user
-        await client.models.Item.update(i).then((res) => {});
+        await client.models.Item.update(i).then(() => {});
         // Refresh
         router.go(0);
       });
@@ -92,26 +95,65 @@ onMounted(async () => {
 </script>
 
 <template>
-  <v-card class="mx-auto" max-width="300px">
+  <v-dialog
+    v-if="item.ownerId == user.getUser?.id && $route.name == 'inventory'"
+    :activator="itemModalRef"
+    max-width="500"
+  >
+    <item-modal :item="item" v-slot:default="{ isActive }" />
+  </v-dialog>
+  
+  <v-card 
+  class="mx-auto" 
+  max-width="300px"
+  :color="item.shopId == user.getShop?.id && $route.name == 'inventory'? 'light-green-lighten-5' : 'none'"
+  >
     <v-img
+      ref="itemModalRef"
       :src="signedSrc"
       :alt="'an image of ' + item.name"
-      @click="item.owner == 'NA' ? buyFlow(item) : null"
-      :class="item.owner == 'NA' ? 'cursor-pointer' : 'cursor-default'"
+      :class="item.ownerId == 'NA' ? 'cursor-pointer' : 'cursor-default'"
       class="cursor-pointer"
       min-width="150px"
       max-width="300px"
     ></v-img>
 
-    <v-card-title class="text-center">
+    <v-card-title class="text-center"
+    >
       {{ item.name }}
     </v-card-title>
-    <v-card-subtitle v-if="item.owner != props.currentUser">
+    
+  <!-- Items owned by the user and on the inventory page-->
+  <template v-if="item.ownerId == props.currentUser && $route.name == 'inventory'">
+    <v-card-subtitle v-if="item.shopId == user.getShop?.id">
+      🛒
+    </v-card-subtitle>
+
+    <v-card-actions>
+      <v-btn
+        @click="handleDelete(item)"
+        text="Obliterate"
+        class="mx-auto"
+        variant="elevated"
+        color="error"
+      ></v-btn>
+    </v-card-actions>
+    </template>
+  <template v-else>
+    <v-card-subtitle>
       Price: {{ item.price }}
     </v-card-subtitle>
 
-    <v-card-actions v-if="item.owner == props.currentUser">
-      <v-btn @click="handleDelete(item)" text="Delete" class="mx-auto"></v-btn>
+    <v-card-actions>
+      <v-btn
+        @click="buyFlow(item)"
+        text="Buy"
+        class="mx-auto"
+        variant="elevated"
+        color="success"
+      ></v-btn>
     </v-card-actions>
+    </template>
   </v-card>
+  
 </template>

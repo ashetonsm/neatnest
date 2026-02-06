@@ -37,13 +37,27 @@ router.beforeEach(async (to) => {
     if (authenticated) {
         console.log("Auth successful")
         switch (to.name) {
+            case "trades":
+                await user.fetchFriends(auth.getUserId as string)
+                await user.fetchTrades()
+                return
             case "inventory":
+                if (!user.getShop) {
+                    await user.fetchShop(user.getUser?.id as string)
+                }
                 await user.fetchInventory()
                 return
             case "shop":
+                if (!user.getShop) {
+                    await user.fetchShop(user.getUser?.id as string)
+                }
                 await user.fetchCredit()
                 return
             case "profile":
+                if (!user.getShop) {
+                    await user.fetchShop(user.getUser?.id as string)
+                }
+                await user.fetchCredit()
                 if (!user.getPets) {
                     await user.fetchPets()
                 }
@@ -58,6 +72,8 @@ router.beforeEach(async (to) => {
                 if (!user.getInventory) {
                     await user.fetchInventory()
                 }
+                // Get friends for trading
+                await user.fetchFriends(auth.getUserId as string)
                 return
             default:
                 console.log("Default switch")

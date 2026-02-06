@@ -16,7 +16,7 @@ const thisFriend = ref<Schema["Friend"]["type"] | any>(null);
 const theseFriends = ref<
   Array<{ username: string; friendObject: Schema["Friend"]["type"] }>
 >([]);
-var thisUser: Schema["User"]["type"] | null = null;
+const thisUser = ref<Schema["User"]["type"]>();
 const thesePets = ref<Array<Schema["Pet"]["type"]>>([]);
 var newUsername = "";
 var newProfileDesc = "";
@@ -53,11 +53,22 @@ async function changeUsername(newUN: Event) {
   var updatedUser = user.getUser!;
   try {
     updatedUser.username = newUsername;
-    client.models.User.update(updatedUser)
+    await client.models.User.update(updatedUser)
       .then((res: any) => {
         console.log("Username updated: ", res);
       })
-      .then(() => {
+      .then(async () => {
+        var updatedShop = user.getShop!;
+        updatedShop.name = newUsername
+        console.log("user.getShop", user.getShop!)
+        console.log("updatedShop", updatedShop)
+        await client.models.Shop.update(updatedShop)
+        .then((res: any) => {
+          console.log("Shop name updated: ", res)
+        })
+      })
+      .then(async () => {
+        await router.push(`/profile/${newUsername}`);
         router.go(0);
       });
   } catch (error: any) {
@@ -83,12 +94,12 @@ async function fetchUser() {
       username: profile.toString(),
     })
       .then((res) => {
-        thisUser = res.data[0];
-        thisProfileDesc.value = thisUser?.description as string;
+        thisUser.value = res.data[0];
+        thisProfileDesc.value = thisUser.value.description as string;
       })
       .then(() => {
         // get the pets via id
-        if (thisUser) {
+        if (thisUser.value) {
           fetchPets();
         }
       });
@@ -99,16 +110,16 @@ async function fetchUser() {
 
 async function fetchPets() {
   await client.models.Pet.listPetsByOwnerAndName({
-    owner: thisUser?.id as string,
+    ownerId: thisUser.value?.id as string,
   }).then((res) => {
     thesePets.value = res.data;
   });
 }
 
 async function addFriend() {
-  if ((thisUser?.id as string) !== user.getUser!.id) {
+  if ((thisUser.value?.id as string) !== user.getUser!.id) {
     await client.models.Friend.create({
-      friendA: thisUser?.id as string,
+      friendA: thisUser.value?.id as string,
       friendB: user.getUser!.id,
       status: "pending",
     }).then((res) => {
@@ -148,7 +159,7 @@ async function updateFriend(action: string) {
     if (res.data == null) {
       console.log("No friend found. Creating new friend to block.");
       await client.models.Friend.create({
-        friendA: thisUser?.id as string,
+        friendA: thisUser.value?.id as string,
         friendB: user.getUser!.id,
         status: "blocked",
       }).then((res) => {
@@ -167,12 +178,12 @@ onMounted(async () => {
     await fetchUser();
   } else {
     // Viewing logged in user's profile
-    thisUser = user.getUser!;
-    thisProfileDesc.value = thisUser?.description as string;
+    thisUser.value = user.getUser!;
+    thisProfileDesc.value = thisUser.value?.description as string;
     thesePets.value = user.getPets;
   }
   // Either way, the friends are determined in the user.
-  theseFriends.value = await user.fetchFriends(thisUser!.id);
+  theseFriends.value = await user.fetchFriends(thisUser.value!.id);
   if (theseFriends.value) {
     theseFriends.value.filter((friend) => {
       // Logged in user has a friend entry with the current profile
@@ -201,6 +212,22 @@ onMounted(async () => {
           type="error"
           class="ma-4"
         ></v-alert>
+
+        <v-btn 
+        color="secondary" 
+        :to="'/shop/' + profile" 
+        class="mb-4">
+        {{profile == user.getUser?.username ? 'Your Shop' : profile + "'s Shop"}}
+        </v-btn>
+        
+        <!-- Stuff to display for the logged in user -->
+        <template v-if="profile == user.getUser?.username"> 
+        <v-btn text="Trade Requests" to="/trades"></v-btn>
+        <h2 class="text-h4 font-weight-black ma-4">
+        Credits: {{ user.getCredits > 0 ? user.getCredits : 0 }}</h2>
+        </template>
+
+
 
         <v-btn
           :disabled="

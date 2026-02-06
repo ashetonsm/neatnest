@@ -7,16 +7,20 @@ import { authStore } from './auth';
 export const userStore = defineStore('user', {
     state: () => ({
         user: ref<Schema["User"]["type"] | null>(null),
+        shop: ref<Schema["Shop"]["type"] | null>(null),
         pets: ref<any>(null),
         inventory: ref<any>(null),
-        credits: ref<any>(null),
+        credits: ref<any>(0),
+        trades: ref<Array<Schema["Trade"]["type"]>>([]),
         friends: ref<Array<{username: string, friendObject: Schema["Friend"]["type"]}>>([]),
     }),
     getters: {
         getUser: (state: { user: Schema["User"]["type"] | null }) => state.user,
+        getShop: (state: { shop: Schema["Shop"]["type"] | null }) => state.shop,
         getPets: (state: { pets: any }) => state.pets,
         getInventory: (state: { inventory: any }) => state.inventory,
         getCredits: (state: { credits: any }) => state.credits,
+        getTrades: (state: { trades: Array<Schema["Trade"]["type"]>}) => state.trades,
         getFriends: (state: { friends: any }) => state.friends,
     },
     actions: {
@@ -37,12 +41,50 @@ export const userStore = defineStore('user', {
             }
         },
 
+        async fetchShop(inputOwnerId: string) {
+            const auth = authStore()
+            try {
+                const client = generateClient<Schema>();
+                await client.models.Shop.shopByOwnerId({ ownerId: inputOwnerId as string})
+                    .then(async (res: { data: any; }) => {
+                        if (res.data.length) {
+                            console.log("Found existing Shop.")
+                            if (inputOwnerId as string == this.getUser?.id) {
+                                this.shop = res.data[0] as unknown as Schema["Shop"]["type"]
+                            }
+                            console.log(res.data[0])
+                            return res.data[0] as unknown as Schema["Shop"]["type"]
+                    } else {
+                        console.log("No Shop found for this user. Creating a shop...")
+                        await client.models.Shop.create(
+                            {
+                                ownerId: this.user!.id,
+                                name: this.user?.username,
+                                items: JSON.stringify([])
+                            }
+                        )
+                        .then((res: { data: any; }) => {
+                            if (inputOwnerId as string == this.getUser?.id) {
+                                this.shop = res.data[0] as unknown as Schema["Shop"]["type"]
+                            }
+                            console.log(res.data[0])
+
+                            return res.data[0] as unknown as Schema["Shop"]["type"]
+                        })
+                    }
+                })
+            } catch (error: any) {
+                    console.error("Oops, something went wrong!")
+                    console.error("Error: ", error)
+                }
+        },
+
         async fetchPets() {
             const client = generateClient<Schema>();
 
             try {
                 await client.models.Pet.listPetsByOwnerAndName(
-                    { owner: this.user!.id, },
+                    { ownerId: this.user!.id, },
                     { authMode: "userPool", })
                     .then((res) => {
                         this.pets = res.data
@@ -52,12 +94,67 @@ export const userStore = defineStore('user', {
             }
         },
 
+        async fetchTrades() {
+            const client = generateClient<Schema>();
+            try {
+                var tradeArray: Array<any> = []
+                // Get trades where this user is the recipient
+                await client.models.Trade.tradeByRecipient(
+                    { recipient: this.user!.id, },
+                    { authMode: "userPool", })
+                .then((res: { data: any; }) => {
+                    if (res.data.length) {
+                        tradeArray = res.data
+                    }
+                })
+
+                // Get trades where this user is the sender
+                await client.models.Trade.tradeBySender(
+                    { sender: this.user!.id, },
+                    { authMode: "userPool", })
+                .then((res: { data: any; }) => {
+                    if (res.data.length) {
+                        tradeArray = [...tradeArray, ...res.data]
+                    }
+                })
+
+
+            var idSet: Set<Schema["Trade"]["type"]> = new Set()
+                
+            // Filter for unique objects
+            tradeArray.forEach(async entry => {
+                // If the trade's recipient is NOT the current user
+                if (entry.recipient !== this.user?.id) {
+                    // This entry isn't already in the set
+                    if (!idSet.has(entry)) {
+                        // Add it to the set.
+                        idSet.add(entry)
+                    }
+                } else {
+                    // This entry isn't already in the set
+                    if (!idSet.has(entry)) {
+                        // Add it to the set.
+                        idSet.add(entry)
+                    }
+                }
+            })
+            const tradeList = Array.from(idSet)
+
+            this.trades = tradeList
+                    
+            } catch (error: any) {
+                this.trades = []
+                console.error(error)
+                console.error(this.trades)
+            }
+        },
+
         async fetchInventory() {
             const client = generateClient<Schema>();
 
             await client.models.Item.listItemsByOwnerAndName(
                 {
-                    owner: this.user!.id
+                    ownerId: this.user!.id
                 },
                 {
                     headers: {
@@ -82,23 +179,23 @@ export const userStore = defineStore('user', {
             const client = generateClient<Schema>();
 
             await client.models.Credit.cashByOwner(
-                { owner: this.user!.id },
+                { ownerId: this.user!.id },
                 { authMode: 'userPool' }
             )
                 .then(async (res: { data: any; }) => {
                     if (res.data.length) {
                         console.log("Found existing Credit.")
-                        return this.credits = res.data[0]
+                        return this.credits = parseInt(res.data[0].amount)
                     } else {
                         console.log("No Credit found for this user. Creating an entry...")
                         await client.models.Credit.create(
                             {
-                                owner: this.user!.id,
+                                ownerId: this.user!.id,
                                 amount: 0
                             }
                         )
                             .then((res: { data: any; }) => {
-                                return this.credits = res.data
+                                return this.credits = parseInt(res.data.amount)
                             })
                     }
                 })

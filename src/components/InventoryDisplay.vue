@@ -50,6 +50,8 @@ onMounted(async () => {
           >Launch Canvas
         </v-btn>
 
+        <v-btn color="secondary" :to="'/shop/'+ user.getShop?.name" class="mb-4">Your Shop</v-btn>
+
         <v-row class="ga-4">
           <Item
             v-if="fetchedItems.length !== 0"

@@ -4,8 +4,10 @@ import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../amplify/data/resource";
 import { onMounted, ref } from "vue";
 import { deleteStorage } from "./tools/deleteStorage";
+import { userStore } from "@/stores/user";
 
 const client = generateClient<Schema>();
+const user = userStore();
 
 const props = defineProps<{
   pet: Schema["Pet"]["type"];
@@ -70,26 +72,64 @@ async function handleSubmit(item: Schema["Item"]["type"] | null | undefined) {
   }
 }
 
+async function handleTrade(
+  friend: { username: string; friendObject: Schema["Friend"]["type"] } | null | undefined
+) {
+  if (friend == undefined || !friend) {
+    alert(`Hmm, nothing was selected.`);
+    return;
+  }
+  try {
+    await client.models.Trade.create({
+      recipient: friend.friendObject.friendA! !== user.getUser!.id ? friend.friendObject.friendA : friend.friendObject.friendB,
+      sender: user.getUser?.id,
+      status: "pending",
+      pet: JSON.stringify(props.pet),
+    }).then((res: any) => {
+      console.log(res);
+    });
+    router.go(0);
+  } catch (error: any) {
+    console.error("Error: ", error);
+  }
+}
+
 var foodOptions = ref<Array<Schema["Item"]["type"]>>();
 var playOptions = ref<Array<Schema["Item"]["type"]>>();
 var selectedFoodOption = ref<Schema["Item"]["type"]>();
 var selectedPlayOption = ref<Schema["Item"]["type"]>();
-
-onMounted(async () => {
-  const itemFilter1 = props.items;
-  const itemFilter2 = props.items;
-  foodOptions.value = JSON.parse(
-    JSON.stringify(itemFilter1.filter((item) => item.category == "food"))
-  );
-  playOptions.value = JSON.parse(
-    JSON.stringify(itemFilter2.filter((item) => item.category == "entertainment"))
-  );
-});
+var selectedFriendOption = ref<Schema["Friend"]["type"]>();
+var friendOptions = ref<
+  Array<{ username: string; friendObject: Schema["Friend"]["type"] }>
+>(user.getFriends);
+const itemFilter1 = props.items;
+const itemFilter2 = props.items;
+foodOptions.value = JSON.parse(
+  JSON.stringify(itemFilter1.filter((item) => item.category == "food"))
+);
+playOptions.value = JSON.parse(
+  JSON.stringify(itemFilter2.filter((item) => item.category == "entertainment"))
+);
 </script>
 <template>
   <v-card class="mx-auto">
     <v-col class="text-center">
       <v-card-title> What would you like to do with {{ pet.name }}? </v-card-title>
+      <v-form
+        v-if="friendOptions.length !== 0"
+        @submit.prevent="handleTrade(selectedFriendOption as any)"
+      >
+        <v-select
+          v-model="selectedFriendOption"
+          label="Friends"
+          :items="friendOptions"
+          item-title="username"
+          item-value="friendOptions.friendObject"
+          return-object
+          single-line
+        ></v-select>
+        <v-btn class="my-2" text="Trade" type="submit"></v-btn>
+      </v-form>
       <v-form @submit.prevent="handleSubmit(selectedFoodOption)">
         <v-select
           v-model="selectedFoodOption"
