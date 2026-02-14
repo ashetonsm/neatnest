@@ -130,7 +130,7 @@ playOptions.value = JSON.parse(
         ></v-select>
         <v-btn class="my-2" text="Trade" type="submit"></v-btn>
       </v-form>
-      <v-form @submit.prevent="handleSubmit(selectedFoodOption)">
+      <v-form @submit.prevent="handleSubmit(selectedFoodOption as any)">
         <v-select
           v-model="selectedFoodOption"
           label="Food"
@@ -142,7 +142,7 @@ playOptions.value = JSON.parse(
         ></v-select>
         <v-btn class="my-2" text="Feed" type="submit"></v-btn>
       </v-form>
-      <v-form @submit.prevent="handleSubmit(selectedPlayOption)">
+      <v-form @submit.prevent="handleSubmit(selectedPlayOption as any)">
         <v-select
           v-model="selectedPlayOption"
           label="Entertainment"
