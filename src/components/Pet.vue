@@ -1,23 +1,24 @@
 <script setup lang="ts">
-import Modal from "./Modal.vue";
 import { onMounted, ref } from "vue";
 import type { Schema } from "../../amplify/data/resource";
 import { getUrl } from "aws-amplify/storage";
+import PetItemModal from "./PetItemModal.vue";
+import { userStore } from "@/stores/user";
+import { generateClient } from "aws-amplify/api";
+import { deleteStorage } from "./tools/deleteStorage";
+import router from "@/router";
+import { useRoute } from "vue-router";
 
-const open = ref(false);
+const route = useRoute();
 const signedSrc = ref("null");
+const petModalRef = ref();
+const user = userStore();
+const client = generateClient<Schema>(); // use this Data client for CRUDL requests
 
 const props = defineProps<{
   pet: Schema["Pet"]["type"];
   items: Array<Schema["Item"]["type"]>;
 }>();
-
-const toggleModal = (n: boolean) => {
-  console.log("Modal toggled");
-  open.value = n;
-  console.log("open: ", open);
-  return open;
-};
 
 async function getFileUrl(fileName: any) {
   try {
@@ -33,8 +34,26 @@ async function getFileUrl(fileName: any) {
     console.error("Error getting URL:", error);
     return null;
   }
-
   return;
+}
+
+async function handleDelete(pet: Schema["Item"]["type"]) {
+  const choice = confirm(`Delete ${pet.name} forever? (This cannot be undone!)`);
+  if (choice) {
+    // Do delete logic
+    // Delete the pet
+    await client.models.Pet.delete({ id: pet.id })
+      .then((res: any) => {
+        console.log("Pet deleted: ", res);
+      })
+      .then(async () => {
+        await deleteStorage(pet.image!);
+      });
+    // Refresh
+    router.go(0);
+  } else {
+    return console.log(`${pet.name} was not deleted!`);
+  }
 }
 
 onMounted(async () => {
@@ -43,21 +62,38 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="open == true">
-    <Modal :pet="pet" :items="items" @open="toggleModal(false)" />
-  </div>
+  <v-dialog
+    v-if="pet.ownerId == user.getUser?.id && route.name == 'pets'"
+    :activator="petModalRef"
+    max-width="500"
+  >
+    <PetItemModal :pet="pet" :items="items" v-slot:default="{ isActive }" />
+  </v-dialog>
 
-  <div class="pet-container box">
-    <div class="pet-image">
-      <img :src="signedSrc" :alt="'an image of ' + pet.name" @click="toggleModal(true)" />
-    </div>
+  <v-card class="mx-auto" max-width="300px">
+    <v-img
+      ref="petModalRef"
+      :src="signedSrc"
+      :alt="'an image of ' + pet.name"
+      class="cursor-pointer"
+      min-width="150px"
+      max-width="300px"
+    ></v-img>
 
-    <div class="pet-info">
-      <h1 class="green">{{ pet.name }}</h1>
-      <h2>hunger:</h2>
-      <h2 class="green">{{ pet.hunger }}</h2>
-      <h2>mood:</h2>
-      <h3 class="green">{{ pet.mood }}</h3>
-    </div>
-  </div>
+    <v-card-title class="text-center">
+      {{ pet.name }}
+    </v-card-title>
+    <v-card-subtitle> Hunger: {{ pet.hunger }} </v-card-subtitle>
+    <v-card-subtitle> Mood: {{ pet.mood }} </v-card-subtitle>
+
+    <v-card-actions v-if="pet.ownerId == user.getUser?.id && route.name == 'pets'">
+      <v-btn
+        @click="handleDelete(pet)"
+        text="Obliterate"
+        class="mx-auto"
+        variant="elevated"
+        color="error"
+      ></v-btn>
+    </v-card-actions>
+  </v-card>
 </template>

@@ -5,8 +5,10 @@ const schema = a.schema({
     .model({
       name: a.string(),
       price: a.integer(),
-      shopfront: a.string(),
+      shopId: a.string(),
+      creator: a.string(),
       owner: a.string(),
+      ownerId: a.string(),
       category: a.string(),
       health: a.integer(),
       rarity: a.integer(),
@@ -14,14 +16,14 @@ const schema = a.schema({
     })
     .secondaryIndexes((index) => [
       index("name")
-        .sortKeys(["owner"])
+        .sortKeys(["ownerId"])
         .queryField("listItemsByNameAndOwner"),
-      index("owner")
+      index("ownerId")
         .sortKeys(["name"])
         .queryField("listItemsByOwnerAndName"),
-      index("shopfront")
-        .sortKeys(["owner"])
-        .queryField("listItemsByShopfrontAndOwner")
+      index("shopId")
+        .sortKeys(["ownerId"])
+        .queryField("listItemsByShopIdAndOwner")
     ])
     .authorization((allow) => [
       // Guests are read only
@@ -29,7 +31,7 @@ const schema = a.schema({
       // Authenticated users can read and write (change item values)
       allow.authenticated('userPools').to(['read', 'update', 'create']),
       // Owners can delete their items
-      allow.owner().to(['delete']),
+      allow.owner(),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
@@ -40,11 +42,12 @@ const schema = a.schema({
       hunger: a.integer(),
       mood: a.integer(),
       owner: a.string(),
+      ownerId: a.string(),
       health: a.integer(),
       image: a.string()
     })
     .secondaryIndexes((index) => [
-      index("owner")
+      index("ownerId")
         .sortKeys(["name"])
         .queryField("listPetsByOwnerAndName"),
       index("species")
@@ -60,7 +63,7 @@ const schema = a.schema({
       // Authenticated users can read and write (change item values)
       allow.authenticated('userPools').to(['read', 'update', 'create']),
       // Owners can delete their pets
-      allow.owner().to(['delete']),
+      allow.owner(),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),
@@ -68,6 +71,7 @@ const schema = a.schema({
     .model({
       email: a.string(),
       username: a.string(),
+      ownerId: a.string(),
       owner: a.string(),
       description: a.string(),
       itemsRemaining: a.integer(),
@@ -85,7 +89,89 @@ const schema = a.schema({
       allow.authenticated('identityPool'),
       allow.authenticated('userPools'),
       // Allow owners
-      allow.ownerDefinedIn("owner"),
+      allow.owner(),
+      // Users in the admin group have full permissions
+      allow.groups(['admin'])
+    ]),
+  Credit: a
+    .model({
+      ownerId: a.string(),
+      amount: a.integer(),
+      owner: a.string()
+    })
+    .secondaryIndexes((index) => [
+      index("ownerId")
+        .queryField("cashByOwner")
+    ])
+    .authorization((allow) => [
+      allow.authenticated('identityPool'),
+      allow.authenticated('userPools'),
+      // Allow owners
+      allow.owner(),
+      // Users in the admin group have full permissions
+      allow.groups(['admin'])
+    ]),
+  Friend: a
+    .model({
+      friendA: a.string(),
+      friendB: a.string(),
+      status: a.string(),
+      owner: a.string()
+    })
+    .secondaryIndexes((index) => [
+      index("friendA")
+        .queryField("friendByfriendA"),
+      index("friendB")
+        .queryField("friendByfriendB"),
+    ])
+    .authorization((allow) => [
+      allow.authenticated('identityPool'),
+      allow.authenticated('userPools'),
+      // Allow owners
+      allow.owner(),
+      // Users in the admin group have full permissions
+      allow.groups(['admin'])
+    ]),
+  Trade: a
+    .model({
+      recipient: a.string(),  // Who is receiving the pet?
+      sender: a.string(),     // Who is sending the pet?
+      status: a.string(),     // What is the status of this trade?
+      pet: a.json(),          // The pet to be traded
+      owner: a.string()
+    })
+    .secondaryIndexes((index) => [
+      index("recipient")
+        .queryField("tradeByRecipient"),
+      index("sender")
+        .queryField("tradeBySender")
+    ])
+    .authorization((allow) => [
+      allow.authenticated('identityPool'),
+      allow.authenticated('userPools'),
+      // Allow owners
+      allow.owner(),
+      // Users in the admin group have full permissions
+      allow.groups(['admin'])
+    ]),
+  Shop: a
+    .model({
+      name: a.string(),
+      owner: a.string(),
+      ownerId: a.string(),
+      items: a.json()
+    })
+    .secondaryIndexes((index) => [
+      index("ownerId")
+        .queryField("shopByOwnerId"),
+      index("name")
+        .queryField("shopByName")
+    ])
+    .authorization((allow) => [
+      allow.authenticated('identityPool'),
+      allow.authenticated('userPools'),
+      // Allow owners
+      allow.owner(),
       // Users in the admin group have full permissions
       allow.groups(['admin'])
     ]),

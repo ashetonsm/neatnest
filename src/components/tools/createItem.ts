@@ -41,8 +41,9 @@ export function createItem(
           name: name,
           category: itemCat,
           price: 1,
-          shopfront: "NA",
-          owner: userID,
+          shopId: "NA",
+          creator: userID,
+          ownerId: userID,
           health: 99,
           rarity: 1,
           image: imgPath

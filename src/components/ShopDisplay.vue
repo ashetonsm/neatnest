@@ -7,53 +7,73 @@ import type { Schema } from "../../amplify/data/resource";
 import { userStore } from "@/stores/user";
 
 // These should be items that are freely in the pool for this shop
-const store = userStore();
+const user = userStore();
 const route = useRoute();
 
 // TODO: Determine shop name based on number from route
-var shopFrontName = route.params.id == "1" ? "Test Emporium" : "Test Shack";
 const client = generateClient<Schema>();
 const fetchedItems = ref<Array<Schema["Item"]["type"]>>([]);
 
 async function fetchItems() {
-  const { data: items } = await client.models.Item.listItemsByShopfrontAndOwner(
-    {
-      shopfront: shopFrontName,
-      owner: {
-        eq: "NA",
+  try {
+    const { data: shop } = await client.models.Shop.shopByName(
+      {
+        name: route.params.id.toString(),
       },
-    },
-    {
-      authMode: "userPool",
-    }
-  );
-  fetchedItems.value = items;
+      {
+        authMode: "userPool",
+      }
+    );
+
+  const stringItems = await JSON.parse(shop[0].items as string) as Array<Schema["Item"]["type"]>;
+  fetchedItems.value = stringItems
+  } catch (error: any) {
+    console.log("No items found!");
+  }
 }
 
 onMounted(async () => {
   await fetchItems();
-});
+  }
+);
 </script>
 
 <template>
-  <div class="page-header">
-    <h1>{{ shopFrontName }}</h1>
-    <p>This is where you shop for things.</p>
-  </div>
-  <div class="page" id="shopPage">
-    <template v-if="!fetchedItems">
-      <h1>Loading!</h1>
-    </template>
-    <template v-if="!fetchedItems.length">
-      <h1>This shop is sold out!</h1>
-    </template>
-    <template v-else>
-      <Item
-        v-for="(item, i) in fetchedItems"
-        :key="item.name ?? i"
-        :item="item"
-        :current-user="store.getUser.id"
-      />
-    </template>
-  </div>
+<v-sheet
+    class="d-flex align-center justify-center text-center mx-auto pa-8"
+    elevation="4"
+    width="100%"
+    rounded
+  >
+    <v-row>
+      <v-col md="12" class="text-center">
+        <h2 class="text-h4 font-weight-black ma-4">
+          Welcome to {{ route.params.id.toString() }}'s shop!
+        </h2>
+
+        <v-alert
+          v-if="!fetchedItems"
+          title="Loading..."
+          type="info"
+          class="ma-4"
+        ></v-alert>
+        <v-alert
+          v-else-if="!fetchedItems.length"
+          title="This shop is empty!"
+          type="info"
+          class="ma-4"
+        ></v-alert>
+      </v-col>
+
+      <v-row class="ga-4">
+        <Item
+          v-if="fetchedItems.length !== 0"
+          v-for="(item, i) in fetchedItems"
+          :key="item.name ?? i"
+          :item="item"
+          :currentUser="user.getUser?.id!"
+        />
+      </v-row>
+    </v-row>
+  </v-sheet>
 </template>

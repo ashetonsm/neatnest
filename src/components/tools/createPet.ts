@@ -40,9 +40,9 @@ export function createPet(
         client.models.Pet.create({
           name: name,
           species: species,
-          hunger: 0,
-          mood: 5,
-          owner: userID,
+          hunger: 5,
+          mood: 0,
+          ownerId: userID,
           health: 100,
           image: imgPath
         }).then(() => {
@@ -59,7 +59,7 @@ export function createPet(
             })
             .then(() => {
               router.push({ name: 'pets' })
-              router.go(1)
+              router.go(0)
             })
         });
       } catch (error: any) {
