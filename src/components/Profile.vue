@@ -174,7 +174,7 @@ async function updateFriend(action: string) {
 onMounted(async () => {
   // Not viewing logged in user's profile
   if (user.getUser!.username !== profile) {
-    await fetchUser();
+    // await fetchUser();
   } else {
     // Viewing logged in user's profile
     thisUser.value = user.getUser!;
@@ -182,7 +182,7 @@ onMounted(async () => {
     thesePets.value = user.getPets;
   }
   // Either way, the friends are determined in the user.
-  theseFriends.value = await user.fetchFriends(thisUser.value!.id);
+  // theseFriends.value = await user.fetchFriends(thisUser.value!.id);
   if (theseFriends.value) {
     theseFriends.value.filter((friend) => {
       // Logged in user has a friend entry with the current profile

@@ -8,7 +8,6 @@ import { userStore } from './stores/user'
 import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
-import { authStore } from './stores/auth'
 import { createAuth0, useAuth0 } from '@auth0/auth0-vue'
 import { GET_BY_PK_SK } from './components/tools/ddbActions'
 
@@ -29,19 +28,22 @@ app.use(auth0)
 app.use(vuetify)
 app.mount('#app')
 
-
-const auth = authStore();
 const user = userStore();
 
 router.beforeEach(async (to) => {
     const { isAuthenticated } = useAuth0()
     if (isAuthenticated) {
-        const test = await GET_BY_PK_SK("user000", "#METADATA#")
-        console.log(test)
-        console.log("Auth successful")
+        console.log("Currently authorized.")
+
+        if (!user.getUser) {
+            await user.fetchUser("user000", "#METADATA#")
+                .then((res) => {
+                    console.log("Got the logged in user's Metadata")
+                })
+        }
         switch (to.name) {
             case "trades":
-                await user.fetchFriends(auth.getUserId as string)
+                // await user.fetchFriends(auth.getUserId as string)
                 await user.fetchTrades()
                 return
             case "inventory":
@@ -65,7 +67,7 @@ router.beforeEach(async (to) => {
                     await user.fetchPets()
                 }
                 if (!user.getFriends) {
-                    await user.fetchFriends(auth.getUserId as string)
+                    // await user.fetchFriends(auth.getUserId as string)
                 }
                 return
             case "pets":
@@ -76,7 +78,7 @@ router.beforeEach(async (to) => {
                     await user.fetchInventory()
                 }
                 // Get friends for trading
-                await user.fetchFriends(auth.getUserId as string)
+                // await user.fetchFriends(auth.getUserId as string)
                 return
             default:
                 console.log("Default switch")

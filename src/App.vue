@@ -18,7 +18,7 @@ const logout = () =>
         <RouterView :key="$route.fullPath" />
       </v-container>
       <v-btn @click="logout"> Log Out </v-btn>
-      <v-btn @click="loginWithRedirect">Log in</v-btn>
+      <v-btn @click="loginWithRedirect({appState: {target: '/callback'}})">Log in</v-btn>
     </v-main>
   </v-app>
 </template>

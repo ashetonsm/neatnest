@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import { authStore } from './auth';
+import { GET_BY_PK_SK } from '@/components/tools/ddbActions';
 
 export const userStore = defineStore('user', {
     state: () => ({
@@ -22,18 +22,11 @@ export const userStore = defineStore('user', {
         getFriends: (state: { friends: any }) => state.friends,
     },
     actions: {
-        async fetchUser() {
-            const auth = authStore()
+        async fetchUser(PK: string, SK: string) {
             try {
-                // If you define this before userStore, you'll get the Amplify Not Configured error.
-
-                /*
-                await client.models.User.get({ id: auth.getUserId as string})
-                    .then((u) => {
-                        // Needs an exclaimation point otherwise you get a nullable error
-                        this.user! = u.data!
-                    });
-                */
+                const userMetadata = await GET_BY_PK_SK(PK, SK)
+                this.user = userMetadata
+                return userMetadata
             } catch (error: any) {
                 console.error("User not authenticated. Cannot fetch info.")
                 // console.error(error)
@@ -41,7 +34,6 @@ export const userStore = defineStore('user', {
         },
 
         async fetchShop(inputOwnerId: string) {
-            const auth = authStore()
             try {
                 /*
                 await client.models.Shop.shopByOwnerId({ ownerId: inputOwnerId as string})
