@@ -27,7 +27,7 @@ router.beforeEach(async (to) => {
     // There is no auth. Check once.
     if (!auth.getAuth) {
         console.log("Checking auth")
-        authenticated = await auth.checkAuth()
+        authenticated = false
     } else {
         authenticated = true;
     }
