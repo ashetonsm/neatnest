@@ -10,17 +10,18 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import { authStore } from './stores/auth'
 import { createAuth0, useAuth0 } from '@auth0/auth0-vue'
+import { GET_BY_PK_SK } from './components/tools/ddbActions'
 
 const pinia = createPinia()
 const app = createApp(App)
 const vuetify = createVuetify({})
-const auth0 =  createAuth0({
-        domain: import.meta.env.VITE_AUTH0_DOMAIN,
-        clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
-        authorizationParams: {
-            redirect_uri: import.meta.env.VITE_AUTH0_CALLBACK_URL
-        }
-    })
+const auth0 = createAuth0({
+    domain: import.meta.env.VITE_AUTH0_DOMAIN,
+    clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
+    authorizationParams: {
+        redirect_uri: import.meta.env.VITE_AUTH0_CALLBACK_URL
+    }
+})
 
 app.use(router)
 app.use(pinia)
@@ -28,13 +29,15 @@ app.use(auth0)
 app.use(vuetify)
 app.mount('#app')
 
+
 const auth = authStore();
 const user = userStore();
 
 router.beforeEach(async (to) => {
-    const {isAuthenticated} = useAuth0()
-    // There is no auth. Check once.
+    const { isAuthenticated } = useAuth0()
     if (isAuthenticated) {
+        const test = await GET_BY_PK_SK("user000", "#METADATA#")
+        console.log(test)
         console.log("Auth successful")
         switch (to.name) {
             case "trades":
