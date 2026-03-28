@@ -11,6 +11,7 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
+    "@auth0/auth0-vue": "^2.5.0",
     "@mdi/font": "^7.4.47",
     "pinia": "^3.0.4",
     "vue": "^3.4.21",
