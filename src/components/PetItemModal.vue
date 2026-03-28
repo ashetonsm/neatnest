@@ -1,20 +1,16 @@
 <script setup lang="ts">
 import router from "@/router";
-import { generateClient } from "aws-amplify/data";
-import type { Schema } from "../../amplify/data/resource";
 import { onMounted, ref } from "vue";
-import { deleteStorage } from "./tools/deleteStorage";
 import { userStore } from "@/stores/user";
 
-const client = generateClient<Schema>();
 const user = userStore();
 
 const props = defineProps<{
-  pet: Schema["Pet"]["type"];
-  items: Array<Schema["Item"]["type"]>;
+  pet: any;
+  items: Array<any>;
 }>();
 
-async function handleSubmit(item: Schema["Item"]["type"] | null | undefined) {
+async function handleSubmit(item: any | null | undefined) {
   if (item == undefined || !item) {
     alert(`Hmm, nothing was selected.`);
     return;
@@ -35,11 +31,13 @@ async function handleSubmit(item: Schema["Item"]["type"] | null | undefined) {
       var confirmDeletion = confirm("This item will disappear after use. Continue?");
       if (confirmDeletion == true) {
         // Delete the item
+        /*
         await client.models.Item.delete({ id: item.id })
           .then((res: any) => {})
           .then(async () => {
             await deleteStorage(item.image!);
           });
+          */
       } else {
         // Deletion was not confirmed.
         return;
@@ -47,7 +45,9 @@ async function handleSubmit(item: Schema["Item"]["type"] | null | undefined) {
     } else {
       // Item will not be deleted
       // Subtract 1 from health
+      /*
       await client.models.Item.update(updatedItem).then((res: any) => {});
+      */
     }
 
     // Update the pet
@@ -65,7 +65,10 @@ async function handleSubmit(item: Schema["Item"]["type"] | null | undefined) {
       }
     }
 
+    /*
+
     await client.models.Pet.update(updatedPet).then((res: any) => {});
+    */
     router.go(0);
   } catch (error: any) {
     console.error("Error: ", error);
@@ -73,35 +76,36 @@ async function handleSubmit(item: Schema["Item"]["type"] | null | undefined) {
 }
 
 async function handleTrade(
-  friend: { username: string; friendObject: Schema["Friend"]["type"] } | null | undefined
+  friend: { username: string; friendObject: any } | null | undefined
 ) {
   if (friend == undefined || !friend) {
     alert(`Hmm, nothing was selected.`);
     return;
   }
   try {
-    await client.models.Trade.create({
-      recipient: friend.friendObject.friendA! !== user.getUser!.id ? friend.friendObject.friendA : friend.friendObject.friendB,
-      sender: user.getUser?.id,
-      status: "pending",
-      pet: JSON.stringify(props.pet),
-    }).then((res: any) => {
-      console.log(res);
-    });
-    router.go(0);
+    /*
+    
+        await client.models.Trade.create({
+          recipient: friend.friendObject.friendA! !== user.getUser!.id ? friend.friendObject.friendA : friend.friendObject.friendB,
+          sender: user.getUser?.id,
+          status: "pending",
+          pet: JSON.stringify(props.pet),
+        }).then((res: any) => {
+          console.log(res);
+        });
+        router.go(0);
+        */
   } catch (error: any) {
     console.error("Error: ", error);
   }
 }
 
-var foodOptions = ref<Array<Schema["Item"]["type"]>>();
-var playOptions = ref<Array<Schema["Item"]["type"]>>();
-var selectedFoodOption = ref<Schema["Item"]["type"]>();
-var selectedPlayOption = ref<Schema["Item"]["type"]>();
-var selectedFriendOption = ref<Schema["Friend"]["type"]>();
-var friendOptions = ref<
-  Array<{ username: string; friendObject: Schema["Friend"]["type"] }>
->(user.getFriends);
+var foodOptions = ref<Array<any>>();
+var playOptions = ref<Array<any>>();
+var selectedFoodOption = ref<any>();
+var selectedPlayOption = ref<any>();
+var selectedFriendOption = ref<any>();
+var friendOptions = ref<Array<{ username: string; friendObject: any }>>(user.getFriends);
 const itemFilter1 = props.items;
 const itemFilter2 = props.items;
 foodOptions.value = JSON.parse(

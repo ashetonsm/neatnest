@@ -1,7 +1,5 @@
 import './assets/main.css'
 
-import { Amplify } from 'aws-amplify'
-import outputs from '../amplify_outputs.json'
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
@@ -12,7 +10,6 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import { authStore } from './stores/auth'
 
-Amplify.configure(outputs)
 const pinia = createPinia()
 const app = createApp(App)
 const vuetify = createVuetify({})

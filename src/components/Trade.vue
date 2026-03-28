@@ -1,21 +1,18 @@
 <script setup lang="ts">
 import { onMounted, ref, shallowRef } from "vue";
-import type { Schema } from "../../amplify/data/resource";
 import { userStore } from "@/stores/user";
-import { generateClient } from "aws-amplify/api";
 import router from "@/router";
 
-const client = generateClient<Schema>();
-const petData = shallowRef<Schema["Pet"]["type"]>();
+const petData = shallowRef<any>();
 const user = userStore();
 const thisFriend = ref<{
   username: string;
-  friendObject: Schema["Friend"]["type"];
+  friendObject: any;
 } | null>(null);
 
 const props = defineProps<{
-  trade: Schema["Trade"]["type"];
-  pet: Schema["Pet"]["type"];
+  trade: any;
+  pet: any;
 }>();
 
 onMounted(async () => {
@@ -30,12 +27,10 @@ onMounted(async () => {
       (f.friendObject.friendB as string) == (props.trade.sender as string);
   });
   thisFriend.value = friendList[0];
-  petData.value = (await JSON.parse(
-    (props.pet as unknown) as string
-  )) as Schema["Pet"]["type"];
+  petData.value = (await JSON.parse((props.pet as unknown) as string)) as any;
 });
 
-async function handleTrade(t: Schema["Trade"]["type"], action: string) {
+async function handleTrade(t: any, action: string) {
   var updatedPet = petData.value;
   if (updatedPet) {
     console.log("The petData.value:", petData.value);
@@ -55,6 +50,7 @@ async function handleTrade(t: Schema["Trade"]["type"], action: string) {
 
             console.log("Updated pet ID:", updatedPet.id);
             console.log("Updated pet:", updatedPet);
+            /*
             await client.models.Pet.update(updatedPet)
               .then((res: any) => {
                 console.log(res.data);
@@ -62,6 +58,7 @@ async function handleTrade(t: Schema["Trade"]["type"], action: string) {
               .then(() => {
                 updatedTrade.status = "accepted";
               });
+              */
             break;
           case "reject":
             console.log("Reject trade.");
@@ -79,9 +76,11 @@ async function handleTrade(t: Schema["Trade"]["type"], action: string) {
         console.log("The trade id: ", updatedTrade.id);
         console.log("The trade status: ", updatedTrade.status);
         // Set trade status
+        /*
         await client.models.Trade.update(updatedTrade).then((res: any) => {
           console.log(res.data);
         });
+        */
 
         // Refresh
         router.go(0);
@@ -130,7 +129,7 @@ async function handleTrade(t: Schema["Trade"]["type"], action: string) {
         color="error"
       ></v-btn>
       <v-btn
-      v-if="props.trade.owner == user.getUser?.id && !['accepted', 'rejected', 'cancelled'].includes(props.trade.status!.toString())"
+        v-if="props.trade.owner == user.getUser?.id && !['accepted', 'rejected', 'cancelled'].includes(props.trade.status!.toString())"
         @click="handleTrade(props.trade, 'cancel')"
         text="Cancel"
         class="mx-auto"

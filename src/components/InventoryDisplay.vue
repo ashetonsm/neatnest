@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import Item from "./Item.vue";
 import { onMounted, ref } from "vue";
-import type { Schema } from "../../amplify/data/resource";
 import { userStore } from "@/stores/user";
 
 // These should be items where the owner is the logged in user
 const user = userStore();
 
 // create a reactive reference to Item[]
-const fetchedItems: any = ref<Array<Schema["Item"]["type"]>>([]);
+const fetchedItems: any = ref<Array<any>>([]);
 var canCreate = true;
 
 async function setCreation() {

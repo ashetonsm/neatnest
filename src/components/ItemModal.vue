@@ -1,21 +1,18 @@
 <script setup lang="ts">
-import { generateClient } from "aws-amplify/data";
-import type { Schema } from "../../amplify/data/resource";
 import { userStore } from "@/stores/user";
 import router from "@/router";
 
-const client = generateClient<Schema>();
 const user = userStore();
 
 const props = defineProps<{
-  item: Schema["Item"]["type"];
+  item: any;
 }>();
 
-async function toggleSell(i: Schema["Item"]["type"], action: string) {
+async function toggleSell(i: any, action: string) {
   var updatedItem = i;
   var updatedShop = user.getShop!;
   var stringItems = await JSON.parse(updatedShop.items as string);
-  var arrayItems = stringItems as Array<Schema["Item"]["type"]>;
+  var arrayItems = stringItems as Array<any>;
 
   try {
     switch (action) {
@@ -29,15 +26,15 @@ async function toggleSell(i: Schema["Item"]["type"], action: string) {
         break;
 
       case "remove":
-        console.log("arrayItems.length", arrayItems.length)
-        console.log("remove ID #", i.id)
+        console.log("arrayItems.length", arrayItems.length);
+        console.log("remove ID #", i.id);
         // Change the item's shop ID
         updatedItem.shopId = "NA";
         if (arrayItems.length) {
           const items = arrayItems;
           // Filter the items to get rid of the one with the matching ID
-          const filteredItems = items.filter(item => 
-            (item.id as string) !== (i.id as string)
+          const filteredItems = items.filter(
+            (item) => (item.id as string) !== (i.id as string)
           );
 
           console.log("filteredItems after filtering: ", filteredItems);
@@ -57,18 +54,22 @@ async function toggleSell(i: Schema["Item"]["type"], action: string) {
         console.log("Invalid action.");
         break;
     }
+    /*
     await client.models.Item.update(updatedItem, { authMode: "userPool" }).then(
       (res: any) => {
         console.log("Updated Item:", res);
       }
     );
-    await client.models.Shop.update(updatedShop, { authMode: "userPool" }).then(
-      (res: any) => {
-        console.log("Updated Shop:", res);
-        // Refresh
-        router.go(0);
-      }
-    );
+    */
+    /*
+       await client.models.Shop.update(updatedShop, { authMode: "userPool" }).then(
+        (res: any) => {
+          console.log("Updated Shop:", res);
+          // Refresh
+          router.go(0);
+        }
+      );
+      */
   } catch (error) {
     console.error(error);
   }

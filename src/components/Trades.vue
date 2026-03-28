@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
-import type { Schema } from "../../amplify/data/resource";
 import { userStore } from "@/stores/user";
 import Trade from "./Trade.vue";
 const user = userStore();
 
-const fetchedTrades = ref<Array<Schema["Trade"]["type"]>>([]);
+const fetchedTrades = ref<Array<any>>([]);
 
 onMounted(() => {
   fetchedTrades.value = user.getTrades

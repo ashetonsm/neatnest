@@ -1,23 +1,18 @@
 <script setup lang="ts">
 import router from "@/router";
 import { userStore } from "@/stores/user";
-import type { Schema } from "amplify/data/resource";
-import { generateClient } from "aws-amplify/api";
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import Pet from "./Pet.vue";
 
-const client = generateClient<Schema>();
 const route = useRoute();
 const user = userStore();
 var profile = route.params.username;
 const thisProfileDesc = ref<String>("Lorum ipsum this is a description");
-const thisFriend = ref<Schema["Friend"]["type"] | any>(null);
-const theseFriends = ref<
-  Array<{ username: string; friendObject: Schema["Friend"]["type"] }>
->([]);
-const thisUser = ref<Schema["User"]["type"]>();
-const thesePets = ref<Array<Schema["Pet"]["type"]>>([]);
+const thisFriend = ref<any | any>(null);
+const theseFriends = ref<Array<{ username: string; friendObject: any }>>([]);
+const thisUser = ref<any>();
+const thesePets = ref<Array<any>>([]);
 var newUsername = "";
 var newProfileDesc = "";
 
@@ -27,6 +22,7 @@ async function changeDescription(newDesc: Event) {
   var updatedUser = user.getUser!;
   try {
     updatedUser.description = newProfileDesc;
+    /*
     client.models.User.update(updatedUser)
       .then((res: any) => {
         console.log("User updated: ", res);
@@ -34,6 +30,7 @@ async function changeDescription(newDesc: Event) {
       .then(() => {
         router.go(0);
       });
+    */
   } catch (error: any) {
     console.error(error);
   }
@@ -53,6 +50,7 @@ async function changeUsername(newUN: Event) {
   var updatedUser = user.getUser!;
   try {
     updatedUser.username = newUsername;
+    /*
     await client.models.User.update(updatedUser)
       .then((res: any) => {
         console.log("Username updated: ", res);
@@ -71,6 +69,7 @@ async function changeUsername(newUN: Event) {
         await router.push(`/profile/${newUsername}`);
         router.go(0);
       });
+    */
   } catch (error: any) {
     console.error(error);
   }
@@ -90,6 +89,7 @@ async function checkUsername() {
 
 async function fetchUser() {
   try {
+    /*
     await client.models.User.userByUsername({
       username: profile.toString(),
     })
@@ -103,21 +103,15 @@ async function fetchUser() {
           fetchPets();
         }
       });
+      */
   } catch (error: any) {
     console.error(error); // The user probably doesn't exist in the db.
   }
 }
 
-async function fetchPets() {
-  await client.models.Pet.listPetsByOwnerAndName({
-    ownerId: thisUser.value?.id as string,
-  }).then((res) => {
-    thesePets.value = res.data;
-  });
-}
-
 async function addFriend() {
   if ((thisUser.value?.id as string) !== user.getUser!.id) {
+    /*
     await client.models.Friend.create({
       friendA: thisUser.value?.id as string,
       friendB: user.getUser!.id,
@@ -126,6 +120,7 @@ async function addFriend() {
       console.log("Updated friend res: ", res.data);
       router.go(0);
     });
+  */
   } else {
     alert("You can't add yourself as a friend!");
   }
@@ -133,10 +128,12 @@ async function addFriend() {
 
 /** Used for both delete friend and unblock */
 async function deleteFriend() {
+  /*
   await client.models.Friend.delete({ id: thisFriend.value?.id }).then((res) => {
     console.log("Deleted friend res: ", res.data);
     router.go(0);
   });
+  */
 }
 
 /** Used to block and accept friends */
@@ -155,6 +152,7 @@ async function updateFriend(action: string) {
       console.log("Invalid friend action");
       break;
   }
+  /*
   await client.models.Friend.update(updatedFriend).then(async (res) => {
     if (res.data == null) {
       console.log("No friend found. Creating new friend to block.");
@@ -167,9 +165,10 @@ async function updateFriend(action: string) {
       });
     } else {
       console.log("Updated existing friend: ", res.data);
-    }
-    router.go(0);
-  });
+  }
+  router.go(0);
+});
+*/
 }
 
 onMounted(async () => {
@@ -213,21 +212,17 @@ onMounted(async () => {
           class="ma-4"
         ></v-alert>
 
-        <v-btn 
-        color="secondary" 
-        :to="'/shop/' + profile" 
-        class="mb-4">
-        {{profile == user.getUser?.username ? 'Your Shop' : profile + "'s Shop"}}
+        <v-btn color="secondary" :to="'/shop/' + profile" class="mb-4">
+          {{ profile == user.getUser?.username ? "Your Shop" : profile + "'s Shop" }}
         </v-btn>
-        
+
         <!-- Stuff to display for the logged in user -->
-        <template v-if="profile == user.getUser?.username"> 
-        <v-btn text="Trade Requests" to="/trades"></v-btn>
-        <h2 class="text-h4 font-weight-black ma-4">
-        Credits: {{ user.getCredits > 0 ? user.getCredits : 0 }}</h2>
+        <template v-if="profile == user.getUser?.username">
+          <v-btn text="Trade Requests" to="/trades"></v-btn>
+          <h2 class="text-h4 font-weight-black ma-4">
+            Credits: {{ user.getCredits > 0 ? user.getCredits : 0 }}
+          </h2>
         </template>
-
-
 
         <v-btn
           :disabled="

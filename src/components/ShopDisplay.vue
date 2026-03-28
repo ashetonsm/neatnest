@@ -2,20 +2,17 @@
 import Item from "./Item.vue";
 import { useRoute } from "vue-router";
 import { onMounted, ref } from "vue";
-import { generateClient } from "aws-amplify/api";
-import type { Schema } from "../../amplify/data/resource";
 import { userStore } from "@/stores/user";
 
 // These should be items that are freely in the pool for this shop
 const user = userStore();
 const route = useRoute();
 
-// TODO: Determine shop name based on number from route
-const client = generateClient<Schema>();
-const fetchedItems = ref<Array<Schema["Item"]["type"]>>([]);
+const fetchedItems = ref<Array<any>>([]);
 
 async function fetchItems() {
   try {
+    /*
     const { data: shop } = await client.models.Shop.shopByName(
       {
         name: route.params.id.toString(),
@@ -25,8 +22,9 @@ async function fetchItems() {
       }
     );
 
-  const stringItems = await JSON.parse(shop[0].items as string) as Array<Schema["Item"]["type"]>;
+  const stringItems = await JSON.parse(shop[0].items as string) as Array<any>;
   fetchedItems.value = stringItems
+  */
   } catch (error: any) {
     console.log("No items found!");
   }

@@ -1,4 +1,3 @@
-import { uploadData } from "aws-amplify/storage";
 import router from '@/router'
 
 export function createPet(
@@ -21,6 +20,7 @@ export function createPet(
     try {
       canvas!.toBlob(async (blob) => {
         try {
+          /*
           const result = await uploadData({
             path: imgPath,
             data: blob!,
@@ -29,6 +29,7 @@ export function createPet(
             }
           }).result;
           console.log('Succeeded: ', result);
+          */
         } catch (error) {
           console.log('Error : ', error);
         }
@@ -37,6 +38,7 @@ export function createPet(
 
       // Try creating a new Item
       try {
+        /*
         client.models.Pet.create({
           name: name,
           species: species,
@@ -62,6 +64,7 @@ export function createPet(
               router.go(0)
             })
         });
+        */
       } catch (error: any) {
         console.log(error)
       }

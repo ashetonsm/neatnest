@@ -1,5 +1,4 @@
 import router from "@/router";
-import { uploadData } from "aws-amplify/storage";
 
 export function createItem(
   name: string,
@@ -21,6 +20,7 @@ export function createItem(
     try {
       canvas!.toBlob(async (blob) => {
         try {
+          /*
           const result = await uploadData({
             path: imgPath,
             data: blob!,
@@ -29,6 +29,7 @@ export function createItem(
             }
           }).result;
           console.log('Succeeded: ', result);
+          */
         } catch (error) {
           console.log('Error : ', error);
         }
@@ -37,6 +38,7 @@ export function createItem(
 
       // Try creating a new Item
       try {
+        /*
         client.models.Item.create({
           name: name,
           category: itemCat,
@@ -64,6 +66,7 @@ export function createItem(
               router.go(1)
             })
         });
+        */
       } catch (error: any) {
         console.log(error)
       }

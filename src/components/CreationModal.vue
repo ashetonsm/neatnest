@@ -2,8 +2,6 @@
 import { userStore } from "@/stores/user";
 import { createItem } from "./tools/createItem";
 import { createPet } from "./tools/createPet";
-import { generateClient } from "aws-amplify/api";
-import type { Schema } from "amplify/data/resource";
 import { ref } from "vue";
 
 var name: string | null;
@@ -11,7 +9,6 @@ var speciesName: string | null;
 var selectedItemType = ref("");
 var itemTypes: Array<string> = ["food", "entertainment"];
 const user = userStore();
-const client = generateClient<Schema>();
 
 const props = defineProps<{
   thing: string | null;
@@ -25,21 +22,25 @@ async function handleSubmit() {
       console.log("Name: ", name);
       console.log("SelectedItemType: ", selectedItemType);
       if (name && selectedItemType) {
-        createItem(
-          name,
-          path,
-          selectedItemType.value,
-          user.getUser?.id!,
-          user.getUser,
-          client
-        );
+        /*
+            createItem(
+              name,
+              path,
+              selectedItemType.value,
+              user.getUser?.id!,
+              user.getUser,
+              client
+            );
+            */
       }
       break;
     case "pet":
       console.log("Name: ", name);
       console.log("SpeciesName: ", speciesName);
       if (name && speciesName) {
-        createPet(name, speciesName, path, user.getUser?.id!, user.getUser, client);
+        /*
+            createPet(name, speciesName, path, user.getUser?.id!, user.getUser, client);
+            */
       }
       break;
 
