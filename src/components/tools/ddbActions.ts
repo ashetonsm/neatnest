@@ -1,0 +1,56 @@
+import { DynamoDB } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocument, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+
+export const config = {
+    credentials: {
+        accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID,
+        secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY
+    },
+    region: import.meta.env.VITE_AWS_DEFAULT_REGION
+}
+
+export const client = DynamoDBDocument.from(new DynamoDB(config), {
+    marshallOptions: {
+        convertEmptyValues: true,
+        removeUndefinedValues: true,
+        convertClassInstanceToMap: true
+    }
+})
+
+export async function CREATE_USER(userItem: Object) {
+  console.log("USERITEM:", userItem)
+
+  const command = new PutCommand({
+    TableName: "neatnest",
+    Item: userItem,
+  });
+
+  const response = await client.send(command);
+  console.log("USER CREATION SUCCESSFUL");
+  return response
+};
+
+/**
+ * Remember that the KeyConditionExpression is CASE SENSITIVE. Lowercase "PK"/"SK" will not work.
+ * @param pk Primary Key (the userID)
+ * @param sk Sort Key (the item type)
+ * @returns 
+ */
+export async function GET_BY_PK_SK(pk: string, sk: string) {
+  const command = new QueryCommand({
+    TableName: "neatnest",
+    KeyConditionExpression: "PK = :pkVal AND begins_with(SK, :skPrefix)",
+    ExpressionAttributeValues:
+    {
+      ":pkVal": pk,
+      ":skPrefix": sk
+    }
+  });
+
+  const response = await client.send(command);
+  if (response.Items?.length == 0) {
+    return null
+  } else {
+    return response.Items![0]
+  }
+}
