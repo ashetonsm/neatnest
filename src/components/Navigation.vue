@@ -21,10 +21,10 @@ const links = ref<Array<{ title: string; name: string }>>([
 onMounted(async () => {
   user.$subscribe((mutation) => {
     // Perform actions here when the state changes
-    console.log("Nav's user: ", user.getUser?.username);
+    console.log("Nav's user: ", user.getUser?.Username);
 
-    if (mutation.storeId == "user" && user.getUser?.username !== undefined) {
-      links.value[4].name = `/profile/${user.getUser?.username}`;
+    if (mutation.storeId == "user" && user.getUser?.Username !== undefined) {
+      links.value[4].name = `/profile/${user.getUser?.Username}`;
     }
   });
 });
