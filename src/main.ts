@@ -9,13 +9,22 @@ import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import { authStore } from './stores/auth'
+import { createAuth0, useAuth0 } from '@auth0/auth0-vue'
 
 const pinia = createPinia()
 const app = createApp(App)
 const vuetify = createVuetify({})
+const auth0 =  createAuth0({
+        domain: import.meta.env.VITE_AUTH0_DOMAIN,
+        clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
+        authorizationParams: {
+            redirect_uri: import.meta.env.VITE_AUTH0_CALLBACK_URL
+        }
+    })
 
 app.use(router)
 app.use(pinia)
+app.use(auth0)
 app.use(vuetify)
 app.mount('#app')
 
@@ -23,15 +32,9 @@ const auth = authStore();
 const user = userStore();
 
 router.beforeEach(async (to) => {
-    var authenticated = false;
+    const {isAuthenticated} = useAuth0()
     // There is no auth. Check once.
-    if (!auth.getAuth) {
-        console.log("Checking auth")
-        authenticated = false
-    } else {
-        authenticated = true;
-    }
-    if (authenticated) {
+    if (isAuthenticated) {
         console.log("Auth successful")
         switch (to.name) {
             case "trades":
