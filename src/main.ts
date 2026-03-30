@@ -32,7 +32,7 @@ const uStore = userStore();
 
 router.beforeEach(async (to) => {
     const { isAuthenticated, user } = useAuth0()
-    if (isAuthenticated) {
+    if (isAuthenticated.value == true) {
         if (!uStore.getUser) {
             console.log("There is no user in the store data.")
             await uStore.fetchUser(user.value?.sub as string, "#METADATA#", user)
