@@ -28,57 +28,58 @@ app.use(auth0)
 app.use(vuetify)
 app.mount('#app')
 
-const user = userStore();
+const uStore = userStore();
 
 router.beforeEach(async (to) => {
-    const { isAuthenticated } = useAuth0()
+    const { isAuthenticated, user } = useAuth0()
     if (isAuthenticated) {
-        console.log("Currently authorized.")
-
-        if (!user.getUser) {
-            await user.fetchUser("user000", "#METADATA#")
-                .then((res) => {
-                    console.log("Got the logged in user's Metadata")
+        if (!uStore.getUser) {
+            console.log("There is no user in the store data.")
+            await uStore.fetchUser(user.value?.sub as string, "#METADATA#", user)
+                .then(() => {
+                    console.log("Got the logged in uStore's Metadata in main.ts: ", uStore.getUser);
                 })
+        } else {
+            console.log("There is a user in the store data.")
         }
         switch (to.name) {
             case "trades":
-                // await user.fetchFriends(auth.getUserId as string)
-                await user.fetchTrades()
+                // await uStore.fetchFriends(auth.getUserId as string)
+                await uStore.fetchTrades()
                 return
             case "inventory":
-                if (!user.getShop) {
-                    await user.fetchShop(user.getUser?.id as string)
+                if (!uStore.getShop) {
+                    await uStore.fetchShop(uStore.getUser?.id as string)
                 }
-                await user.fetchInventory()
+                await uStore.fetchInventory()
                 return
             case "shop":
-                if (!user.getShop) {
-                    await user.fetchShop(user.getUser?.id as string)
+                if (!uStore.getShop) {
+                    await uStore.fetchShop(uStore.getUser?.id as string)
                 }
-                await user.fetchCredit()
+                await uStore.fetchCredit()
                 return
             case "profile":
-                if (!user.getShop) {
-                    await user.fetchShop(user.getUser?.id as string)
+                if (!uStore.getShop) {
+                    await uStore.fetchShop(uStore.getUser?.id as string)
                 }
-                await user.fetchCredit()
-                if (!user.getPets) {
-                    await user.fetchPets()
+                await uStore.fetchCredit()
+                if (!uStore.getPets) {
+                    await uStore.fetchPets()
                 }
-                if (!user.getFriends) {
-                    // await user.fetchFriends(auth.getUserId as string)
+                if (!uStore.getFriends) {
+                    // await uStore.fetchFriends(auth.getUserId as string)
                 }
                 return
             case "pets":
-                if (!user.getPets) {
-                    await user.fetchPets()
+                if (!uStore.getPets) {
+                    await uStore.fetchPets()
                 }
-                if (!user.getInventory) {
-                    await user.fetchInventory()
+                if (!uStore.getInventory) {
+                    await uStore.fetchInventory()
                 }
                 // Get friends for trading
-                // await user.fetchFriends(auth.getUserId as string)
+                // await uStore.fetchFriends(auth.getUserId as string)
                 return
             default:
                 console.log("Default switch")

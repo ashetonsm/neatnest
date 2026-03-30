@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import router from "@/router";
 import { userStore } from "../stores/user";
+import { useAuth0 } from "@auth0/auth0-vue";
 
-const user = userStore();
+const uStore = userStore();
+const { user } = useAuth0();
 
-await user.fetchUser("user000", "#METADATA#")
-    .then((res) => {
-        console.log(res)
-    })
-
+if (!uStore.getUser) {
+  await uStore.fetchUser(user.value?.sub as string, "#METADATA#", user).then(() => {
+    console.log("Got the logged in uStore's Metadata in Callback: ", uStore.getUser);
+  });
+}
 </script>
 
 <template>

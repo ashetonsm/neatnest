@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import { GET_BY_PK_SK } from '@/components/tools/ddbActions';
+import { CREATE_USER, GET_BY_PK_SK } from '@/components/tools/ddbActions';
 
 export const userStore = defineStore('user', {
     state: () => ({
@@ -22,14 +22,33 @@ export const userStore = defineStore('user', {
         getFriends: (state: { friends: any }) => state.friends,
     },
     actions: {
-        async fetchUser(PK: string, SK: string) {
+        async fetchUser(PK: string, SK: string, inputUser? : any) {
             try {
-                const userMetadata = await GET_BY_PK_SK(PK, SK)
-                this.user = userMetadata
-                return userMetadata
+                const retrievedUser = await GET_BY_PK_SK(PK, SK)
+                if (!retrievedUser) {
+                    if (inputUser.value) {
+                        const newUser = await CREATE_USER({
+                            PK: PK,
+                            SK: '#METADATA#' + PK,
+                            Email: inputUser.value.email,
+                            Username: inputUser.value.name,
+                            Avatar: inputUser.value.image,
+                            CreatedAt: new Date().toISOString(),
+                            Currency: 0,
+                            Gender: 'unassigned',
+                            ItemsRemaining: 3,
+                            PetsRemaining: 3,
+                            Type: 'Metadata',
+                            UpdatedAt: new Date().toISOString(),
+                        })
+                        this.user = newUser
+                        return newUser
+                    }
+                }
+                this.user = retrievedUser
+                return retrievedUser
             } catch (error: any) {
-                console.error("User not authenticated. Cannot fetch info.")
-                // console.error(error)
+                console.error("An error occurred in fetchUser: ", error)
             }
         },
 
