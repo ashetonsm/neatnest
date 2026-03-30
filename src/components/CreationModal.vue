@@ -15,32 +15,35 @@ const props = defineProps<{
 }>();
 
 async function handleSubmit() {
-  const path = `images/${user.getUser?.id!}/${props.thing}/${name}.png`;
+  const path = `images/${user.getUser?.PK!}/${props.thing}/${name}.png`;
 
   switch (props.thing) {
     case "item":
-      console.log("Name: ", name);
-      console.log("SelectedItemType: ", selectedItemType);
-      if (name && selectedItemType) {
-        /*
-            createItem(
-              name,
-              path,
-              selectedItemType.value,
-              user.getUser?.id!,
-              user.getUser,
-              client
-            );
-            */
+      if (user.getUser.ItemsRemaining - 1 < 0) {
+        // Make sure creation won't put the user into negative numbers.
+        console.log("Insufficient itemsRemaining. Aborting process.");
+        return;
+      } else {
+        console.log("Name: ", name);
+        console.log("SelectedItemType: ", selectedItemType);
+        if (name && selectedItemType) {
+          createItem(name, path, selectedItemType.value, user.getUser?.PK);
+        }
       }
       break;
     case "pet":
-      console.log("Name: ", name);
-      console.log("SpeciesName: ", speciesName);
-      if (name && speciesName) {
-        /*
+      if (user.getUser.PetsRemaining - 1 < 0) {
+        // Make sure creation won't put the user into negative numbers.
+        console.log("Insufficient petsRemaining. Aborting process.");
+        return;
+      } else {
+        console.log("Name: ", name);
+        console.log("SpeciesName: ", speciesName);
+        if (name && speciesName) {
+          /*
             createPet(name, speciesName, path, user.getUser?.id!, user.getUser, client);
             */
+        }
       }
       break;
 
