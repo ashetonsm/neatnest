@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@auth0/auth0-vue": "^2.5.0",
+    "@aws-sdk/client-s3": "^3.1019.0",
+    "@aws-sdk/credential-providers": "^3.1019.0",
     "@mdi/font": "^7.4.47",
     "pinia": "^3.0.4",
     "vue": "^3.4.21",
@@ -26,8 +28,6 @@
     "@vitejs/plugin-basic-ssl": "^1.2.0",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/tsconfig": "^0.5.1",
-    "aws-cdk": "^2.137.0",
-    "aws-cdk-lib": "^2.137.0",
     "constructs": "^10.3.0",
     "esbuild": "^0.20.2",
     "npm-run-all2": "^6.1.2",
