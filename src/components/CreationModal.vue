@@ -27,7 +27,7 @@ async function handleSubmit() {
         console.log("Name: ", name);
         console.log("SelectedItemType: ", selectedItemType);
         if (name && selectedItemType) {
-          createItem(name, path, selectedItemType.value, user.getUser?.PK);
+          createItem(name, path, selectedItemType.value, user.getUser);
         }
       }
       break;
