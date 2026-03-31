@@ -11,14 +11,15 @@ const fetchedItems: any = ref<Array<any>>([]);
 var canCreate = true;
 
 async function setCreation() {
-  if (user.getUser?.itemsRemaining! > 0) {
+  if (user.getUser?.ItemsRemaining! > 0) {
     canCreate = true;
   }
 }
 
 onMounted(async () => {
   await setCreation();
-  fetchedItems.value = JSON.parse(JSON.stringify(user.getInventory));
+  fetchedItems.value = user.getInventory;
+  console.log("fetchedItems.value:", fetchedItems.value)
 });
 </script>
 
@@ -48,15 +49,15 @@ onMounted(async () => {
           >Launch Canvas
         </v-btn>
 
-        <v-btn color="secondary" :to="'/shop/'+ user.getShop?.name" class="mb-4">Your Shop</v-btn>
+        <!-- <v-btn color="secondary" :to="'/shop/'+ user.getShop?.Name" class="mb-4">Your Shop</v-btn> -->
 
         <v-row class="ga-4">
           <Item
             v-if="fetchedItems.length !== 0"
             v-for="(item, i) in fetchedItems"
-            :key="item.name ?? i"
+            :key="item.Name ?? i"
             :item="item"
-            :currentUser="user.getUser?.id!"
+            :currentUser="user.getUser?.PK!"
           />
         </v-row>
       </v-col>
