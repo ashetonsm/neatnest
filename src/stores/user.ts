@@ -29,7 +29,7 @@ export const userStore = defineStore('user', {
                     if (inputUser.value) {
                         const newUser = await CREATE_USER({
                             PK: PK,
-                            SK: '#METADATA#' + PK,
+                            SK: '#METADATA',
                             Email: inputUser.value.email,
                             Username: inputUser.value.name,
                             Avatar: inputUser.value.image,
