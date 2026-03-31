@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 import { onMounted, ref } from "vue";
 import { userStore } from "@/stores/user";
 import ItemModal from "./ItemModal.vue";
+import { createPresignedUrlWithClient } from "@/components/tools/s3Actions";
 const user = userStore();
 const itemModalRef = ref();
 
@@ -51,18 +52,11 @@ async function buyFlow(i: any) {
 
 async function getFileUrl(fileName: any) {
   try {
-    /*
-          const result = await getUrl({
-            path: fileName, // Adjust path as needed (e.g., private/, protected/)
-            options: {
-              expiresIn: 3600, // URL valid for 1 hour
-              validateObjectExistence: true,
-            },
-          });
-          signedSrc.value = result.url.toString();
-          */
+    const result = await createPresignedUrlWithClient(fileName as string);
+    console.log(result);
+    signedSrc.value = result;
   } catch (error) {
-    console.error("Error getting URL:", error);
+    console.error(error);
     return null;
   }
 
@@ -106,7 +100,7 @@ onMounted(async () => {
     class="mx-auto"
     max-width="300px"
     :color="
-      item.shopId == user.getShop?.id && $route.name == 'inventory'
+      item.Selling && $route.name == 'inventory'
         ? 'light-green-lighten-5'
         : 'none'
     "
@@ -127,12 +121,12 @@ onMounted(async () => {
 
     <!-- Items owned by the user and on the inventory page-->
     <template v-if="item.Owner == props.currentUser && $route.name == 'inventory'">
-      <v-card-subtitle v-if="item.shopId == user.getShop?.id"> 🛒 </v-card-subtitle>
+      <v-card-subtitle v-if="item.Selling"> 🛒 </v-card-subtitle>
 
       <v-card-actions>
         <v-btn
           @click="handleDelete(item)"
-          text="Obliterate"
+          text="Erase"
           class="mx-auto"
           variant="elevated"
           color="error"
