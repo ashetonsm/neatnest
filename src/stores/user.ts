@@ -1,13 +1,13 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import { PUT_DATA, GET_BY_PK_SK } from '@/components/tools/ddbActions';
+import { PUT_DATA, GET_BY_PK_SK, LIST_BY_PK_SK } from '@/components/tools/ddbActions';
 
 export const userStore = defineStore('user', {
     state: () => ({
         user: ref<any | null>(null),
         shop: ref<any | null>(null),
         pets: ref<any>(null),
-        inventory: ref<any>(null),
+        inventory: ref<Array<any>>([]),
         credits: ref<any>(0),
         trades: ref<Array<any>>([]),
         friends: ref<Array<{ username: string, friendObject: any }>>([]),
@@ -22,7 +22,7 @@ export const userStore = defineStore('user', {
         getFriends: (state: { friends: any }) => state.friends,
     },
     actions: {
-        async fetchUser(PK: string, SK: string, inputUser? : any) {
+        async fetchUser(PK: string, SK: string, inputUser?: any) {
             try {
                 const retrievedUser = await GET_BY_PK_SK(PK, SK)
                 if (!retrievedUser) {
@@ -163,29 +163,28 @@ export const userStore = defineStore('user', {
         },
 
         async fetchInventory() {
-            /*
-            await client.models.Item.listItemsByOwnerAndName(
-                {
-                    ownerId: this.user!.id
-                },
-                {
-                    headers: {
-                        'Access-Control-Allow-Headers': '*',
-                        'Access-Control-Allow-Origin': '*',
-                        'Access-Control-Allow-Methods': '*',
-                        'Content-Type': 'application/json',
-                    },
-                authMode: 'userPool'
+
+            // headers: {
+            //     'Access-Control-Allow-Headers': '*',
+            //     'Access-Control-Allow-Origin': '*',
+            //     'Access-Control-Allow-Methods': '*',
+            //     'Content-Type': 'application/json',
+            // },
+
+            const inventory = await LIST_BY_PK_SK(this.getUser.PK, "ITEM")
+
+            try {
+                console.log("The inventory from user.ts:", inventory)
+                let updatedInventory: any[] = []
+                inventory!.forEach(item => {
+                    updatedInventory.push(item)
+                });
+                this.inventory = updatedInventory
+                return this.inventory
+            } catch (error: any) {
+                console.error("Error fetching the inventory: ", error)
+                return this.inventory
             }
-        )
-        .then((res: { data: any; }) => {
-            return this.inventory = res.data
-        })
-        .catch((error: any) => {
-            console.log("No items found for this user.")
-            return this.inventory = []
-        });
-        */
         },
 
         async fetchCredit() {
