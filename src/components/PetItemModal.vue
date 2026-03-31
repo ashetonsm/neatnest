@@ -53,15 +53,15 @@ async function handleSubmit(item: any | null | undefined) {
     // Update the pet
 
     // Mood actions
-    if (pet.mood < 5) {
+    if (pet.Mood < 5) {
       // Increment mood by one
-      updatedPet.mood++;
+      updatedPet.Mood++;
     }
     // Food actions
-    if (item.category == "food") {
-      if (pet.hunger > 0) {
+    if (item.Category == "food") {
+      if (pet.Hunger > 0) {
         // decrease hunger by one
-        updatedPet.hunger--;
+        updatedPet.Hunger--;
       }
     }
 
@@ -109,16 +109,16 @@ var friendOptions = ref<Array<{ username: string; friendObject: any }>>(user.get
 const itemFilter1 = props.items;
 const itemFilter2 = props.items;
 foodOptions.value = JSON.parse(
-  JSON.stringify(itemFilter1.filter((item) => item.category == "food"))
+  JSON.stringify(itemFilter1.filter((item) => item.Category == "food"))
 );
 playOptions.value = JSON.parse(
-  JSON.stringify(itemFilter2.filter((item) => item.category == "entertainment"))
+  JSON.stringify(itemFilter2.filter((item) => item.Category == "entertainment"))
 );
 </script>
 <template>
   <v-card class="mx-auto">
     <v-col class="text-center">
-      <v-card-title> What would you like to do with {{ pet.name }}? </v-card-title>
+      <v-card-title> What would you like to do with {{ pet.Name }}? </v-card-title>
       <v-form
         v-if="friendOptions.length !== 0"
         @submit.prevent="handleTrade(selectedFriendOption as any)"
