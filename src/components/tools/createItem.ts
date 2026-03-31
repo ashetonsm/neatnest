@@ -1,11 +1,12 @@
 import router from "@/router";
 import { uploadData } from "./s3Actions";
+import { CREATE_ITEM, CREATE_USER } from "./ddbActions";
 
-export function createItem(
+export async function createItem(
   name: string,
   imgPath: string,
   itemCat: string,
-  userID: string,
+  userObj: any,
 ) {
   // Query for the canvas
   const canvas = document.querySelector('canvas')
@@ -15,7 +16,7 @@ export function createItem(
     canvas!.toBlob(async (blob) => {
       try {
         const result = (await uploadData(imgPath, blob));
-        
+
         if (result && result.$metadata.httpStatusCode == 200) {
           console.log('Uploaded succeeded');
         } else {
@@ -29,40 +30,37 @@ export function createItem(
 
     // Try creating a new Item
     try {
-      /*
-      client.models.Item.create({
-        name: name,
-        category: itemCat,
-        price: 1,
-        shopId: "NA",
-        creator: userID,
-        ownerId: userID,
-        health: 99,
-        rarity: 1,
-        image: imgPath
-      }).then(() => {
-        // Update the user by decreasing itemsRemaining by 1 if itemsRemaining > 0
-        var updatedUser = userObj
-        // Subtract 1 from itemsRemaining
-        updatedUser.itemsRemaining = updatedUser.itemsRemaining - 1
-        // Update the updatedAt time for the User
-        updatedUser.updatedAt = new Date().toISOString()
-
-        client.models.User.update(updatedUser)
-          .then((res: any) => {
-            console.log("User updated: ", res)
-          })
-          .then(() => {
-            router.push({ name: 'inventory' })
-            router.go(1)
-          })
-      });
-      */
+      await CREATE_ITEM({
+        PK: userObj.PK,
+        SK: `ITEM#${itemCat}#${name}`,
+        Creator: userObj.PK,
+        Owner: userObj.PK,
+        Health: 99,
+        Selling: false,
+        Image: imgPath,
+        Price: 0,
+        Type: 'Item',
+        CreatedAt: new Date().toISOString(),
+        UpdatedAt: new Date().toISOString(),
+      })
+        .then(async () => {
+          // Update the user by decreasing itemsRemaining by 1 if itemsRemaining > 0
+          var updatedUser = userObj
+          // Subtract 1 from itemsRemaining
+          updatedUser.ItemsRemaining = updatedUser.ItemsRemaining - 1
+          // Update the updatedAt time for the User
+          updatedUser.UpdatedAt = new Date().toISOString()
+          await CREATE_USER(updatedUser)
+        })
+        .then(() => {
+          router.push({ name: 'inventory' })
+          router.go(1)
+        });
     } catch (error: any) {
-      console.log(error)
+      console.error(error)
     }
 
   } catch (e: any) {
-    console.log("Error: ", e)
+    console.error("Error: ", e)
   }
 }
