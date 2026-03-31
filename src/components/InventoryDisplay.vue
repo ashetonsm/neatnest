@@ -45,7 +45,6 @@ onMounted(async () => {
           color="primary"
           to="/canvas/item"
           class="mb-4"
-          target="_blank"
           >Launch Canvas
         </v-btn>
 

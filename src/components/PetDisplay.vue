@@ -50,7 +50,6 @@ onMounted(async () => {
           color="primary"
           to="/canvas/pet"
           class="mb-4"
-          target="_blank"
           >Launch Canvas
         </v-btn>
 
