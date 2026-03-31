@@ -16,8 +16,6 @@ import {
     S3ServiceException,
 } from "@aws-sdk/client-s3";
 
-import { fromTemporaryCredentials } from "@aws-sdk/credential-providers"; // ES6 import
-
 const client = new S3Client({
     region: import.meta.env.VITE_AWS_DEFAULT_REGION,
     credentials: {
