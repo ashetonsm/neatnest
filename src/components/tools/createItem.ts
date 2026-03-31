@@ -1,6 +1,6 @@
 import router from "@/router";
 import { uploadData } from "./s3Actions";
-import { CREATE_ITEM, CREATE_USER } from "./ddbActions";
+import { PUT_DATA } from "./ddbActions";
 
 export async function createItem(
   name: string,
@@ -30,7 +30,7 @@ export async function createItem(
 
     // Try creating a new Item
     try {
-      await CREATE_ITEM({
+      await PUT_DATA({
         PK: userObj.PK,
         SK: `ITEM#${itemCat}#${name}`,
         Creator: userObj.PK,
@@ -50,7 +50,7 @@ export async function createItem(
           updatedUser.ItemsRemaining = updatedUser.ItemsRemaining - 1
           // Update the updatedAt time for the User
           updatedUser.UpdatedAt = new Date().toISOString()
-          await CREATE_USER(updatedUser)
+          await PUT_DATA(updatedUser)
         })
         .then(() => {
           router.push({ name: 'inventory' })

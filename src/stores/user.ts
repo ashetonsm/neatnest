@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import { CREATE_USER, GET_BY_PK_SK } from '@/components/tools/ddbActions';
+import { PUT_DATA, GET_BY_PK_SK } from '@/components/tools/ddbActions';
 
 export const userStore = defineStore('user', {
     state: () => ({
@@ -27,7 +27,7 @@ export const userStore = defineStore('user', {
                 const retrievedUser = await GET_BY_PK_SK(PK, SK)
                 if (!retrievedUser) {
                     if (inputUser.value) {
-                        const newUser = await CREATE_USER({
+                        const newUser = await PUT_DATA({
                             PK: PK,
                             SK: '#METADATA',
                             Email: inputUser.value.email,

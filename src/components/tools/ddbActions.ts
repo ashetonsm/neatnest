@@ -1,32 +1,37 @@
-import { DynamoDB } from "@aws-sdk/client-dynamodb";
+import { DynamoDB, UpdateItem$, UpdateItemCommand, type UpdateItemCommandInput } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocument, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 
 export const config = {
-    credentials: {
-        accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID,
-        secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY
-    },
-    region: import.meta.env.VITE_AWS_DEFAULT_REGION
+  credentials: {
+    accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID,
+    secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY
+  },
+  region: import.meta.env.VITE_AWS_DEFAULT_REGION
 }
 
 export const client = DynamoDBDocument.from(new DynamoDB(config), {
-    marshallOptions: {
-        convertEmptyValues: true,
-        removeUndefinedValues: true,
-        convertClassInstanceToMap: true
-    }
+  marshallOptions: {
+    convertEmptyValues: true,
+    removeUndefinedValues: true,
+    convertClassInstanceToMap: true
+  }
 })
 
-export async function CREATE_USER(userItem: Object) {
-  console.log("USERITEM:", userItem)
+/**
+ * Creates or updates an entry in the database
+ * @param newData The new or updated data object
+ * @returns 
+ */
+export async function PUT_DATA(newData: Object) {
+  console.log("NEW DATA:", newData)
 
   const command = new PutCommand({
     TableName: "neatnest",
-    Item: userItem,
+    Item: newData,
   });
 
   const response = await client.send(command);
-  console.log("USER CREATION SUCCESSFUL");
+  console.log("DATA PUT SUCCESSFUL");
   return response
 };
 
