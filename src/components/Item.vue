@@ -15,7 +15,7 @@ const props = defineProps<{
 }>();
 
 async function buyFlow(i: any) {
-  const choice = confirm("Buy " + i.name + " for " + i.price + "?");
+  const choice = confirm("Buy " + i.Name + " for " + i.Price + "?");
   if (choice) {
     // Have not fetched Credit entry yet
     if (!user.getCredits) {
@@ -26,9 +26,9 @@ async function buyFlow(i: any) {
     // console.log(shopItems)
 
     // console.log("User has ", user.getCredits.amount, " credit(s).");
-    if (user.getCredits.amount && i.price && user.getCredits.amount >= i.price) {
+    if (user.getCredits.amount && i.Price && user.getCredits.amount >= i.Price) {
       var updatedCredit = user.getCredits;
-      updatedCredit.amount = updatedCredit.amount - i.price;
+      updatedCredit.amount = updatedCredit.amount - i.Price;
 
       // Subtract the amount.
       /*
@@ -70,7 +70,7 @@ async function getFileUrl(fileName: any) {
 }
 
 async function handleDelete(i: any) {
-  const choice = confirm("Delete " + i.name + "?");
+  const choice = confirm("Delete " + i.Name + "?");
   if (choice) {
     // Do delete logic
     // Delete the item
@@ -89,13 +89,13 @@ async function handleDelete(i: any) {
 }
 
 onMounted(async () => {
-  await getFileUrl(props.item.image);
+  await getFileUrl(props.item.Image);
 });
 </script>
 
 <template>
   <v-dialog
-    v-if="item.ownerId == user.getUser?.id && $route.name == 'inventory'"
+    v-if="item.Owner == user.getUser?.PK && $route.name == 'inventory'"
     :activator="itemModalRef"
     max-width="500"
   >
@@ -114,19 +114,19 @@ onMounted(async () => {
     <v-img
       ref="itemModalRef"
       :src="signedSrc"
-      :alt="'an image of ' + item.name"
-      :class="item.ownerId == 'NA' ? 'cursor-pointer' : 'cursor-default'"
+      :alt="'an image of ' + item.Name"
+      :class="item.Owner == 'NA' ? 'cursor-pointer' : 'cursor-default'"
       class="cursor-pointer"
       min-width="150px"
       max-width="300px"
     ></v-img>
 
     <v-card-title class="text-center">
-      {{ item.name }}
+      {{ item.Name }}
     </v-card-title>
 
     <!-- Items owned by the user and on the inventory page-->
-    <template v-if="item.ownerId == props.currentUser && $route.name == 'inventory'">
+    <template v-if="item.Owner == props.currentUser && $route.name == 'inventory'">
       <v-card-subtitle v-if="item.shopId == user.getShop?.id"> 🛒 </v-card-subtitle>
 
       <v-card-actions>
@@ -140,7 +140,7 @@ onMounted(async () => {
       </v-card-actions>
     </template>
     <template v-else>
-      <v-card-subtitle> Price: {{ item.price }} </v-card-subtitle>
+      <v-card-subtitle> Price: {{ item.Price }} </v-card-subtitle>
 
       <v-card-actions>
         <v-btn
