@@ -57,33 +57,33 @@ router.beforeEach(async (to) => {
                 return
             case "inventory":
                 if (!uStore.getShop) {
-                    await uStore.fetchShop(uStore.getUser?.id as string)
+                    // await uStore.fetchShop(uStore.getUser?.id as string)
                 }
                 await uStore.fetchInventory()
                 return
             case "shop":
                 if (!uStore.getShop) {
-                    await uStore.fetchShop(uStore.getUser?.id as string)
+                    // await uStore.fetchShop(uStore.getUser?.id as string)
                 }
                 await uStore.fetchCredit()
                 return
             case "profile":
                 if (!uStore.getShop) {
-                    await uStore.fetchShop(uStore.getUser?.id as string)
+                    // await uStore.fetchShop(uStore.getUser?.id as string)
                 }
                 await uStore.fetchCredit()
-                if (!uStore.getPets) {
+                if ((uStore.getPets.length == 0)) {
                     await uStore.fetchPets()
                 }
-                if (!uStore.getFriends) {
+                if ((uStore.getFriends.length == 0)) {
                     // await uStore.fetchFriends(auth.getUserId as string)
                 }
                 return
             case "pets":
-                if (!uStore.getPets) {
+                if (uStore.getPets.length == 0) {
                     await uStore.fetchPets()
                 }
-                if (!uStore.getInventory) {
+                if (uStore.getInventory.length == 0) {
                     await uStore.fetchInventory()
                 }
                 // Get friends for trading
