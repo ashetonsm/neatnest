@@ -32,9 +32,12 @@ const uStore = userStore();
 
 router.beforeEach(async (to) => {
     const { isAuthenticated, user } = useAuth0()
+    // The user is authenticated
     if (isAuthenticated.value == true) {
+        // The store user is null
         if (!uStore.getUser) {
             console.log("There is no user in the store data.")
+            // Fetch the user to populate the store
             await uStore.fetchUser(user.value?.sub as string, "#METADATA#", user)
                 .then(() => {
                     console.log("Got the logged in uStore's Metadata in main.ts: ", uStore.getUser);
@@ -43,6 +46,11 @@ router.beforeEach(async (to) => {
             console.log("There is a user in the store data.")
         }
         switch (to.name) {
+            case "canvas":
+                if (!uStore.getUser) {
+                    await uStore.fetchUser(user.value?.sub as string, "#METADATA#", user)
+                }
+                return
             case "trades":
                 // await uStore.fetchFriends(auth.getUserId as string)
                 await uStore.fetchTrades()
