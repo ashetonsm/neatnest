@@ -34,6 +34,7 @@ export async function createItem(
         PK: userObj.PK,
         SK: `ITEM#${itemCat}#${name}`,
         Creator: userObj.PK,
+        Name: name,
         Owner: userObj.PK,
         Health: 99,
         Selling: false,
