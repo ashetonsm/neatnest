@@ -9,15 +9,17 @@ const fetchedItems = ref<Array<any>>([]);
 var canCreate = true;
 
 async function setCreation() {
-  if (user.getUser?.petsRemaining! > 0) {
+  if (user.getUser?.PetsRemaining! > 0) {
     canCreate = true;
   }
 }
 
 onMounted(async () => {
   await setCreation();
-  fetchedPets.value = JSON.parse(JSON.stringify(user.getPets));
-  fetchedItems.value = JSON.parse(JSON.stringify(user.getInventory));
+  fetchedPets.value = user.getPets;
+  fetchedItems.value = user.getInventory;
+    console.log("fetchedPets.value:", fetchedPets.value)
+
 });
 </script>
 
@@ -58,7 +60,7 @@ onMounted(async () => {
         <v-row class="ga-4">
           <Pet
             v-for="(pet, i) in fetchedPets"
-            :key="pet.name ?? i"
+            :key="pet.Name ?? i"
             :pet="pet"
             :items="fetchedItems"
           />
