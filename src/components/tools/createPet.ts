@@ -1,76 +1,68 @@
 import router from '@/router'
+import { uploadData } from "./s3Actions";
+import { PUT_DATA } from "./ddbActions";
 
-export function createPet(
+export async function createPet(
   name: string,
-  species: string,
   imgPath: string,
-  userID: string,
+  species: string,
   userObj: any,
-  client: any
 ) {
-  if ((userObj.itemsRemaining - 1) < 0) {
-    // Make sure creation won't put the user into negative numbers.
-    console.log("Insufficient itemsRemaining. Aborting process.")
-    return
-  } else {
-    // Query for the canvas
-    const canvas = document.querySelector('canvas')
+  // Query for the canvas
+  const canvas = document.querySelector('canvas')
 
-    // Try uploading the image
-    try {
-      canvas!.toBlob(async (blob) => {
-        try {
-          /*
-          const result = await uploadData({
-            path: imgPath,
-            data: blob!,
-            options: {
-              contentType: 'image/png'
-            }
-          }).result;
-          console.log('Succeeded: ', result);
-          */
-        } catch (error) {
-          console.log('Error : ', error);
-        }
-
-      }, 'image/png')
-
-      // Try creating a new Item
+  // Try uploading the image
+  try {
+    canvas!.toBlob(async (blob) => {
       try {
-        /*
-        client.models.Pet.create({
-          name: name,
-          species: species,
-          hunger: 5,
-          mood: 0,
-          ownerId: userID,
-          health: 100,
-          image: imgPath
-        }).then(() => {
-          // Update the user by decreasing petsRemaining by 1 if petsRemaining > 0
-          var updatedUser = userObj
-          // Subtract 1 from petsRemaining
-          updatedUser.petsRemaining = updatedUser.petsRemaining - 1
-          // Update the updatedAt time for the User
-          updatedUser.updatedAt = new Date().toISOString()
+        const result = (await uploadData(imgPath, blob));
 
-          client.models.User.update(updatedUser)
-            .then((res: any) => {
-              console.log("User updated: ", res)
-            })
-            .then(() => {
-              router.push({ name: 'pets' })
-              router.go(0)
-            })
-        });
-        */
-      } catch (error: any) {
-        console.log(error)
+        if (result && result.$metadata.httpStatusCode == 200) {
+          console.log('Uploaded succeeded');
+        } else {
+          console.log('Something went wrong with the upload.');
+        }
+      } catch (error) {
+        console.log('Error : ', error);
       }
 
-    } catch (e: any) {
-      console.log("Error: ", e)
+    }, 'image/png')
+
+    // Try creating a new Item
+    try {
+      await PUT_DATA({
+        PK: userObj.PK,
+        SK: `PET#${species}#${name}`,
+        Creator: userObj.PK,
+        Name: name,
+        Owner: userObj.PK,
+        Health: 100,
+        Hunger: 5,
+        Mood: 0,
+        TradeStatus: 0,
+        Image: imgPath,
+        Type: 'Pet',
+        CreatedAt: new Date().toISOString(),
+        UpdatedAt: new Date().toISOString(),
+      })
+        .then(async () => {
+          // Update the user by decreasing itemsRemaining by 1 if itemsRemaining > 0
+          var updatedUser = userObj
+          // Subtract 1 from itemsRemaining
+          updatedUser.PetsRemaining = updatedUser.PetsRemaining - 1
+          // Update the updatedAt time for the User
+          updatedUser.UpdatedAt = new Date().toISOString()
+          await PUT_DATA(updatedUser)
+        })
+        .then(() => {
+          router.push({ name: 'pets' })
+          router.go(1)
+        });
+    } catch (error: any) {
+      console.error(error)
     }
+
+  } catch (e: any) {
+    console.error("Error: ", e)
   }
 }

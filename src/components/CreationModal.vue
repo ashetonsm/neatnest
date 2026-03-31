@@ -40,9 +40,7 @@ async function handleSubmit() {
         console.log("Name: ", name);
         console.log("SpeciesName: ", speciesName);
         if (name && speciesName) {
-          /*
-            createPet(name, speciesName, path, user.getUser?.id!, user.getUser, client);
-            */
+          createPet(name, path, speciesName, user.getUser);
         }
       }
       break;
