@@ -6,7 +6,7 @@ export const userStore = defineStore('user', {
     state: () => ({
         user: ref<any | null>(null),
         shop: ref<any | null>(null),
-        pets: ref<any>(null),
+        pets: ref<Array<any>>([]),
         inventory: ref<Array<any>>([]),
         credits: ref<any>(0),
         trades: ref<Array<any>>([]),
@@ -91,16 +91,20 @@ export const userStore = defineStore('user', {
         },
 
         async fetchPets() {
-
             try {
-                /*
-                await client.models.Pet.listPetsByOwnerAndName(
-                    { ownerId: this.user!.id, },
-                    { authMode: "userPool", })
-                    .then((res) => {
-                        this.pets = res.data
-                    })
-                    */
+                const pets = await LIST_BY_PK_SK(this.getUser.PK, "PET")
+                try {
+                    console.log("The pets from user.ts:", pets)
+                    let updatedPets: any[] = []
+                    pets!.forEach(pet => {
+                        updatedPets.push(pet)
+                    });
+                    this.pets = updatedPets
+                    return this.pets
+                } catch (error: any) {
+                    console.error("Error fetching pets: ", error)
+                    return this.pets
+                }
             } catch (error: any) {
                 console.error(error)
             }
