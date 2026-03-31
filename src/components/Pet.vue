@@ -4,6 +4,7 @@ import PetItemModal from "./PetItemModal.vue";
 import { userStore } from "@/stores/user";
 import router from "@/router";
 import { useRoute } from "vue-router";
+import { createPresignedUrlWithClient } from "./tools/s3Actions";
 
 const route = useRoute();
 const signedSrc = ref("null");
@@ -17,25 +18,18 @@ const props = defineProps<{
 
 async function getFileUrl(fileName: any) {
   try {
-    /*
-    const result = await getUrl({
-      path: fileName, // Adjust path as needed (e.g., private/, protected/)
-      options: {
-        expiresIn: 3600, // URL valid for 1 hour
-        validateObjectExistence: true,
-      },
-    });
-    signedSrc.value = result.url.toString();
-    */
+    const result = await createPresignedUrlWithClient(fileName as string);
+    console.log(result);
+    signedSrc.value = result;
   } catch (error) {
-    console.error("Error getting URL:", error);
+    console.error(error);
     return null;
   }
   return;
 }
 
 async function handleDelete(pet: any) {
-  const choice = confirm(`Delete ${pet.name} forever? (This cannot be undone!)`);
+  const choice = confirm(`Delete ${pet.Name} forever? (This cannot be undone!)`);
   if (choice) {
     // Do delete logic
     // Delete the pet
@@ -51,18 +45,18 @@ async function handleDelete(pet: any) {
         router.go(0);
         */
   } else {
-    return console.log(`${pet.name} was not deleted!`);
+    return console.log(`${pet.Name} was not deleted!`);
   }
 }
 
 onMounted(async () => {
-  await getFileUrl(props.pet.image);
+  await getFileUrl(props.pet.Image);
 });
 </script>
 
 <template>
   <v-dialog
-    v-if="pet.ownerId == user.getUser?.id && route.name == 'pets'"
+    v-if="pet.Owner == user.getUser?.PK && route.name == 'pets'"
     :activator="petModalRef"
     max-width="500"
   >
@@ -73,22 +67,22 @@ onMounted(async () => {
     <v-img
       ref="petModalRef"
       :src="signedSrc"
-      :alt="'an image of ' + pet.name"
+      :alt="'an image of ' + pet.Name"
       class="cursor-pointer"
       min-width="150px"
       max-width="300px"
     ></v-img>
 
     <v-card-title class="text-center">
-      {{ pet.name }}
+      {{ pet.Name }}
     </v-card-title>
-    <v-card-subtitle> Hunger: {{ pet.hunger }} </v-card-subtitle>
-    <v-card-subtitle> Mood: {{ pet.mood }} </v-card-subtitle>
+    <v-card-subtitle> Hunger: {{ pet.Hunger }} </v-card-subtitle>
+    <v-card-subtitle> Mood: {{ pet.Mood }} </v-card-subtitle>
 
-    <v-card-actions v-if="pet.ownerId == user.getUser?.id && route.name == 'pets'">
+    <v-card-actions v-if="pet.Owner == user.getUser?.PK && route.name == 'pets'">
       <v-btn
         @click="handleDelete(pet)"
-        text="Obliterate"
+        text="Erase"
         class="mx-auto"
         variant="elevated"
         color="error"
