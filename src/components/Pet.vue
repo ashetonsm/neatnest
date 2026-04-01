@@ -4,7 +4,8 @@ import PetItemModal from "./PetItemModal.vue";
 import { userStore } from "@/stores/user";
 import router from "@/router";
 import { useRoute } from "vue-router";
-import { createPresignedUrlWithClient } from "./tools/s3Actions";
+import { createPresignedUrlWithClient, DELETE_S3 } from "./tools/s3Actions";
+import { DELETE_DATA } from "./tools/ddbActions";
 
 const route = useRoute();
 const signedSrc = ref("null");
@@ -32,18 +33,17 @@ async function handleDelete(pet: any) {
   const choice = confirm(`Delete ${pet.Name} forever? (This cannot be undone!)`);
   if (choice) {
     // Do delete logic
-    // Delete the pet
-    /*
-        await client.models.Pet.delete({ id: pet.id })
-        .then((res: any) => {
-          console.log("Pet deleted: ", res);
-        })
-        .then(async () => {
-          await deleteStorage(pet.image!);
-        });
+    await DELETE_S3(pet).then(() => {
+      console.log("Image deleted.");
+    });
+    await DELETE_DATA(pet)
+      .then(async () => {
+        console.log("DynamoDB data deleted.");
+      })
+      .then(() => {
         // Refresh
         router.go(0);
-        */
+      });
   } else {
     return console.log(`${pet.Name} was not deleted!`);
   }
