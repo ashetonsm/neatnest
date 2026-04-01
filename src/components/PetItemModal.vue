@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import router from "@/router";
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import { userStore } from "@/stores/user";
+import { DELETE_S3 } from "./tools/s3Actions";
+import { DELETE_DATA, PUT_DATA } from "./tools/ddbActions";
 
 const user = userStore();
 
@@ -15,14 +17,14 @@ async function handleSubmit(item: any | null | undefined) {
     alert(`Hmm, nothing was selected.`);
     return;
   }
-  const pet = JSON.parse(JSON.stringify(props.pet));
+  const pet = props.pet
   try {
     var updatedItem = item;
     var updatedPet = pet;
     var itemWillBeDeleted = false;
-    updatedItem.health!--;
+    updatedItem.Health!--;
 
-    if (updatedItem.health! <= 0 || updatedItem.category == "food") {
+    if (updatedItem.Health! <= 0 || updatedItem.Category == "food") {
       itemWillBeDeleted = true;
     }
 
@@ -30,24 +32,18 @@ async function handleSubmit(item: any | null | undefined) {
     if (itemWillBeDeleted) {
       var confirmDeletion = confirm("This item will disappear after use. Continue?");
       if (confirmDeletion == true) {
-        // Delete the item
-        /*
-        await client.models.Item.delete({ id: item.id })
-          .then((res: any) => {})
-          .then(async () => {
-            await deleteStorage(item.image!);
-          });
-          */
+        // Do delete logic
+        await DELETE_S3(item).then(() => {
+          console.log("Image deleted.");
+        });
+        await DELETE_DATA(item).then(async () => {
+          console.log("DynamoDB data deleted.");
+        });
       } else {
-        // Deletion was not confirmed.
         return;
       }
     } else {
-      // Item will not be deleted
-      // Subtract 1 from health
-      /*
-      await client.models.Item.update(updatedItem).then((res: any) => {});
-      */
+      await PUT_DATA(updatedItem);
     }
 
     // Update the pet
@@ -64,11 +60,7 @@ async function handleSubmit(item: any | null | undefined) {
         updatedPet.Hunger--;
       }
     }
-
-    /*
-
-    await client.models.Pet.update(updatedPet).then((res: any) => {});
-    */
+    await PUT_DATA(updatedPet);
     router.go(0);
   } catch (error: any) {
     console.error("Error: ", error);
@@ -108,11 +100,9 @@ var selectedFriendOption = ref<any>();
 var friendOptions = ref<Array<{ username: string; friendObject: any }>>(user.getFriends);
 const itemFilter1 = props.items;
 const itemFilter2 = props.items;
-foodOptions.value = JSON.parse(
-  JSON.stringify(itemFilter1.filter((item) => item.Category == "food"))
+foodOptions.value = itemFilter1.filter((item) => item.Category == "food"
 );
-playOptions.value = JSON.parse(
-  JSON.stringify(itemFilter2.filter((item) => item.Category == "entertainment"))
+playOptions.value = itemFilter2.filter((item) => item.Category == "entertainment"
 );
 </script>
 <template>
@@ -139,7 +129,7 @@ playOptions.value = JSON.parse(
           v-model="selectedFoodOption"
           label="Food"
           :items="foodOptions"
-          item-title="name"
+          item-title="Name"
           item-value="selectedFoodOption"
           return-object
           single-line
@@ -151,7 +141,7 @@ playOptions.value = JSON.parse(
           v-model="selectedPlayOption"
           label="Entertainment"
           :items="playOptions"
-          item-title="name"
+          item-title="Name"
           item-value="selectedPlayOption"
           return-object
           single-line
