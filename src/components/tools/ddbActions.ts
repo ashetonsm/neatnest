@@ -1,4 +1,4 @@
-import { DynamoDB, UpdateItem$, UpdateItemCommand, type UpdateItemCommandInput } from "@aws-sdk/client-dynamodb";
+import { DeleteItemCommand, DynamoDB } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocument, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 
 export const config = {
@@ -32,6 +32,26 @@ export async function PUT_DATA(newData: Object) {
 
   const response = await client.send(command);
   console.log("DATA PUT SUCCESSFUL");
+  return response
+};
+
+/**
+ * Deletes an entry in the database
+ * @param newData The new or updated data object
+ * @returns 
+ */
+export async function DELETE_DATA(newData: any) {
+
+  const command = {
+    TableName: "neatnest",
+    Key: {
+      PK: { S: newData.PK as string },
+      SK: { S: newData.SK as string }
+    },
+  };
+
+  const response = await client.send(new DeleteItemCommand(command));
+  console.log("DATA DELETION SUCCESSFUL");
   return response
 };
 

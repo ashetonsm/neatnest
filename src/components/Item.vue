@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import router from "@/router";
-import { useRoute } from "vue-router";
 import { onMounted, ref } from "vue";
 import { userStore } from "@/stores/user";
 import ItemModal from "./ItemModal.vue";
-import { createPresignedUrlWithClient } from "@/components/tools/s3Actions";
+import { createPresignedUrlWithClient, DELETE_S3 } from "@/components/tools/s3Actions";
+import { DELETE_DATA } from "./tools/ddbActions";
 const user = userStore();
 const itemModalRef = ref();
 
@@ -67,16 +67,16 @@ async function handleDelete(i: any) {
   const choice = confirm("Delete " + i.Name + "?");
   if (choice) {
     // Do delete logic
-    // Delete the item
-    /*
-          await client.models.Item.delete({ id: i.id })
-          .then((res: any) => {
-            console.log("Item deleted: ", res);
-          })
-          .then(async () => {});
-          // Refresh
-          router.go(0);
-          */
+    await DELETE_S3(i).then(() => {
+      console.log("Image deleted.");
+    });
+    await DELETE_DATA(i).then(async () => {
+      console.log("DynamoDB data deleted.");
+    })
+    .then(() => {
+      // Refresh
+      router.go(0);
+    })
   } else {
     return console.log("Deletion aborted.");
   }
@@ -99,11 +99,7 @@ onMounted(async () => {
   <v-card
     class="mx-auto"
     max-width="300px"
-    :color="
-      item.Selling && $route.name == 'inventory'
-        ? 'light-green-lighten-5'
-        : 'none'
-    "
+    :color="item.Selling && $route.name == 'inventory' ? 'light-green-lighten-5' : 'none'"
   >
     <v-img
       ref="itemModalRef"

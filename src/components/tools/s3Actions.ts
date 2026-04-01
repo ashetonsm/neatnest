@@ -11,6 +11,7 @@ Expect: 100-continue
 */
 
 import {
+    DeleteObjectCommand,
     PutObjectCommand,
     S3Client,
     S3ServiceException,
@@ -66,6 +67,26 @@ or the multipart upload API (5TB max).`,
     }
 };
 
+
+/**
+ * Deletes an item from the S3 database.
+ * @param itemKey The item to be deleted
+ * @returns 
+ */
+export const DELETE_S3 = async (itemKey: any) => {
+    const command = {
+        Bucket: import.meta.env.VITE_S3_BUCKET_NAME,
+        Key: itemKey.Image
+    };
+
+    try {
+        const data = await client.send(new DeleteObjectCommand(command))
+        console.log("Success. Object deleted.", data)
+        return data
+    } catch (err) {
+        console.log("Error", err);
+    }
+};
 
 export const createPresignedUrlWithClient = (key: string) => {
     const command = new GetObjectCommand({ Bucket: import.meta.env.VITE_S3_BUCKET_NAME, Key: key });
