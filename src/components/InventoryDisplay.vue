@@ -18,6 +18,7 @@ async function setCreation() {
 
 onMounted(async () => {
   await setCreation();
+  await user.fetchInventory()
   fetchedItems.value = user.getInventory;
   console.log("fetchedItems.value:", fetchedItems.value)
 });

@@ -16,6 +16,8 @@ async function setCreation() {
 
 onMounted(async () => {
   await setCreation();
+  await user.fetchPets()
+  await user.fetchInventory()
   fetchedPets.value = user.getPets;
   fetchedItems.value = user.getInventory;
     console.log("fetchedPets.value:", fetchedPets.value)
