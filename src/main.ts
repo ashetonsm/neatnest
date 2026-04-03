@@ -4,12 +4,11 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import { createPinia } from 'pinia'
-import { userStore } from './stores/user'
 import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import { createAuth0, useAuth0 } from '@auth0/auth0-vue'
-import { GET_BY_PK_SK } from './components/tools/ddbActions'
+import { userStore } from './stores/user'
 
 const pinia = createPinia()
 const app = createApp(App)
@@ -22,84 +21,22 @@ const auth0 = createAuth0({
     }
 })
 
+app.use(auth0)
 app.use(router)
 app.use(pinia)
-app.use(auth0)
 app.use(vuetify)
 app.mount('#app')
 
-const uStore = userStore();
+const ustore = userStore()
 
 router.beforeEach(async (to) => {
-    const { isAuthenticated, user } = useAuth0()
-    // The user is authenticated
-    if (isAuthenticated.value == true) {
-        // The store user is null
-        if (!uStore.getUser) {
-            console.log("There is no user in the store data.")
-            // Fetch the user to populate the store
-            await uStore.fetchUser(user.value?.sub as string, "#METADATA#", user)
-                .then(() => {
-                    console.log("Got the logged in uStore's Metadata in main.ts: ", uStore.getUser);
-                })
-        } else {
-            console.log("There is a user in the store data.")
-        }
-        switch (to.name) {
-            case "canvas":
-                if (!uStore.getUser) {
-                    await uStore.fetchUser(user.value?.sub as string, "#METADATA#", user)
-                }
-                return
-            case "trades":
-                // await uStore.fetchFriends(auth.getUserId as string)
-                await uStore.fetchTrades()
-                return
-            case "inventory":
-                if (!uStore.getShop) {
-                    // await uStore.fetchShop(uStore.getUser?.id as string)
-                }
-                await uStore.fetchInventory()
-                return
-            case "shop":
-                if (!uStore.getShop) {
-                    // await uStore.fetchShop(uStore.getUser?.id as string)
-                }
-                await uStore.fetchCredit()
-                return
-            case "profile":
-                if (!uStore.getShop) {
-                    // await uStore.fetchShop(uStore.getUser?.id as string)
-                }
-                await uStore.fetchCredit()
-                if ((uStore.getPets.length == 0)) {
-                    await uStore.fetchPets()
-                }
-                if ((uStore.getFriends.length == 0)) {
-                    // await uStore.fetchFriends(auth.getUserId as string)
-                }
-                return
-            case "pets":
-                if (uStore.getPets.length == 0) {
-                    await uStore.fetchPets()
-                }
-                if (uStore.getInventory.length == 0) {
-                    await uStore.fetchInventory()
-                }
-                // Get friends for trading
-                // await uStore.fetchFriends(auth.getUserId as string)
-                return
-            default:
-                console.log("Default switch")
-                // Return the page (no extra prep is required)
-                return
-        }
-    } else {
-        console.log("Auth not found.")
-        if (["login", "about", "home"].includes(to.name as string)) {
-            return
-        } else {
-            return { name: 'login' }
+    if (!ustore.getUser) {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith('currentUser')) {
+                ustore.fetchUser(cookie.split('=')[1], "#METADATA")
+            }
         }
     }
 }
