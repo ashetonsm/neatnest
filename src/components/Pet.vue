@@ -30,7 +30,7 @@ async function getFileUrl(fileName: any) {
 }
 
 async function handleDelete(pet: any) {
-  const choice = confirm(`Delete ${pet.Name} forever? (This cannot be undone!)`);
+  const choice = confirm(`Delete ${pet.name} forever? (This cannot be undone!)`);
   if (choice) {
     // Do delete logic
     await DELETE_S3(pet).then(() => {
@@ -45,18 +45,18 @@ async function handleDelete(pet: any) {
         router.go(0);
       });
   } else {
-    return console.log(`${pet.Name} was not deleted!`);
+    return console.log(`${pet.name} was not deleted!`);
   }
 }
 
 onMounted(async () => {
-  await getFileUrl(props.pet.Image);
+  await getFileUrl(props.pet.image);
 });
 </script>
 
 <template>
   <v-dialog
-    v-if="pet.Owner == user.getUser?.PK && route.name == 'pets'"
+    v-if="pet.owner == user.getUser?.PK && route.name == 'pets'"
     :activator="petModalRef"
     max-width="500"
   >
@@ -67,19 +67,19 @@ onMounted(async () => {
     <v-img
       ref="petModalRef"
       :src="signedSrc"
-      :alt="'an image of ' + pet.Name"
+      :alt="'an image of ' + pet.name"
       class="cursor-pointer"
       min-width="150px"
       max-width="300px"
     ></v-img>
 
     <v-card-title class="text-center">
-      {{ pet.Name }}
+      {{ pet.name }}
     </v-card-title>
-    <v-card-subtitle> Hunger: {{ pet.Hunger }} </v-card-subtitle>
-    <v-card-subtitle> Mood: {{ pet.Mood }} </v-card-subtitle>
+    <v-card-subtitle> Hunger: {{ pet.hunger }} </v-card-subtitle>
+    <v-card-subtitle> Mood: {{ pet.mood }} </v-card-subtitle>
 
-    <v-card-actions v-if="pet.Owner == user.getUser?.PK && route.name == 'pets'">
+    <v-card-actions v-if="pet.owner == user.getUser?.PK && route.name == 'pets'">
       <v-btn
         @click="handleDelete(pet)"
         text="Erase"

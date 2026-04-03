@@ -89,7 +89,7 @@ export async function GET_BY_USERNAME(un: string) {
   const command = new QueryCommand({
     TableName: "neatnest",
     IndexName: "Username",
-    KeyConditionExpression: "Username = :unVal",
+    KeyConditionExpression: "username = :unVal",
     ExpressionAttributeValues:
     {
       ":unVal": un,

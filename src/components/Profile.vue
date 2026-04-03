@@ -22,9 +22,9 @@ async function changeBio(newDesc: Event) {
 
   var updatedUser = user.getUser!;
   try {
-    updatedUser.Bio = newProfileDesc;
+    updatedUser.bio = newProfileDesc;
     await PUT_DATA(updatedUser).then(async () => {
-      router.push(`/profile/${updatedUser.Username}`);
+      router.push(`/profile/${updatedUser.username}`);
       // router.go(0)
     });
   } catch (error: any) {
@@ -45,10 +45,10 @@ async function changeUsername(newUN: Event) {
 
   var updatedUser = user.getUser!;
   try {
-    updatedUser.Username = newUsername;
-    updatedUser.Bio = newProfileDesc;
+    updatedUser.username = newUsername;
+    updatedUser.bio = newProfileDesc;
     await PUT_DATA(updatedUser).then(async () => {
-      router.push(`/profile/${updatedUser.Username}`);
+      router.push(`/profile/${updatedUser.username}`);
     });
   } catch (error: any) {
     console.error(error);
@@ -73,7 +73,7 @@ async function fetchUser() {
       .then((res) => {
         console.log(res)
         thisUser.value = res
-        thisProfileDesc.value = thisUser.value.Bio as string;
+        thisProfileDesc.value = thisUser.value.bio as string;
       })
       .then(() => {
         // get the pets via id
@@ -150,12 +150,12 @@ async function updateFriend(action: string) {
 
 onMounted(async () => {
   // Not viewing logged in user's profile
-  if (user.getUser!.Username !== profile) {
+  if (user.getUser!.username !== profile) {
     await fetchUser();
   } else {
     // Viewing logged in user's profile
     thisUser.value = user.getUser!;
-    thisProfileDesc.value = thisUser.value?.Bio as string;
+    thisProfileDesc.value = thisUser.value.bio as string;
     thesePets.value = user.getPets;
   }
   // Either way, the friends are determined in the user.
@@ -163,7 +163,7 @@ onMounted(async () => {
   if (theseFriends.value) {
     theseFriends.value.filter((friend) => {
       // Logged in user has a friend entry with the current profile
-      if (friend.username === user.getUser!.Username) {
+      if (friend.username === user.getUser!.username) {
         thisFriend.value = JSON.parse(JSON.stringify(friend.friendObject));
       }
       console.log("thisFriend: ", thisFriend.value);
@@ -190,11 +190,11 @@ onMounted(async () => {
         ></v-alert>
 
         <v-btn color="secondary" :to="'/shop/' + profile" class="mb-4">
-          {{ profile == user.getUser?.Username ? "Your Shop" : profile + "'s Shop" }}
+          {{ profile == user.getUser?.username ? "Your Shop" : profile + "'s Shop" }}
         </v-btn>
 
         <!-- Stuff to display for the logged in user -->
-        <template v-if="profile == user.getUser?.Username">
+        <template v-if="profile == user.getUser?.username">
           <v-btn text="Trade Requests" to="/trades"></v-btn>
           <h2 class="text-h4 font-weight-black ma-4">
             Credits: {{ user.getCredits > 0 ? user.getCredits : 0 }}
@@ -203,7 +203,7 @@ onMounted(async () => {
 
         <v-btn
           :disabled="
-            profile == user.getUser?.Username ||
+            profile == user.getUser?.username ||
             ['accepted', 'pending', 'blocked'].includes(thisFriend?.status!)
               ? true
               : false
@@ -220,7 +220,7 @@ onMounted(async () => {
         -->
         <v-btn
           v-if="thisFriend !== null && thisFriend.status !== 'blocked'"
-          :disabled="profile == user.getUser?.Username ? true : false"
+          :disabled="profile == user.getUser?.username ? true : false"
           class="mt-2"
           color="primary"
           :text="
@@ -239,7 +239,7 @@ onMounted(async () => {
         <!-- Always display -->
         <v-btn
           :disabled="
-            profile == user.getUser?.Username
+            profile == user.getUser?.username
               ? true
               : thisFriend?.status == 'blocked' && thisFriend?.owner !== user.getUser?.PK
               ? true
@@ -256,7 +256,7 @@ onMounted(async () => {
         ></v-btn>
       </v-col>
 
-      <v-col class="mx-auto" v-if="user.getUser!.Username == profile">
+      <v-col class="mx-auto" v-if="user.getUser!.username == profile">
         <!-- Change your username -->
         <v-expansion-panels>
           <v-expansion-panel>
@@ -268,7 +268,7 @@ onMounted(async () => {
                 <v-text-field
                   v-model="newUsername"
                   label="Username"
-                  :placeholder="user.getUser!.Username"
+                  :placeholder="user.getUser!.username"
                 ></v-text-field>
                 <v-btn class="mt-2" text="Submit" type="submit"></v-btn>
               </v-form>
@@ -287,7 +287,7 @@ onMounted(async () => {
                 <v-text-field
                   v-model="newProfileDesc"
                   label="Description"
-                  :placeholder="user.getUser!.Bio!"
+                  :placeholder="user.getUser!.bio!"
                 ></v-text-field>
                 <v-btn class="mt-2" text="Submit" type="submit"></v-btn>
               </v-form>

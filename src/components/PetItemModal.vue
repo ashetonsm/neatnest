@@ -49,15 +49,15 @@ async function handleSubmit(item: any | null | undefined) {
     // Update the pet
 
     // Mood actions
-    if (pet.Mood < 5) {
+    if (pet.mood < 5) {
       // Increment mood by one
-      updatedPet.Mood++;
+      updatedPet.mood++;
     }
     // Food actions
     if (item.Category == "food") {
-      if (pet.Hunger > 0) {
+      if (pet.hunger > 0) {
         // decrease hunger by one
-        updatedPet.Hunger--;
+        updatedPet.hunger--;
       }
     }
     await PUT_DATA(updatedPet);
@@ -108,7 +108,7 @@ playOptions.value = itemFilter2.filter((item) => item.Category == "entertainment
 <template>
   <v-card class="mx-auto">
     <v-col class="text-center">
-      <v-card-title> What would you like to do with {{ pet.Name }}? </v-card-title>
+      <v-card-title> What would you like to do with {{ pet.name }}? </v-card-title>
       <v-form
         v-if="friendOptions.length !== 0"
         @submit.prevent="handleTrade(selectedFriendOption as any)"

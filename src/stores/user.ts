@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import { PUT_DATA, GET_BY_PK_SK, LIST_BY_PK_SK } from '@/components/tools/ddbActions';
+import { PUT_DATA, GET_BY_PK_SK, LIST_BY_PK_SK, GET_BY_USERNAME } from '@/components/tools/ddbActions';
 
 export const userStore = defineStore('user', {
     state: () => ({
@@ -30,17 +30,17 @@ export const userStore = defineStore('user', {
                         const newUser = await PUT_DATA({
                             PK: PK,
                             SK: '#METADATA',
-                            Email: inputUser.value.email,
-                            Username: inputUser.value.name,
-                            Avatar: inputUser.value.image,
-                            Bio: "Hi, I'm new! Nice to meet you!",
-                            CreatedAt: new Date().toISOString(),
-                            Currency: 0,
-                            Gender: 'NA',
-                            ItemsRemaining: 3,
-                            PetsRemaining: 3,
-                            Type: 'Metadata',
-                            UpdatedAt: new Date().toISOString(),
+                            email: inputUser.value.email,
+                            username: inputUser.value.name,
+                            avatar: inputUser.value.image,
+                            bio: "Hi, I'm new! Nice to meet you!",
+                            createdAt: new Date().toISOString(),
+                            currency: 0,
+                            gender: 'NA',
+                            itemsRemaining: 3,
+                            petsRemaining: 3,
+                            type: 'Metadata',
+                            updatedAt: new Date().toISOString(),
                         })
                         this.user = newUser
                         return newUser
@@ -222,8 +222,8 @@ export const userStore = defineStore('user', {
         */
         },
 
-        async fetchFriends(inputUserID: string) {
-            // This will all be reworked.
+        async fetchFriends(inputUsername: string) {
+            // const userByUsername = await GET_BY_USERNAME(inputUsername)
 
         }
     }

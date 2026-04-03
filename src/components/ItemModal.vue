@@ -43,7 +43,7 @@ async function toggleSell(i: any, action: string) {
 <template>
   <v-card class="mx-auto">
     <v-col class="text-center">
-      <v-card-title>What would you like to do with "{{ item.Name }}"?</v-card-title>
+      <v-card-title>What would you like to do with "{{ item.name }}"?</v-card-title>
       <v-card-actions>
         <v-btn
           @click="

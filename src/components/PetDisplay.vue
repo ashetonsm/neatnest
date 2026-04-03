@@ -9,7 +9,7 @@ const fetchedItems = ref<Array<any>>([]);
 var canCreate = true;
 
 async function setCreation() {
-  if (user.getUser?.PetsRemaining! > 0) {
+  if (user.getUser?.petsRemaining! > 0) {
     canCreate = true;
   }
 }
@@ -62,7 +62,7 @@ onMounted(async () => {
         <v-row class="ga-4">
           <Pet
             v-for="(pet, i) in fetchedPets"
-            :key="pet.Name ?? i"
+            :key="pet.name ?? i"
             :pet="pet"
             :items="fetchedItems"
           />

@@ -51,10 +51,10 @@ async function handleSubmit(this: any, t: string) {
 }
 
 async function setCreation() {
-  if (user.getUser?.ItemsRemaining! > 0) {
+  if (user.getUser?.itemsRemaining! > 0) {
     canCreateItem.value = true;
   }
-  if (user.getUser?.PetsRemaining! > 0) {
+  if (user.getUser?.petsRemaining! > 0) {
     canCreatePet.value = true;
   }
   loading.value = false;

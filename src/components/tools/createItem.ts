@@ -33,26 +33,26 @@ export async function createItem(
       await PUT_DATA({
         PK: userObj.PK,
         SK: `ITEM#${itemCat}#${name}`,
-        Creator: userObj.PK,
-        Name: name,
-        Owner: userObj.PK,
-        Health: 99,
-        Selling: false,
-        TradeStatus: 0,
-        Image: imgPath,
-        Category: itemCat,
-        Price: 0,
-        Type: 'Item',
-        CreatedAt: new Date().toISOString(),
-        UpdatedAt: new Date().toISOString(),
+        creator: userObj.PK,
+        name: name,
+        owner: userObj.PK,
+        health: 99,
+        selling: false,
+        tradeStatus: 0,
+        image: imgPath,
+        category: itemCat,
+        price: 0,
+        type: 'Item',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       })
         .then(async () => {
           // Update the user by decreasing itemsRemaining by 1 if itemsRemaining > 0
           var updatedUser = userObj
           // Subtract 1 from itemsRemaining
-          updatedUser.ItemsRemaining = updatedUser.ItemsRemaining - 1
+          updatedUser.itemsRemaining = updatedUser.itemsRemaining - 1
           // Update the updatedAt time for the User
-          updatedUser.UpdatedAt = new Date().toISOString()
+          updatedUser.updatedAt = new Date().toISOString()
           await PUT_DATA(updatedUser)
         })
         .then(() => {

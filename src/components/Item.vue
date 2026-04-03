@@ -16,7 +16,7 @@ const props = defineProps<{
 }>();
 
 async function buyFlow(i: any) {
-  const choice = confirm("Buy " + i.Name + " for " + i.Price + "?");
+  const choice = confirm("Buy " + i.name + " for " + i.Price + "?");
   if (choice) {
     // Have not fetched Credit entry yet
     if (!user.getCredits) {
@@ -64,7 +64,7 @@ async function getFileUrl(fileName: any) {
 }
 
 async function handleDelete(i: any) {
-  const choice = confirm("Delete " + i.Name + "?");
+  const choice = confirm("Delete " + i.name + "?");
   if (choice) {
     // Do delete logic
     await DELETE_S3(i).then(() => {
@@ -83,13 +83,13 @@ async function handleDelete(i: any) {
 }
 
 onMounted(async () => {
-  await getFileUrl(props.item.Image);
+  await getFileUrl(props.item.image);
 });
 </script>
 
 <template>
   <v-dialog
-    v-if="item.Owner == user.getUser?.PK && $route.name == 'inventory'"
+    v-if="item.owner == user.getUser?.PK && $route.name == 'inventory'"
     :activator="itemModalRef"
     max-width="500"
   >
@@ -104,19 +104,19 @@ onMounted(async () => {
     <v-img
       ref="itemModalRef"
       :src="signedSrc"
-      :alt="'an image of ' + item.Name"
-      :class="item.Owner == 'NA' ? 'cursor-pointer' : 'cursor-default'"
+      :alt="'an image of ' + item.name"
+      :class="item.owner == 'NA' ? 'cursor-pointer' : 'cursor-default'"
       class="cursor-pointer"
       min-width="150px"
       max-width="300px"
     ></v-img>
 
     <v-card-title class="text-center">
-      {{ item.Name }}
+      {{ item.name }}
     </v-card-title>
 
     <!-- Items owned by the user and on the inventory page-->
-    <template v-if="item.Owner == props.currentUser && $route.name == 'inventory'">
+    <template v-if="item.owner == props.currentUser && $route.name == 'inventory'">
       <v-card-subtitle v-if="item.Selling"> 🛒 </v-card-subtitle>
 
       <v-card-actions>

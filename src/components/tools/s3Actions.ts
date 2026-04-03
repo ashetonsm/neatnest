@@ -1,15 +1,3 @@
-/*
-PUT /my-image.jpg HTTP/1.1
-Host: myBucket.s3.<Region>.amazonaws.com
-Date: Wed, 12 Oct 2009 17:50:00 GMT
-Authorization: authorization string
-Content-Type: text/plain
-Content-Length: 11434
-x-amz-meta-author: Janet
-Expect: 100-continue
-[11434 bytes of object data]
-*/
-
 import {
     DeleteObjectCommand,
     PutObjectCommand,
@@ -76,7 +64,7 @@ or the multipart upload API (5TB max).`,
 export const DELETE_S3 = async (itemKey: any) => {
     const command = {
         Bucket: import.meta.env.VITE_S3_BUCKET_NAME,
-        Key: itemKey.Image
+        Key: itemKey.image
     };
 
     try {

@@ -19,7 +19,7 @@ async function handleSubmit() {
 
   switch (props.thing) {
     case "item":
-      if (user.getUser.ItemsRemaining - 1 < 0) {
+      if (user.getUser.itemsRemaining - 1 < 0) {
         // Make sure creation won't put the user into negative numbers.
         console.log("Insufficient itemsRemaining. Aborting process.");
         return;
@@ -32,7 +32,7 @@ async function handleSubmit() {
       }
       break;
     case "pet":
-      if (user.getUser.PetsRemaining - 1 < 0) {
+      if (user.getUser.petsRemaining - 1 < 0) {
         // Make sure creation won't put the user into negative numbers.
         console.log("Insufficient petsRemaining. Aborting process.");
         return;
