@@ -4,6 +4,7 @@ import { userStore } from "@/stores/user";
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import Pet from "./Pet.vue";
+import { GET_BY_PK_SK, GET_BY_USERNAME, PUT_DATA } from "./tools/ddbActions";
 
 const route = useRoute();
 const user = userStore();
@@ -16,21 +17,16 @@ const thesePets = ref<Array<any>>([]);
 var newUsername = "";
 var newProfileDesc = "";
 
-async function changeDescription(newDesc: Event) {
+async function changeBio(newDesc: Event) {
   console.log("Changing description to: ", newProfileDesc);
 
   var updatedUser = user.getUser!;
   try {
-    updatedUser.description = newProfileDesc;
-    /*
-    client.models.User.update(updatedUser)
-      .then((res: any) => {
-        console.log("User updated: ", res);
-      })
-      .then(() => {
-        router.go(0);
-      });
-    */
+    updatedUser.Bio = newProfileDesc;
+    await PUT_DATA(updatedUser).then(async () => {
+      router.push(`/profile/${updatedUser.Username}`);
+      // router.go(0)
+    });
   } catch (error: any) {
     console.error(error);
   }
@@ -49,27 +45,11 @@ async function changeUsername(newUN: Event) {
 
   var updatedUser = user.getUser!;
   try {
-    updatedUser.username = newUsername;
-    /*
-    await client.models.User.update(updatedUser)
-      .then((res: any) => {
-        console.log("Username updated: ", res);
-      })
-      .then(async () => {
-        var updatedShop = user.getShop!;
-        updatedShop.name = newUsername
-        console.log("user.getShop", user.getShop!)
-        console.log("updatedShop", updatedShop)
-        await client.models.Shop.update(updatedShop)
-        .then((res: any) => {
-          console.log("Shop name updated: ", res)
-        })
-      })
-      .then(async () => {
-        await router.push(`/profile/${newUsername}`);
-        router.go(0);
-      });
-    */
+    updatedUser.Username = newUsername;
+    updatedUser.Bio = newProfileDesc;
+    await PUT_DATA(updatedUser).then(async () => {
+      router.push(`/profile/${updatedUser.Username}`);
+    });
   } catch (error: any) {
     console.error(error);
   }
@@ -89,21 +69,18 @@ async function checkUsername() {
 
 async function fetchUser() {
   try {
-    /*
-    await client.models.User.userByUsername({
-      username: profile.toString(),
-    })
+    await GET_BY_USERNAME(profile.toString())
       .then((res) => {
-        thisUser.value = res.data[0];
+        console.log(res)
+        thisUser.value = res
         thisProfileDesc.value = thisUser.value.Bio as string;
       })
       .then(() => {
         // get the pets via id
         if (thisUser.value) {
-          fetchPets();
+          // fetchPets();
         }
       });
-      */
   } catch (error: any) {
     console.error(error); // The user probably doesn't exist in the db.
   }
@@ -174,7 +151,7 @@ async function updateFriend(action: string) {
 onMounted(async () => {
   // Not viewing logged in user's profile
   if (user.getUser!.Username !== profile) {
-    // await fetchUser();
+    await fetchUser();
   } else {
     // Viewing logged in user's profile
     thisUser.value = user.getUser!;
@@ -306,7 +283,7 @@ onMounted(async () => {
               ><span>Change description</span></v-expansion-panel-title
             >
             <v-expansion-panel-text>
-              <v-form @submit.prevent="changeDescription($event)">
+              <v-form @submit.prevent="changeBio($event)">
                 <v-text-field
                   v-model="newProfileDesc"
                   label="Description"
