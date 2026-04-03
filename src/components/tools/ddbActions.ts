@@ -82,6 +82,30 @@ export async function GET_BY_PK_SK(pk: string, sk: string) {
 
 /**
  * Remember that the KeyConditionExpression is CASE SENSITIVE. Lowercase "PK"/"SK" will not work.
+ * @param un Primary Key (the username)
+ * @returns 
+ */
+export async function GET_BY_USERNAME(un: string) {
+  const command = new QueryCommand({
+    TableName: "neatnest",
+    IndexName: "Username",
+    KeyConditionExpression: "Username = :unVal",
+    ExpressionAttributeValues:
+    {
+      ":unVal": un,
+    }
+  });
+
+  const response = await client.send(command);
+  if (response.Items?.length == 0) {
+    return null
+  } else {
+    return response.Items![0]
+  }
+}
+
+/**
+ * Remember that the KeyConditionExpression is CASE SENSITIVE. Lowercase "PK"/"SK" will not work.
  * @param pk Primary Key (the userID)
  * @param sk Sort Key (the item type)
  * @returns 
