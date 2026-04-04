@@ -36,6 +36,184 @@ export async function PUT_DATA(newData: Object) {
 };
 
 /**
+ * Creates or updates a friend in the #RELATIONSHIPS entry for the user
+ * @param newData The new or updated data object
+ * @returns 
+ */
+export async function UPDATE_FRIEND(targetFriend: any, initiatingFriend: any, updateType: string) {
+  var initiatingRel = {}
+  var targetRel = {}
+
+  try {
+
+
+    var command1 = new PutCommand({
+      TableName: undefined,
+      Item: undefined,
+    });
+    var command2 = new PutCommand({
+      TableName: undefined,
+      Item: undefined,
+    });
+
+    switch (updateType) {
+      case "add":
+        initiatingRel = {
+          PK: initiatingFriend.PK,
+          SK: `RELATIONSHIP#${targetFriend.PK}`,
+          status: 0,
+          type: 'Relationship',
+          username: initiatingFriend.username,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+        targetRel = {
+          PK: targetFriend.PK,
+          SK: `RELATIONSHIP#${initiatingFriend.PK}`,
+          status: 0,
+          type: 'Relationship',
+          username: targetFriend.username,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+
+        command1 = new PutCommand({
+          TableName: "neatnest",
+          Item: initiatingRel,
+        });
+        command2 = new PutCommand({
+          TableName: "neatnest",
+          Item: targetRel,
+        });
+        break
+      case "accept":
+        initiatingRel = {
+          PK: initiatingFriend.PK,
+          SK: `RELATIONSHIP#${targetFriend.PK}`,
+          status: 1,
+          type: 'Relationship',
+          username: initiatingFriend.username,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+        targetRel = {
+          PK: targetFriend.PK,
+          SK: `RELATIONSHIP#${initiatingFriend.PK}`,
+          status: 1,
+          type: 'Relationship',
+          username: targetFriend.username,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+
+        command1 = new PutCommand({
+          TableName: "neatnest",
+          Item: initiatingRel,
+        });
+        command2 = new PutCommand({
+          TableName: "neatnest",
+          Item: targetRel,
+        });
+        break
+      case "remove":
+        initiatingRel = {
+          PK: initiatingFriend.PK,
+          SK: `RELATIONSHIP#${targetFriend.PK}`
+        }
+        targetRel = {
+          PK: targetFriend.PK,
+          SK: `RELATIONSHIP#${initiatingFriend.PK}`
+        }
+
+        await DELETE_DATA(initiatingRel)
+          .then((res) => {
+            console.log("Delete initiatingRel: ", res)
+          })
+        await DELETE_DATA(targetRel)
+          .then((res) => {
+            console.log("Delete targetRel: ", res)
+          })
+        return
+      case "reject":
+        initiatingRel = {
+          PK: initiatingFriend.PK,
+          SK: `RELATIONSHIP#${targetFriend.PK}`
+        }
+        targetRel = {
+          PK: targetFriend.PK,
+          SK: `RELATIONSHIP#${initiatingFriend.PK}`
+        }
+
+        await DELETE_DATA(initiatingRel)
+          .then((res) => {
+            console.log("Delete initiatingRel: ", res)
+          })
+        await DELETE_DATA(targetRel)
+          .then((res) => {
+            console.log("Delete targetRel: ", res)
+          })
+        return
+      case "block":
+        initiatingRel = {
+          PK: initiatingFriend.PK,
+          SK: `RELATIONSHIP#${targetFriend.PK}`,
+          status: 2,
+          type: 'Relationship',
+          username: initiatingFriend.username,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+        targetRel = {
+          PK: targetFriend.PK,
+          SK: `RELATIONSHIP#${initiatingFriend.PK}`,
+          status: 2,
+          type: 'Relationship',
+          username: targetFriend.username,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+
+        command1 = new PutCommand({
+          TableName: "neatnest",
+          Item: initiatingRel,
+        });
+        command2 = new PutCommand({
+          TableName: "neatnest",
+          Item: targetRel,
+        });
+        break
+      default:
+        console.error("Invalid updateType")
+    }
+
+    if (command1.input.TableName !== undefined && command2.input.TableName !== undefined) {
+      await client.send(command1)
+        .then((res) => {
+          console.log("Command1: ", res)
+        })
+      await client.send(command2)
+        .then((res) => {
+          console.log("Command2: ", res)
+        })
+    }
+  } catch (error: any) {
+    console.error("Error: ", error)
+  }
+  return
+}
+
+// Add a new friend
+// Pending = 0, accepted = 1, blocked = 2
+// list_append(pending, thisUser.value.PK)
+// expression-attribute-names" "#pu": pending, thisUser.value.PK)
+
+
+// const command = new PutCommand({
+//   TableName: "neatnest",
+//   Item: newData,
+// });
+
+/**
  * Deletes an entry in the database
  * @param newData The new or updated data object
  * @returns 
@@ -85,14 +263,15 @@ export async function GET_BY_PK_SK(pk: string, sk: string) {
  * @param un Primary Key (the username)
  * @returns 
  */
-export async function GET_BY_USERNAME(un: string) {
+export async function GET_BY_USERNAME(un: string, SK?: string) {
   const command = new QueryCommand({
     TableName: "neatnest",
     IndexName: "Username",
-    KeyConditionExpression: "username = :unVal",
+    KeyConditionExpression: "username = :unVal AND begins_with(SK, :skPrefix)",
     ExpressionAttributeValues:
     {
       ":unVal": un,
+      ":skPrefix": SK || "",
     }
   });
 
