@@ -4,14 +4,14 @@ import { userStore } from "@/stores/user";
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import Pet from "./Pet.vue";
-import { GET_BY_PK_SK, GET_BY_USERNAME, PUT_DATA } from "./tools/ddbActions";
+import { GET_BY_PK_SK, GET_BY_USERNAME, LIST_BY_PK_SK, PUT_DATA, UPDATE_FRIEND } from "./tools/ddbActions";
 
 const route = useRoute();
 const user = userStore();
 var profile = route.params.username;
 const thisProfileDesc = ref<String>("Lorum ipsum this is a description");
 const thisFriend = ref<any | any>(null);
-const theseFriends = ref<Array<{ username: string; friendObject: any }>>([]);
+const theseFriends = ref<any>([]);
 const thisUser = ref<any>();
 const thesePets = ref<Array<any>>([]);
 var newUsername = "";
@@ -69,83 +69,43 @@ async function checkUsername() {
 
 async function fetchUser() {
   try {
-    await GET_BY_USERNAME(profile.toString())
+    await GET_BY_USERNAME(profile.toString(), "#METADATA")
       .then((res) => {
         console.log(res)
         thisUser.value = res
         thisProfileDesc.value = thisUser.value.bio as string;
       })
-      .then(() => {
-        // get the pets via id
-        if (thisUser.value) {
-          // fetchPets();
-        }
-      });
+      .then(async () => {
+        await LIST_BY_PK_SK(thisUser.value.PK, "RELATIONSHIP#")
+          .then((res) => {
+            console.log(res)
+            theseFriends.value = res
+          })
+        await GET_BY_PK_SK(thisUser.value.PK, `RELATIONSHIP#${user.getUser.PK}`)
+          .then((res) => {
+            if (res !== null) {
+              console.log(true, res)
+              thisFriend.value = res
+            } else {
+              console.log(false, res)
+              thisFriend.value = null
+            }
+            console.log("user.getUser.username", user.getUser.username)
+            console.log("thisFriend.username", thisFriend.value?.username)
+          })
+      })
   } catch (error: any) {
     console.error(error); // The user probably doesn't exist in the db.
   }
 }
 
-async function addFriend() {
-  if ((thisUser.value?.PK as string) !== user.getUser!.PK) {
-    /*
-    await client.models.Friend.create({
-      friendA: thisUser.value?.PK as string,
-      friendB: user.getUser!.PK,
-      status: "pending",
-    }).then((res) => {
-      console.log("Updated friend res: ", res.data);
-      router.go(0);
-    });
-  */
-  } else {
-    alert("You can't add yourself as a friend!");
-  }
-}
-
-/** Used for both delete friend and unblock */
-async function deleteFriend() {
-  /*
-  await client.models.Friend.delete({ id: thisFriend.value?.PK }).then((res) => {
-    console.log("Deleted friend res: ", res.data);
-    router.go(0);
-  });
-  */
-}
-
 /** Used to block and accept friends */
 async function updateFriend(action: string) {
-  var updatedFriend: any = {};
-  updatedFriend!.id = thisFriend.value?.PK;
-
-  switch (action) {
-    case "block":
-      updatedFriend!.status = "blocked";
-      break;
-    case "accept":
-      updatedFriend!.status = "accepted";
-      break;
-    default:
-      console.log("Invalid friend action");
-      break;
-  }
-  /*
-  await client.models.Friend.update(updatedFriend).then(async (res) => {
-    if (res.data == null) {
-      console.log("No friend found. Creating new friend to block.");
-      await client.models.Friend.create({
-        friendA: thisUser.value?.PK as string,
-        friendB: user.getUser!.PK,
-        status: "blocked",
-      }).then((res) => {
-        console.log("Blocked with new friend created: ", res.data);
-      });
-    } else {
-      console.log("Updated existing friend: ", res.data);
-  }
-  router.go(0);
-});
-*/
+  await UPDATE_FRIEND(thisUser.value, user.getUser, action)
+    .then(() => {
+      router.push(`/profile/${profile}`);
+      router.go(0);
+    })
 }
 
 onMounted(async () => {
@@ -158,36 +118,16 @@ onMounted(async () => {
     thisProfileDesc.value = thisUser.value.bio as string;
     thesePets.value = user.getPets;
   }
-  // Either way, the friends are determined in the user.
-  // theseFriends.value = await user.fetchFriends(thisUser.value!.PK);
-  if (theseFriends.value) {
-    theseFriends.value.filter((friend) => {
-      // Logged in user has a friend entry with the current profile
-      if (friend.username === user.getUser!.username) {
-        thisFriend.value = JSON.parse(JSON.stringify(friend.friendObject));
-      }
-      console.log("thisFriend: ", thisFriend.value);
-    });
-  }
 });
 </script>
 
 <template>
-  <v-sheet
-    class="d-flex align-center justify-center flex-wrap text-center mx-auto pa-4"
-    elevation="4"
-    width="100%"
-    rounded
-  >
+  <v-sheet class="d-flex align-center justify-center flex-wrap text-center mx-auto pa-4" elevation="4" width="100%"
+    rounded>
     <v-row>
       <v-col md="12" class="text-center">
         <h2 class="text-h4 font-weight-black ma-4">{{ profile }}'s Profile</h2>
-        <v-alert
-          v-if="profile == 'null'"
-          title="Profile not found!"
-          type="error"
-          class="ma-4"
-        ></v-alert>
+        <v-alert v-if="profile == 'null'" title="Profile not found!" type="error" class="ma-4"></v-alert>
 
         <v-btn color="secondary" :to="'/shop/' + profile" class="mb-4">
           {{ profile == user.getUser?.username ? "Your Shop" : profile + "'s Shop" }}
@@ -201,75 +141,50 @@ onMounted(async () => {
           </h2>
         </template>
 
-        <v-btn
-          :disabled="
-            profile == user.getUser?.username ||
-            ['accepted', 'pending', 'blocked'].includes(thisFriend?.status!)
-              ? true
-              : false
-          "
-          class="mt-2"
-          color="primary"
-          text="Add Friend"
-          @click="addFriend()"
-        ></v-btn>
+        <v-btn :disabled="profile == user.getUser?.username ||
+          [0, 1, 2].includes(thisFriend?.status!)
+          ? true
+          : false
+          " class="mt-2" color="primary" text="Add Friend" @click="updateFriend('add')"></v-btn>
 
         <!-- Accept Request is available if Friend status is pending and 
         you are NOT the owner of the Friend record 
         Otherwise, display "Pending" and disable the button.
         -->
-        <v-btn
-          v-if="thisFriend !== null && thisFriend.status !== 'blocked'"
-          :disabled="profile == user.getUser?.username ? true : false"
-          class="mt-2"
-          color="primary"
-          :text="
-            thisFriend?.status == 'pending' && thisFriend?.owner !== user.getUser?.PK
-              ? 'Accept Request'
-              : thisFriend?.status == 'pending'
+        <v-btn v-if="thisFriend !== null && thisFriend.status !== 2"
+          :disabled="profile == user.getUser?.username ? true : false" class="mt-2" color="primary" :text="thisFriend.status == 0 && thisFriend.value?.username == user.getUser?.username
+            ? 'Accept Request'
+            : thisFriend?.status == 0
               ? 'Cancel Request'
               : 'Remove Friend'
-          "
-          @click="
-            thisFriend?.status == 'pending' && thisFriend?.owner !== user.getUser?.PK
-              ? updateFriend('accept')
-              : deleteFriend()
-          "
-        ></v-btn>
+            " @click="
+              thisFriend?.status == 0 && thisFriend.value?.username !== user.getUser?.username
+                ? updateFriend('accept')
+                : updateFriend('remove')
+              "></v-btn>
         <!-- Always display -->
-        <v-btn
-          :disabled="
-            profile == user.getUser?.username
-              ? true
-              : thisFriend?.status == 'blocked' && thisFriend?.owner !== user.getUser?.PK
-              ? true
-              : false
-          "
-          class="mt-2"
-          color="error"
-          :text="['accepted', 'pending', undefined].includes(thisFriend?.status!) ? 
-          'Block' : thisFriend?.status == 'blocked' && thisFriend?.owner !== user.getUser?.PK ?
-          'Block' :
-          'Unblock'
-          "
-          @click="(!thisFriend || ['accepted', 'pending'].includes(thisFriend?.status!)) ? updateFriend('block') : deleteFriend()"
-        ></v-btn>
+        <v-btn :disabled="profile == user.getUser?.username
+          ? true
+          : thisFriend?.status == 2 && thisFriend.value?.username == user.getUser?.username
+            ? true
+            : false
+          " class="mt-2" color="error" :text="[1, 0, undefined].includes(thisFriend?.status!) ?
+            'Block' : thisFriend?.status == 2 && thisFriend.value?.username == user.getUser?.username ?
+              'Block' :
+              'Unblock'
+            "
+          @click="(!thisFriend || [1, 0].includes(thisFriend?.status!)) ? updateFriend('block') : updateFriend('remove')"></v-btn>
       </v-col>
 
       <v-col class="mx-auto" v-if="user.getUser!.username == profile">
         <!-- Change your username -->
         <v-expansion-panels>
           <v-expansion-panel>
-            <v-expansion-panel-title
-              ><span>Change username</span></v-expansion-panel-title
-            >
+            <v-expansion-panel-title><span>Change username</span></v-expansion-panel-title>
             <v-expansion-panel-text>
               <v-form @submit.prevent="changeUsername($event)">
-                <v-text-field
-                  v-model="newUsername"
-                  label="Username"
-                  :placeholder="user.getUser!.username"
-                ></v-text-field>
+                <v-text-field v-model="newUsername" label="Username"
+                  :placeholder="user.getUser!.username"></v-text-field>
                 <v-btn class="mt-2" text="Submit" type="submit"></v-btn>
               </v-form>
             </v-expansion-panel-text>
@@ -279,16 +194,11 @@ onMounted(async () => {
         <!-- Change your description -->
         <v-expansion-panels>
           <v-expansion-panel>
-            <v-expansion-panel-title
-              ><span>Change description</span></v-expansion-panel-title
-            >
+            <v-expansion-panel-title><span>Change description</span></v-expansion-panel-title>
             <v-expansion-panel-text>
               <v-form @submit.prevent="changeBio($event)">
-                <v-text-field
-                  v-model="newProfileDesc"
-                  label="Description"
-                  :placeholder="user.getUser!.bio!"
-                ></v-text-field>
+                <v-text-field v-model="newProfileDesc" label="Description"
+                  :placeholder="user.getUser!.bio!"></v-text-field>
                 <v-btn class="mt-2" text="Submit" type="submit"></v-btn>
               </v-form>
             </v-expansion-panel-text>
@@ -311,12 +221,7 @@ onMounted(async () => {
             <v-col md="12" class="text-center">
               <h2 class="text-h4 font-weight-black ma-4">{{ profile }}'s Pets:</h2>
               <v-row class="ga-4" v-if="thesePets.length !== 0">
-                <Pet
-                  v-for="(pet, i) in thesePets"
-                  :key="pet.name ?? i"
-                  :pet="pet"
-                  :items="[]"
-                />
+                <Pet v-for="(pet, i) in thesePets" :key="pet.name ?? i" :pet="pet" :items="[]" />
               </v-row>
               <div v-else>Aww, {{ profile }} has no pets!</div>
             </v-col>
@@ -326,21 +231,13 @@ onMounted(async () => {
         <!-- Friends -->
         <v-sheet border="md" class="pa-4 text-white mx-auto rounded" color="purple">
           <h2 class="text-h4 font-weight-black ma-4">{{ profile }}'s Friends:</h2>
-          <v-list
-            v-if="
-              theseFriends &&
-              theseFriends.filter((f) => f.friendObject.status == 'accepted').length !== 0
-            "
-          >
-            <template
-              v-for="n in theseFriends.filter((f) => f.friendObject.status == 'accepted')"
-            >
-              <v-list-item
-                v-if="n"
-                :key="'Friend: ' + n.username"
-                :title="n.username.toString()"
-                :to="'/profile/' + n.username"
-              ></v-list-item>
+          <v-list v-if="
+            theseFriends &&
+            theseFriends.filter((f: { status: number; }) => f.status == 1).length !== 0
+          ">
+            <template v-for="n in theseFriends.filter((f: { status: number; }) => f.status == 1)">
+              <v-list-item v-if="n" :key="'Friend: ' + n.username" :title="n.username.toString()"
+                :to="'/profile/' + n.username"></v-list-item>
             </template>
           </v-list>
           <div v-else>Aww, {{ profile }} has no friends!</div>
