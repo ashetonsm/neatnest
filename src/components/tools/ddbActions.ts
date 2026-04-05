@@ -202,16 +202,144 @@ export async function UPDATE_FRIEND(targetFriend: any, initiatingFriend: any, up
   return
 }
 
-// Add a new friend
-// Pending = 0, accepted = 1, blocked = 2
-// list_append(pending, thisUser.value.PK)
-// expression-attribute-names" "#pu": pending, thisUser.value.PK)
+/**
+ * Creates or updates a trade in the TRADES entry for the user
+ * @param targetFriend The user who is being tradeded with
+ * @param initiatingFriend The user who initiated the trade
+ * @param newData The action being performed on the trade
+ * @returns 
+ */
+export async function UPDATE_TRADE(targetFriend: any, initiatingFriend: any, updateType: string) {
+  var initiatingRel = {}
+  var targetRel = {}
 
+  try {
+    var command1 = new PutCommand({
+      TableName: undefined,
+      Item: undefined,
+    });
+    var command2 = new PutCommand({
+      TableName: undefined,
+      Item: undefined,
+    });
 
-// const command = new PutCommand({
-//   TableName: "neatnest",
-//   Item: newData,
-// });
+    switch (updateType) {
+      case "create":
+        initiatingRel = {
+          PK: initiatingFriend.PK,
+          SK: `TRADE#${targetFriend.PK}`,
+          status: 0,
+          type: 'Trade',
+          username: initiatingFriend.username,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+        targetRel = {
+          PK: targetFriend.PK,
+          SK: `TRADE#${initiatingFriend.PK}`,
+          status: 0,
+          type: 'Trade',
+          username: targetFriend.username,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+
+        command1 = new PutCommand({
+          TableName: "neatnest",
+          Item: initiatingRel,
+        });
+        command2 = new PutCommand({
+          TableName: "neatnest",
+          Item: targetRel,
+        });
+        break
+      case "accept":
+        initiatingRel = {
+          PK: initiatingFriend.PK,
+          SK: `TRADE#${targetFriend.PK}`,
+          status: 1,
+          type: 'Trade',
+          username: initiatingFriend.username,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+        targetRel = {
+          PK: targetFriend.PK,
+          SK: `TRADE#${initiatingFriend.PK}`,
+          status: 1,
+          type: 'Trade',
+          username: targetFriend.username,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+
+        command1 = new PutCommand({
+          TableName: "neatnest",
+          Item: initiatingRel,
+        });
+        command2 = new PutCommand({
+          TableName: "neatnest",
+          Item: targetRel,
+        });
+        break
+      case "remove":
+        initiatingRel = {
+          PK: initiatingFriend.PK,
+          SK: `TRADE#${targetFriend.PK}`
+        }
+        targetRel = {
+          PK: targetFriend.PK,
+          SK: `TRADE#${initiatingFriend.PK}`
+        }
+
+        await DELETE_DATA(initiatingRel)
+          .then((res) => {
+            console.log("Delete initiatingRel: ", res)
+          })
+        await DELETE_DATA(targetRel)
+          .then((res) => {
+            console.log("Delete targetRel: ", res)
+          })
+        return
+      case "reject":
+        initiatingRel = {
+          PK: initiatingFriend.PK,
+          SK: `TRADE#${targetFriend.PK}`
+        }
+        targetRel = {
+          PK: targetFriend.PK,
+          SK: `TRADE#${initiatingFriend.PK}`
+        }
+
+        await DELETE_DATA(initiatingRel)
+          .then((res) => {
+            console.log("Delete initiatingRel: ", res)
+          })
+        await DELETE_DATA(targetRel)
+          .then((res) => {
+            console.log("Delete targetRel: ", res)
+          })
+        return
+      default:
+        console.error("Invalid updateType")
+    }
+
+    if (command1.input.TableName !== undefined && command2.input.TableName !== undefined) {
+      await client.send(command1)
+        .then((res) => {
+          console.log("Command1: ", res)
+        })
+      await client.send(command2)
+        .then((res) => {
+          console.log("Command2: ", res)
+        })
+    }
+  } catch (error: any) {
+    console.error("Error: ", error)
+  }
+  return
+}
+
 
 /**
  * Deletes an entry in the database
