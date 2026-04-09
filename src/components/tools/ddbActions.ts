@@ -37,7 +37,14 @@ export async function PUT_DATA(newData: Object) {
 
 /**
  * Creates or updates a friend in the #RELATIONSHIPS entry for the user
- * @param newData The new or updated data object
+ * 0 = pending for the target
+ * 1 = accepted
+ * 2 = blocked for the target
+ * 8 = blocked for the initiator
+ * 9 = pending for the initiator
+ * @param targetFriend The user who is updating a relationship 
+ * @param initiatingFriend The user who initiated the relationship
+ * @param newData The action being performed on the relationship
  * @returns 
  */
 export async function UPDATE_FRIEND(targetFriend: any, initiatingFriend: any, updateType: string) {
@@ -61,7 +68,7 @@ export async function UPDATE_FRIEND(targetFriend: any, initiatingFriend: any, up
         initiatingRel = {
           PK: initiatingFriend.PK,
           SK: `RELATIONSHIP#${targetFriend.PK}`,
-          status: 0,
+          status: 9,
           type: 'Relationship',
           username: initiatingFriend.username,
           createdAt: new Date().toISOString(),
@@ -166,7 +173,7 @@ export async function UPDATE_FRIEND(targetFriend: any, initiatingFriend: any, up
         targetRel = {
           PK: targetFriend.PK,
           SK: `RELATIONSHIP#${initiatingFriend.PK}`,
-          status: 2,
+          status: 8,
           type: 'Relationship',
           username: targetFriend.username,
           createdAt: new Date().toISOString(),
@@ -204,6 +211,9 @@ export async function UPDATE_FRIEND(targetFriend: any, initiatingFriend: any, up
 
 /**
  * Creates or updates a trade in the TRADES entry for the user
+ * 0 = pending for the target
+ * 1 = accepted
+ * 9 = pending for the initiator
  * @param targetFriend The user who is being tradeded with
  * @param initiatingFriend The user who initiated the trade
  * @param newData The action being performed on the trade
@@ -228,7 +238,7 @@ export async function UPDATE_TRADE(targetFriend: any, initiatingFriend: any, upd
         initiatingRel = {
           PK: initiatingFriend.PK,
           SK: `TRADE#${targetFriend.PK}`,
-          status: 0,
+          status: 9,
           type: 'Trade',
           username: initiatingFriend.username,
           createdAt: new Date().toISOString(),
