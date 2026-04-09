@@ -140,41 +140,7 @@ onMounted(async () => {
             Credits: {{ user.getCredits > 0 ? user.getCredits : 0 }}
           </h2>
         </template>
-
-        <v-btn :disabled="profile == user.getUser?.username ||
-          [0, 1, 2].includes(thisFriend?.status!)
-          ? true
-          : false
-          " class="mt-2" color="primary" text="Add Friend" @click="updateFriend('add')"></v-btn>
-
-        <!-- Accept Request is available if Friend status is pending and 
-        you are NOT the owner of the Friend record 
-        Otherwise, display "Pending" and disable the button.
-        -->
-        <v-btn v-if="thisFriend !== null && thisFriend.status !== 2"
-          :disabled="profile == user.getUser?.username ? true : false" class="mt-2" color="primary" :text="thisFriend.status == 0 && thisFriend.value?.username == user.getUser?.username
-            ? 'Accept Request'
-            : thisFriend?.status == 0
-              ? 'Cancel Request'
-              : 'Remove Friend'
-            " @click="
-              thisFriend?.status == 0 && thisFriend.value?.username !== user.getUser?.username
-                ? updateFriend('accept')
-                : updateFriend('remove')
-              "></v-btn>
-        <!-- Always display -->
-        <v-btn :disabled="profile == user.getUser?.username
-          ? true
-          : thisFriend?.status == 2 && thisFriend.value?.username == user.getUser?.username
-            ? true
-            : false
-          " class="mt-2" color="error" :text="[1, 0, undefined].includes(thisFriend?.status!) ?
-            'Block' : thisFriend?.status == 2 && thisFriend.value?.username == user.getUser?.username ?
-              'Block' :
-              'Unblock'
-            "
-          @click="(!thisFriend || [1, 0].includes(thisFriend?.status!)) ? updateFriend('block') : updateFriend('remove')"></v-btn>
-      </v-col>
+      </v-col >
 
       <v-col class="mx-auto" v-if="user.getUser!.username == profile">
         <!-- Change your username -->
