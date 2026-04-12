@@ -1,26 +1,43 @@
 <script setup lang="ts">
 import router from "@/router";
 import { userStore } from "@/stores/user";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, toRaw } from "vue";
 import { useRoute } from "vue-router";
 import Pet from "@/components/Pet.vue"
 import {
   GET_BY_USERNAME,
   LIST_BY_PK_SK,
-  PUT_DATA,
   UPDATE_FRIEND
 } from "@/components/tools/ddbActions";
 import FriendsList from "./FriendsList.vue";
 import ChangeProfile from "./ChangeProfile.vue";
-import type { SubmitEventPromise } from "vuetify";
+import FriendButtons from "./FriendButtons.vue";
 
 const route = useRoute();
 const user = userStore();
 var profile = route.params.username;
 const thisProfileDesc = ref<String>("Lorum ipsum this is a description");
-const friends = ref<any>([]);
-const thisUser = ref<any>();
-const thesePets = ref<Array<any>>([]);
+const friends = ref<Array<Record<string, any>> | undefined>([])
+const buttonValues = ref<{
+  add: boolean,
+  cancel: boolean,
+  remove: boolean,
+  accept: boolean,
+  reject: boolean,
+  block: boolean,
+  unblock: boolean
+}>({
+  add: false,
+  cancel: false,
+  remove: false,
+  accept: false,
+  reject: false,
+  block: false,
+  unblock: false
+})
+const thisUser = ref<any>()
+const targetFriend = ref<any>()
+const thesePets = ref<Array<any>>([])
 
 async function fetchUser() {
   try {
@@ -32,14 +49,63 @@ async function fetchUser() {
       })
       .then(async () => {
         await LIST_BY_PK_SK(thisUser.value.PK, "RELATIONSHIP#")
-          .then((res) => {
-            console.log(res)
+          .then(async (res) => {
             friends.value = res
           })
-        console.log("user.getUser.username", user.getUser.username)
       })
+    console.log(friends.value)
   } catch (error: any) {
     console.error(error); // The user probably doesn't exist in the db.
+  }
+
+
+  // Set the target friend.
+  try {
+    if (friends.value) {
+      friends.value.forEach((friend: { SK?: string; }) => {
+        if ((friend.SK as string).match('(?<=\#).*'))
+          return targetFriend.value = friend
+      });
+      console.log(targetFriend.value)
+    }
+
+    /*
+    * 0 = Your incoming friend request is pending.
+    * 1 = accepted
+    * 2 = blocked for the target
+    * 8 = blocked for the initiator
+    * 9 = Your outgoing friend request is pending.
+    */
+    switch (targetFriend.value.status) {
+      case 0:
+        console.log("This user is waiting for a response from you.")
+        buttonValues.value.accept = true
+        buttonValues.value.reject = true
+        buttonValues.value.block = true
+        return
+      case 1:
+        buttonValues.value.remove = true
+        buttonValues.value.block = true
+        return
+      case 2:
+        console.log("You blocked this user.")
+        buttonValues.value.unblock = true
+        return
+      case 8:
+        console.log("You are blocked (don't tell them this, obviously.)")
+        return
+      case 9:
+        console.log("You are waiting for a response from this user.")
+        buttonValues.value.cancel = true
+        buttonValues.value.block = true
+        return
+      default:
+        console.log("No friend status found.")
+        buttonValues.value.add = true
+        buttonValues.value.block = true
+    }
+  } catch (error: any) {
+    console.error("Something went wrong setting the targetFriend value.", error)
   }
 }
 
@@ -77,6 +143,9 @@ onMounted(async () => {
           {{ profile == user.getUser?.username ? "Your Shop" : profile + "'s Shop" }}
         </v-btn>
 
+        <FriendButtons :buttonValues="buttonValues" />
+
+
         <!-- Stuff to display for the logged in user -->
         <template v-if="profile == user.getUser?.username">
           <v-btn text="Trade Requests" to="/trades"></v-btn>
@@ -87,7 +156,7 @@ onMounted(async () => {
       </v-col>
 
       <v-col class="mx-auto" v-if="user.getUser!.username == profile">
-        <ChangeProfile/>
+        <ChangeProfile />
       </v-col>
 
       <v-col cols="12" class="mx-auto">
@@ -112,7 +181,7 @@ onMounted(async () => {
           </v-row>
         </v-sheet>
 
-        <FriendsList :friends="friends" username="profile" />
+        <FriendsList :friends="friends" :username="profile as string" />
       </v-col>
     </v-row>
   </v-sheet>
