@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import router from "@/router";
 import { userStore } from "@/stores/user";
-import { onMounted, ref, toRaw } from "vue";
+import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import Pet from "@/components/Pet.vue"
 import {
   GET_BY_USERNAME,
-  LIST_BY_PK_SK,
   UPDATE_RELATIONSHIP
 } from "@/components/tools/ddbActions";
 import FriendsList from "./FriendsList.vue";
@@ -39,28 +38,16 @@ const thisUser = ref<any>()
 const targetFriend = ref<any>()
 const thesePets = ref<Array<any>>([])
 
-async function fetchFriends() {
-  try {
-    await LIST_BY_PK_SK(thisUser.value.PK, "RELATIONSHIP#")
-      .then(async (res) => {
-        friends.value = res
-      })
-  } catch (error: any) {
-    console.error(error); // The user probably doesn't exist in the db.
-  }
-}
-
 async function fetchUser() {
   try {
     await GET_BY_USERNAME(profile.toString(), "#METADATA")
-      .then((res) => {
+      .then(async (res) => {
         console.log(res)
         thisUser.value = res
         thisProfileDesc.value = thisUser.value.bio as string;
+        friends.value = await user.fetchFriends(res.PK)
+        console.log(res.PK)
       })
-      await fetchFriends()
-
-    console.log(friends.value)
   } catch (error: any) {
     console.error(error); // The user probably doesn't exist in the db.
   }
@@ -140,7 +127,7 @@ onMounted(async () => {
     thisUser.value = user.getUser!;
     thisProfileDesc.value = thisUser.value.bio as string;
     thesePets.value = user.getPets;
-    await fetchFriends()
+    friends.value = await user.fetchFriends(user.getUser.PK)
   }
 });
 </script>
