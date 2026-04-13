@@ -10,7 +10,7 @@ export const userStore = defineStore('user', {
         inventory: ref<Array<any>>([]),
         credits: ref<any>(0),
         trades: ref<Array<any>>([]),
-        friends: ref<Array<{ username: string, friendObject: any }>>([]),
+        friends: ref<Array<any>>([]),
     }),
     getters: {
         getUser: (state: { user: any | null }) => state.user,
@@ -168,23 +168,10 @@ export const userStore = defineStore('user', {
         },
 
         async fetchInventory() {
-
-            // headers: {
-            //     'Access-Control-Allow-Headers': '*',
-            //     'Access-Control-Allow-Origin': '*',
-            //     'Access-Control-Allow-Methods': '*',
-            //     'Content-Type': 'application/json',
-            // },
-
             const inventory = await LIST_BY_PK_SK(this.getUser.PK, "ITEM")
-
             try {
                 console.log("The inventory from user.ts:", inventory)
-                let updatedInventory: any[] = []
-                inventory!.forEach(item => {
-                    updatedInventory.push(item)
-                });
-                this.inventory = updatedInventory
+                this.inventory = inventory || []
                 return this.inventory
             } catch (error: any) {
                 console.error("Error fetching the inventory: ", error)
@@ -222,9 +209,18 @@ export const userStore = defineStore('user', {
         */
         },
 
-        async fetchFriends(inputUsername: string) {
-            // const userByUsername = await GET_BY_USERNAME(inputUsername)
-
+        async fetchFriends(PK: string) {
+            const friends = await LIST_BY_PK_SK(PK, "RELATIONSHIP#")
+            try {
+                console.log(friends)
+                if (PK == this.user.PK) {
+                    this.friends = friends || []
+                    return this.friends
+                }
+                return friends
+            } catch (error: any) {
+                console.error(error)
+            }
         }
     }
-});
+})
