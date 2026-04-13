@@ -17,8 +17,8 @@ const props = defineProps<{
             friends.filter((f: { status?: number; }) => f.status == 1).length !== 0
         ">
             <template v-for="n in friends.filter((f: { status?: number; }) => f.status == 1)">
-                <v-list-item v-if="n" :key="'Friend: ' + n.username" :title="n.username.toString()"
-                    :to="'/profile/' + n.username"></v-list-item>
+                <v-list-item v-if="n" :key="'Friend: ' + n.relationshipUsername" :title="n.relationshipUsername.toString()"
+                    :to="'/profile/' + n.relationshipUsername"></v-list-item>
             </template>
         </v-list>
         <div v-else>Aww, {{ username }} has no friends!</div>
