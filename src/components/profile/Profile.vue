@@ -7,7 +7,7 @@ import Pet from "@/components/Pet.vue"
 import {
   GET_BY_USERNAME,
   LIST_BY_PK_SK,
-  UPDATE_FRIEND
+  UPDATE_RELATIONSHIP
 } from "@/components/tools/ddbActions";
 import FriendsList from "./FriendsList.vue";
 import ChangeProfile from "./ChangeProfile.vue";
@@ -124,7 +124,7 @@ async function fetchUser() {
 
 /** Used to block and accept friends */
 async function updateFriend(action: string) {
-  await UPDATE_FRIEND(thisUser.value, user.getUser, action)
+  await UPDATE_RELATIONSHIP(thisUser.value, user.getUser, action)
     .then(() => {
       router.push(`/profile/${profile}`);
       router.go(0);
