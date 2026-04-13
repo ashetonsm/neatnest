@@ -39,6 +39,17 @@ const thisUser = ref<any>()
 const targetFriend = ref<any>()
 const thesePets = ref<Array<any>>([])
 
+async function fetchFriends() {
+  try {
+    await LIST_BY_PK_SK(thisUser.value.PK, "RELATIONSHIP#")
+      .then(async (res) => {
+        friends.value = res
+      })
+  } catch (error: any) {
+    console.error(error); // The user probably doesn't exist in the db.
+  }
+}
+
 async function fetchUser() {
   try {
     await GET_BY_USERNAME(profile.toString(), "#METADATA")
@@ -47,12 +58,8 @@ async function fetchUser() {
         thisUser.value = res
         thisProfileDesc.value = thisUser.value.bio as string;
       })
-      .then(async () => {
-        await LIST_BY_PK_SK(thisUser.value.PK, "RELATIONSHIP#")
-          .then(async (res) => {
-            friends.value = res
-          })
-      })
+      await fetchFriends()
+
     console.log(friends.value)
   } catch (error: any) {
     console.error(error); // The user probably doesn't exist in the db.
@@ -61,7 +68,7 @@ async function fetchUser() {
 
   // Set the target friend.
   try {
-    if (friends.value) {
+    if (friends.value !== undefined) {
       friends.value.forEach((friend: { SK?: string; }) => {
         if ((friend.SK as string).match('(?<=\#).*'))
           return targetFriend.value = friend
@@ -69,40 +76,46 @@ async function fetchUser() {
       console.log(targetFriend.value)
     }
 
-    /*
-    * 0 = Your incoming friend request is pending.
-    * 1 = accepted
-    * 2 = blocked for the target
-    * 8 = blocked for the initiator
-    * 9 = Your outgoing friend request is pending.
-    */
-    switch (targetFriend.value.status) {
-      case 0:
-        console.log("This user is waiting for a response from you.")
-        buttonValues.value.accept = true
-        buttonValues.value.reject = true
-        buttonValues.value.block = true
-        return
-      case 1:
-        buttonValues.value.remove = true
-        buttonValues.value.block = true
-        return
-      case 2:
-        console.log("You blocked this user.")
-        buttonValues.value.unblock = true
-        return
-      case 8:
-        console.log("You are blocked (don't tell them this, obviously.)")
-        return
-      case 9:
-        console.log("You are waiting for a response from this user.")
-        buttonValues.value.cancel = true
-        buttonValues.value.block = true
-        return
-      default:
-        console.log("No friend status found.")
-        buttonValues.value.add = true
-        buttonValues.value.block = true
+    if (targetFriend.value !== undefined) {
+
+      /*
+      * 0 = Your incoming friend request is pending.
+      * 1 = accepted
+      * 2 = blocked for the target
+      * 8 = blocked for the initiator
+      * 9 = Your outgoing friend request is pending.
+      */
+      switch (targetFriend.value.status) {
+        case 0:
+          console.log("You are waiting for a response from this user.")
+          buttonValues.value.cancel = true
+          buttonValues.value.block = true
+          return
+        case 1:
+          buttonValues.value.remove = true
+          buttonValues.value.block = true
+          return
+        case 2:
+          console.log("You are blocked (don't tell them this, obviously.)")
+          return
+        case 8:
+          console.log("You blocked this user.")
+          buttonValues.value.unblock = true
+          return
+        case 9:
+          console.log("This user is waiting for a response from you.")
+          buttonValues.value.accept = true
+          buttonValues.value.reject = true
+          buttonValues.value.block = true
+          return
+        default:
+          console.log("No friend status found.")
+          buttonValues.value.add = true
+          buttonValues.value.block = true
+      }
+    } else {
+      buttonValues.value.add = true
+      buttonValues.value.block = true
     }
   } catch (error: any) {
     console.error("Something went wrong setting the targetFriend value.", error)
@@ -127,6 +140,7 @@ onMounted(async () => {
     thisUser.value = user.getUser!;
     thisProfileDesc.value = thisUser.value.bio as string;
     thesePets.value = user.getPets;
+    await fetchFriends()
   }
 });
 </script>
@@ -143,7 +157,7 @@ onMounted(async () => {
           {{ profile == user.getUser?.username ? "Your Shop" : profile + "'s Shop" }}
         </v-btn>
 
-        <FriendButtons :buttonValues="buttonValues" />
+        <FriendButtons :buttonValues="buttonValues" :updateFriend="updateFriend" />
 
 
         <!-- Stuff to display for the logged in user -->
