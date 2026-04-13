@@ -48,150 +48,73 @@ export async function PUT_DATA(newData: Object) {
  * @returns 
  */
 export async function UPDATE_FRIEND(targetFriend: any, initiatingFriend: any, updateType: string) {
-  var initiatingRel = {}
-  var targetRel = {}
+  var initiatingRel = {
+    PK: initiatingFriend.PK,
+    SK: `RELATIONSHIP#${targetFriend.PK}`,
+    status: 0,	// to be changed
+    type: 'Relationship',
+    relationshipUsername: targetFriend.username,
+    username: initiatingFriend.username,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
+  var targetRel = {
+    PK: targetFriend.PK,
+    SK: `RELATIONSHIP#${initiatingFriend.PK}`,
+    status: 0,	// to be changed
+    type: 'Relationship',
+    relationshipUsername: initiatingFriend.username,
+    username: targetFriend.username,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
 
   try {
-
-
-    var command1 = new PutCommand({
-      TableName: undefined,
-      Item: undefined,
-    });
-    var command2 = new PutCommand({
-      TableName: undefined,
-      Item: undefined,
-    });
-
     switch (updateType) {
       case "add":
-        initiatingRel = {
-          PK: initiatingFriend.PK,
-          SK: `RELATIONSHIP#${targetFriend.PK}`,
-          status: 9,
-          type: 'Relationship',
-          username: initiatingFriend.username,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }
-        targetRel = {
-          PK: targetFriend.PK,
-          SK: `RELATIONSHIP#${initiatingFriend.PK}`,
-          status: 0,
-          type: 'Relationship',
-          username: targetFriend.username,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }
-
-        command1 = new PutCommand({
-          TableName: "neatnest",
-          Item: initiatingRel,
-        });
-        command2 = new PutCommand({
-          TableName: "neatnest",
-          Item: targetRel,
-        });
+        initiatingRel.status = 9
+        targetRel.status = 0
         break
       case "accept":
-        initiatingRel = {
-          PK: initiatingFriend.PK,
-          SK: `RELATIONSHIP#${targetFriend.PK}`,
-          status: 1,
-          type: 'Relationship',
-          username: initiatingFriend.username,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }
-        targetRel = {
-          PK: targetFriend.PK,
-          SK: `RELATIONSHIP#${initiatingFriend.PK}`,
-          status: 1,
-          type: 'Relationship',
-          username: targetFriend.username,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }
-
-        command1 = new PutCommand({
-          TableName: "neatnest",
-          Item: initiatingRel,
-        });
-        command2 = new PutCommand({
-          TableName: "neatnest",
-          Item: targetRel,
-        });
+        initiatingRel.status = 1
+        targetRel.status = 1
         break
       case "remove":
-        initiatingRel = {
+        const initiatingRelDelete = {
           PK: initiatingFriend.PK,
           SK: `RELATIONSHIP#${targetFriend.PK}`
         }
-        targetRel = {
+        const targetRelDelete = {
           PK: targetFriend.PK,
           SK: `RELATIONSHIP#${initiatingFriend.PK}`
         }
 
-        await DELETE_DATA(initiatingRel)
+        await DELETE_DATA(initiatingRelDelete)
           .then((res) => {
             console.log("Delete initiatingRel: ", res)
           })
-        await DELETE_DATA(targetRel)
-          .then((res) => {
-            console.log("Delete targetRel: ", res)
-          })
-        return
-      case "reject":
-        initiatingRel = {
-          PK: initiatingFriend.PK,
-          SK: `RELATIONSHIP#${targetFriend.PK}`
-        }
-        targetRel = {
-          PK: targetFriend.PK,
-          SK: `RELATIONSHIP#${initiatingFriend.PK}`
-        }
-
-        await DELETE_DATA(initiatingRel)
-          .then((res) => {
-            console.log("Delete initiatingRel: ", res)
-          })
-        await DELETE_DATA(targetRel)
+        await DELETE_DATA(targetRelDelete)
           .then((res) => {
             console.log("Delete targetRel: ", res)
           })
         return
       case "block":
-        initiatingRel = {
-          PK: initiatingFriend.PK,
-          SK: `RELATIONSHIP#${targetFriend.PK}`,
-          status: 2,
-          type: 'Relationship',
-          username: initiatingFriend.username,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }
-        targetRel = {
-          PK: targetFriend.PK,
-          SK: `RELATIONSHIP#${initiatingFriend.PK}`,
-          status: 8,
-          type: 'Relationship',
-          username: targetFriend.username,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }
-
-        command1 = new PutCommand({
-          TableName: "neatnest",
-          Item: initiatingRel,
-        });
-        command2 = new PutCommand({
-          TableName: "neatnest",
-          Item: targetRel,
-        });
+        initiatingRel.status = 2
+        targetRel.status = 8
         break
       default:
         console.error("Invalid updateType")
+        return
     }
+
+    const command1 = new PutCommand({
+      TableName: "neatnest",
+      Item: initiatingRel,
+    });
+    const command2 = new PutCommand({
+      TableName: "neatnest",
+      Item: targetRel,
+    });
 
     if (command1.input.TableName !== undefined && command2.input.TableName !== undefined) {
       await client.send(command1)
