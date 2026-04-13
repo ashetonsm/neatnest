@@ -11,18 +11,19 @@ const props = defineProps<{
     reject: boolean,
     block: boolean,
     unblock: boolean
-  };
+  },
+  updateFriend: any
 }>();
 
 </script>
 
 <template>
 
-  <v-btn v-if="props.buttonValues.add">Add</v-btn>
-  <v-btn v-if="props.buttonValues.cancel">Cancel</v-btn>
-  <v-btn v-if="props.buttonValues.remove">Remove</v-btn>
-  <v-btn v-if="props.buttonValues.accept">Accept</v-btn>
-  <v-btn v-if="props.buttonValues.reject">Reject</v-btn>
-  <v-btn v-if="props.buttonValues.block">Block</v-btn>
-  <v-btn v-if="props.buttonValues.unblock">Unblock</v-btn>
+  <v-btn v-if="props.buttonValues.add" @click="updateFriend('add')">Add</v-btn>
+  <v-btn v-if="props.buttonValues.cancel" @click="updateFriend('remove')">Cancel</v-btn>
+  <v-btn v-if="props.buttonValues.remove" @click="updateFriend('remove')">Remove</v-btn>
+  <v-btn v-if="props.buttonValues.accept" @click="updateFriend('accept')">Accept</v-btn>
+  <v-btn v-if="props.buttonValues.reject" @click="updateFriend('remove')">Reject</v-btn>
+  <v-btn v-if="props.buttonValues.block" @click="updateFriend('block')">Block</v-btn>
+  <v-btn v-if="props.buttonValues.unblock" @click="updateFriend('remove')">Unblock</v-btn>
 </template>
