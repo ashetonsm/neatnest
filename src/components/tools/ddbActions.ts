@@ -36,35 +36,35 @@ export async function PUT_DATA(newData: Object) {
 };
 
 /**
- * Creates or updates a friend in the #RELATIONSHIPS entry for the user
+ * Creates or updates a relationship in the #RELATIONSHIPS entry for the user
  * 0 = pending for the target
  * 1 = accepted
  * 2 = blocked for the target
  * 8 = blocked for the initiator
  * 9 = pending for the initiator
- * @param targetFriend The user who is updating a relationship 
- * @param initiatingFriend The user who initiated the relationship
+ * @param targetRelationship The user who is updating a relationship 
+ * @param initiatingRelationship The user who initiated the relationship
  * @param newData The action being performed on the relationship
  * @returns 
  */
-export async function UPDATE_FRIEND(targetFriend: any, initiatingFriend: any, updateType: string) {
+export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRelationship: any, updateType: string) {
   var initiatingRel = {
-    PK: initiatingFriend.PK,
-    SK: `RELATIONSHIP#${targetFriend.PK}`,
+    PK: initiatingRelationship.PK,
+    SK: `RELATIONSHIP#${targetRelationship.PK}`,
     status: 0,	// to be changed
     type: 'Relationship',
-    relationshipUsername: targetFriend.username,
-    username: initiatingFriend.username,
+    relationshipUsername: targetRelationship.username,
+    username: initiatingRelationship.username,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
   var targetRel = {
-    PK: targetFriend.PK,
-    SK: `RELATIONSHIP#${initiatingFriend.PK}`,
+    PK: targetRelationship.PK,
+    SK: `RELATIONSHIP#${initiatingRelationship.PK}`,
     status: 0,	// to be changed
     type: 'Relationship',
-    relationshipUsername: initiatingFriend.username,
-    username: targetFriend.username,
+    relationshipUsername: initiatingRelationship.username,
+    username: targetRelationship.username,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
@@ -81,12 +81,12 @@ export async function UPDATE_FRIEND(targetFriend: any, initiatingFriend: any, up
         break
       case "remove":
         const initiatingRelDelete = {
-          PK: initiatingFriend.PK,
-          SK: `RELATIONSHIP#${targetFriend.PK}`
+          PK: initiatingRelationship.PK,
+          SK: `RELATIONSHIP#${targetRelationship.PK}`
         }
         const targetRelDelete = {
-          PK: targetFriend.PK,
-          SK: `RELATIONSHIP#${initiatingFriend.PK}`
+          PK: targetRelationship.PK,
+          SK: `RELATIONSHIP#${initiatingRelationship.PK}`
         }
 
         await DELETE_DATA(initiatingRelDelete)
@@ -136,126 +136,84 @@ export async function UPDATE_FRIEND(targetFriend: any, initiatingFriend: any, up
  * Creates or updates a trade in the TRADES entry for the user
  * 0 = pending for the target
  * 1 = accepted
+ * 7 = rejected for the target
+ * 8 = rejected for the initiator
  * 9 = pending for the initiator
- * @param targetFriend The user who is being tradeded with
- * @param initiatingFriend The user who initiated the trade
- * @param newData The action being performed on the trade
+ * @param targetTrader The user who is being tradeded with
+ * @param initiatingTrader The user who initiated the trade
+ * @param updateType The action being performed on the trade
  * @returns 
  */
-export async function UPDATE_TRADE(targetFriend: any, initiatingFriend: any, updateType: string) {
-  var initiatingRel = {}
-  var targetRel = {}
+export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tradeContents: any, updateType: string) {
+  var initiatingTrade = {
+    PK: initiatingTrader.PK,
+    SK: `TRADE#${targetTrader.PK}`,
+    status: 0,	// to be changed
+    type: 'Trade',
+    tradeUsername: targetTrader.username,
+    tradeContents: tradeContents,
+    username: initiatingTrader.username,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
+  var targetTrade = {
+    PK: targetTrader.PK,
+    SK: `TRADE#${initiatingTrader.PK}`,
+    status: 0,	// to be changed
+    type: 'Trade',
+    tradeUsername: initiatingTrader.username,
+    tradeContents: tradeContents,
+    username: targetTrader.username,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
 
   try {
-    var command1 = new PutCommand({
-      TableName: undefined,
-      Item: undefined,
-    });
-    var command2 = new PutCommand({
-      TableName: undefined,
-      Item: undefined,
-    });
-
     switch (updateType) {
-      case "create":
-        initiatingRel = {
-          PK: initiatingFriend.PK,
-          SK: `TRADE#${targetFriend.PK}`,
-          status: 9,
-          type: 'Trade',
-          username: initiatingFriend.username,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }
-        targetRel = {
-          PK: targetFriend.PK,
-          SK: `TRADE#${initiatingFriend.PK}`,
-          status: 0,
-          type: 'Trade',
-          username: targetFriend.username,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }
-
-        command1 = new PutCommand({
-          TableName: "neatnest",
-          Item: initiatingRel,
-        });
-        command2 = new PutCommand({
-          TableName: "neatnest",
-          Item: targetRel,
-        });
+      case "add":
+        initiatingTrade.status = 9
+        targetTrade.status = 0
         break
       case "accept":
-        initiatingRel = {
-          PK: initiatingFriend.PK,
-          SK: `TRADE#${targetFriend.PK}`,
-          status: 1,
-          type: 'Trade',
-          username: initiatingFriend.username,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }
-        targetRel = {
-          PK: targetFriend.PK,
-          SK: `TRADE#${initiatingFriend.PK}`,
-          status: 1,
-          type: 'Trade',
-          username: targetFriend.username,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }
-
-        command1 = new PutCommand({
-          TableName: "neatnest",
-          Item: initiatingRel,
-        });
-        command2 = new PutCommand({
-          TableName: "neatnest",
-          Item: targetRel,
-        });
+        initiatingTrade.status = 1
+        targetTrade.status = 1
+        break
+      case "reject":
+        initiatingTrade.status = 8
+        targetTrade.status = 7
         break
       case "remove":
-        initiatingRel = {
-          PK: initiatingFriend.PK,
-          SK: `TRADE#${targetFriend.PK}`
+        const initiatingTradeDelete = {
+          PK: initiatingTrader.PK,
+          SK: `TRADE#${targetTrader.PK}`
         }
-        targetRel = {
-          PK: targetFriend.PK,
-          SK: `TRADE#${initiatingFriend.PK}`
-        }
-
-        await DELETE_DATA(initiatingRel)
-          .then((res) => {
-            console.log("Delete initiatingRel: ", res)
-          })
-        await DELETE_DATA(targetRel)
-          .then((res) => {
-            console.log("Delete targetRel: ", res)
-          })
-        return
-      case "reject":
-        initiatingRel = {
-          PK: initiatingFriend.PK,
-          SK: `TRADE#${targetFriend.PK}`
-        }
-        targetRel = {
-          PK: targetFriend.PK,
-          SK: `TRADE#${initiatingFriend.PK}`
+        const targetTradeDelete = {
+          PK: targetTrader.PK,
+          SK: `TRADE#${initiatingTrader.PK}`
         }
 
-        await DELETE_DATA(initiatingRel)
+        await DELETE_DATA(initiatingTradeDelete)
           .then((res) => {
-            console.log("Delete initiatingRel: ", res)
+            console.log("Delete initiatingTrade: ", res)
           })
-        await DELETE_DATA(targetRel)
+        await DELETE_DATA(targetTradeDelete)
           .then((res) => {
-            console.log("Delete targetRel: ", res)
+            console.log("Delete targetTrade: ", res)
           })
         return
       default:
         console.error("Invalid updateType")
+        return
     }
+
+    const command1 = new PutCommand({
+      TableName: "neatnest",
+      Item: initiatingTrade,
+    });
+    const command2 = new PutCommand({
+      TableName: "neatnest",
+      Item: targetTrade,
+    });
 
     if (command1.input.TableName !== undefined && command2.input.TableName !== undefined) {
       await client.send(command1)
