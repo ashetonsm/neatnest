@@ -18,7 +18,7 @@ export const userStore = defineStore('user', {
         getPets: (state: { pets: any }) => state.pets,
         getInventory: (state: { inventory: any }) => state.inventory,
         getCredits: (state: { credits: any }) => state.credits,
-        getTrades: (state: { trades: Array<any> }) => state.trades,
+        getTrades: (state: { trades: any }) => state.trades,
         getFriends: (state: { friends: any }) => state.friends,
     },
     actions: {
@@ -35,7 +35,7 @@ export const userStore = defineStore('user', {
                             avatar: inputUser.value.image,
                             bio: "Hi, I'm new! Nice to meet you!",
                             createdAt: new Date().toISOString(),
-                            currency: 0,
+                            credits: 0,
                             gender: 'NA',
                             itemsRemaining: 3,
                             petsRemaining: 3,
@@ -43,127 +43,40 @@ export const userStore = defineStore('user', {
                             updatedAt: new Date().toISOString(),
                         })
                         this.user = newUser
+                        this.credits = 0
                         return newUser
                     }
                 }
                 this.user = retrievedUser
+                this.credits = retrievedUser?.credits
                 return retrievedUser
             } catch (error: any) {
                 console.error("An error occurred in fetchUser: ", error)
             }
         },
 
-        async fetchShop(inputOwnerId: string) {
+        async fetchPets(PK: string) {
+            const pets = await LIST_BY_PK_SK(PK, "PET#")
             try {
-                /*
-                await client.models.Shop.shopByOwnerId({ ownerId: inputOwnerId as string})
-                .then(async (res: { data: any; }) => {
-                    if (res.data.length) {
-                        console.log("Found existing Shop.")
-                        if (inputOwnerId as string == this.getUser?.id) {
-                            this.shop = res.data[0] as unknown as any
-                        }
-                        console.log(res.data[0])
-                        return res.data[0] as unknown as any
-                    } else {
-                        console.log("No Shop found for this user. Creating a shop...")
-                    await client.models.Shop.create(
-                        {
-                            ownerId: this.user!.id,
-                            name: this.user?.username,
-                            items: JSON.stringify([])
-                        }
-                    )
-                    .then((res: { data: any; }) => {
-                        if (inputOwnerId as string == this.getUser?.id) {
-                            this.shop = res.data[0] as unknown as any
-                        }
-                        console.log(res.data[0])
-                        
-                        return res.data[0] as unknown as any
-                    })
-                }
-            })
-            */
-            } catch (error: any) {
-                console.error("Oops, something went wrong!")
-                console.error("Error: ", error)
-            }
-        },
-
-        async fetchPets() {
-            try {
-                const pets = await LIST_BY_PK_SK(this.getUser.PK, "PET")
-                try {
-                    console.log("The pets from user.ts:", pets)
-                    let updatedPets: any[] = []
-                    pets!.forEach(pet => {
-                        updatedPets.push(pet)
-                    });
-                    this.pets = updatedPets
-                    return this.pets
-                } catch (error: any) {
-                    console.error("Error fetching pets: ", error)
+                console.log(pets)
+                if (PK == this.user.PK) {
+                    this.pets = pets || []
                     return this.pets
                 }
+                return pets
             } catch (error: any) {
                 console.error(error)
             }
         },
 
         async fetchTrades() {
+            const trades = await LIST_BY_PK_SK(this.getUser.PK, "TRADE#")
             try {
-                /*
-                var tradeArray: Array<any> = []
-                // Get trades where this user is the recipient
-                await client.models.Trade.tradeByRecipient(
-                    { recipient: this.user!.id, },
-                    { authMode: "userPool", })
-                    .then((res: { data: any; }) => {
-                        if (res.data.length) {
-                            tradeArray = res.data
-                        }
-                    })
-                    
-                    // Get trades where this user is the sender
-                    await client.models.Trade.tradeBySender(
-                        { sender: this.user!.id, },
-                        { authMode: "userPool", })
-                        .then((res: { data: any; }) => {
-                            if (res.data.length) {
-                                tradeArray = [...tradeArray, ...res.data]
-                            }
-                        })
-                        
-
-                        var idSet: Set<any> = new Set()
-                        
-                        // Filter for unique objects
-                        tradeArray.forEach(async entry => {
-                            // If the trade's recipient is NOT the current user
-                            if (entry.recipient !== this.user?.id) {
-                                // This entry isn't already in the set
-                                if (!idSet.has(entry)) {
-                                    // Add it to the set.
-                                    idSet.add(entry)
-                                }
-                            } else {
-                                // This entry isn't already in the set
-                            if (!idSet.has(entry)) {
-                                // Add it to the set.
-                                idSet.add(entry)
-                            }
-                        }
-                    })
-                    const tradeList = Array.from(idSet)
-                    
-                    this.trades = tradeList
-                    
-                    */
+                console.log(trades)
+                this.trades = trades || []
+                return this.trades
             } catch (error: any) {
-                this.trades = []
                 console.error(error)
-                console.error(this.trades)
             }
         },
 
@@ -177,36 +90,6 @@ export const userStore = defineStore('user', {
                 console.error("Error fetching the inventory: ", error)
                 return this.inventory
             }
-        },
-
-        async fetchCredit() {
-            /*
-            await client.models.Credit.cashByOwner(
-                { ownerId: this.user!.id },
-                { authMode: 'userPool' }
-            )
-            .then(async (res: { data: any; }) => {
-                if (res.data.length) {
-                    console.log("Found existing Credit.")
-                    return this.credits = parseInt(res.data[0].amount)
-                } else {
-                    console.log("No Credit found for this user. Creating an entry...")
-                await client.models.Credit.create(
-                    {
-                        ownerId: this.user!.id,
-                        amount: 0
-                    }
-                )
-                .then((res: { data: any; }) => {
-                    return this.credits = parseInt(res.data.amount)
-                })
-            }
-        })
-        .catch(async (error: any) => {
-            console.error("Oops, something went wrong!")
-            console.error("Error: ", error)
-        });
-        */
         },
 
         async fetchFriends(PK: string) {
