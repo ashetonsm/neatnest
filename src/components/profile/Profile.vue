@@ -45,8 +45,8 @@ async function fetchUser() {
         console.log(res)
         thisUser.value = res
         thisProfileDesc.value = thisUser.value.bio as string;
-        friends.value = await user.fetchFriends(res.PK)
-        console.log(res.PK)
+        friends.value = await user.fetchFriends(res!.PK)
+        console.log(res!.PK)
       })
   } catch (error: any) {
     console.error(error); // The user probably doesn't exist in the db.
@@ -122,6 +122,7 @@ onMounted(async () => {
   // Not viewing logged in user's profile
   if (user.getUser!.username !== profile) {
     await fetchUser();
+    thesePets.value = await user.fetchPets(thisUser.value.PK) || []
   } else {
     // Viewing logged in user's profile
     thisUser.value = user.getUser!;
