@@ -3,12 +3,9 @@ import { onMounted, ref, shallowRef } from "vue";
 import { userStore } from "@/stores/user";
 import router from "@/router";
 
-const petData = shallowRef<any>();
+const petData = shallowRef<any>(null);
+const thisFriend = shallowRef<any>(null);
 const user = userStore();
-const thisFriend = ref<{
-  username: string;
-  friendObject: any;
-} | null>(null);
 
 const props = defineProps<{
   trade: any;
@@ -16,6 +13,9 @@ const props = defineProps<{
 }>();
 
 onMounted(async () => {
+  if (user.getFriends.length == 0) {
+
+  }
   const friendList = user.getFriends;
   // Get trader usernames
   friendList.filter((f: any) => {
