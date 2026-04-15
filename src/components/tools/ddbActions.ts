@@ -134,11 +134,11 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
 
 /**
  * Creates or updates a trade in the TRADES entry for the user
- * 0 = pending for the target
- * 1 = accepted
- * 7 = rejected for the target
- * 8 = rejected for the initiator
- * 9 = pending for the initiator
+ * 0 = Pending for the target
+ * 1 = Accepted (If both entries are status 1, close the trade)
+ * 2 = Rejected (if both entries are status 2, close the trade)
+ * 8 = Closed
+ * 9 = Pending for the initiator
  * @param targetTrader The user who is being tradeded with
  * @param initiatingTrader The user who initiated the trade
  * @param updateType The action being performed on the trade
@@ -170,17 +170,21 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
 
   try {
     switch (updateType) {
-      case "add":
+      case "create":
         initiatingTrade.status = 9
         targetTrade.status = 0
         break
       case "accept":
         initiatingTrade.status = 1
-        targetTrade.status = 1
+        // targetTrade.status = 1
         break
       case "reject":
+        initiatingTrade.status = 2
+        // targetTrade.status = 2
+        break
+      case "close":
         initiatingTrade.status = 8
-        targetTrade.status = 7
+        targetTrade.status = 8
         break
       case "remove":
         const initiatingTradeDelete = {
