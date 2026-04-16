@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { userStore } from "@/stores/user";
-import Trade from "@/components/trade/Trade.vue";
 import CreateTrade from "@/components/trade/CreateTrade.vue"
+import Trade from "@/components/trade/Trade.vue"
 const user = userStore();
 
 const trades = ref<Array<any>>([]);
@@ -11,9 +11,6 @@ const friends = ref<Array<any>>(user.getFriends);
 onMounted(async () => {
   if (user.getTrades.length == 0) {
     trades.value = await user.fetchTrades() || []
-  }
-  if (user.getFriends.length == 0) {
-    friends.value = await user.fetchFriends(user.getUser.PK) || []
   }
 })
 
@@ -31,7 +28,6 @@ onMounted(async () => {
       <v-col md="12" class="text-center">
         <h2 class="text-h4 font-weight-black ma-4">Your Trades</h2>
 
-
         <v-alert
           v-if="!trades"
           title="Loading..."
@@ -48,9 +44,8 @@ onMounted(async () => {
         <v-row class="ga-4">
           <Trade
             v-for="(trade, i) in trades"
-            :key="trade?.id ?? i"
+            :key="trade?.PK ?? i"
             :trade="trade"
-            :pet="trade.pet as any"
           />
         </v-row>
       </v-col>
