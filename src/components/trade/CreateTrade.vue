@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import { userStore } from "@/stores/user";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, toRaw } from "vue";
 import { UPDATE_TRADE } from "../tools/ddbActions";
 const user = userStore();
 const tradeForm = ref()
-const selectedFriend = ref(null)
-const selectedPets = ref(null)
-const selectedItems = ref(null)
-const selectedCredits = ref(user.getCredits)
+const selectedFriend = ref()
+const selectedPets = ref([])
+const selectedItems = ref([])
+// The table has the name currency right now, which is why this doesn't work.
+// const selectedCredits = ref(user.getCredits)
+const selectedCredits = ref(0)
 
 const friends = ref<Array<any>>(user.getFriends);
 const pets = ref<Array<any>>(user.getPets);
 const items = ref<Array<any>>(user.getInventory);
-const tradeContents = ref<Array<any>>([]);
 
 onMounted(async () => {
   if (user.getFriends.length == 0) {
@@ -28,14 +29,18 @@ onMounted(async () => {
 
 async function createTrade() {
     try {
+        // The actual content of the trade
         const contents = [
-            selectedFriend._rawValue, 
-            selectedPets._rawValue, 
-            selectedPets._rawValue, 
-            {credits: selectedCredits.value}
+            {pets: toRaw(selectedPets.value)},
+            {items: toRaw(selectedItems.value)},
+            {credits: toRaw(selectedCredits.value)}
         ]
         console.log(contents)
-        await UPDATE_TRADE(selectedFriend.value, user.getUser, contents, 'create')
+        var friendObj = {PK: '', relationshipUsername: ''}
+        friendObj.PK = (selectedFriend.value.SK).match(/(?<=#)\S+/)[0]
+        friendObj.relationshipUsername = selectedFriend.value.relationshipUsername
+        // The recipient, the sender, the contents, the action
+        await UPDATE_TRADE(friendObj, user.getUser, contents, 'create')
     } catch (error: any) {
         console.error(error);
     }
@@ -45,11 +50,6 @@ async function validateTrade() {
     const { valid } = await tradeForm.value.validate()
 
     if (valid) alert('Trade is valid')
-    console.log(selectedPets.value)
-    console.log(selectedFriend.value)
-    console.log(selectedItems.value)
-    console.log(selectedCredits.value)
-
     try {
         createTrade()
     } catch (error: any) {
@@ -74,6 +74,7 @@ async function validateTrade() {
                         item-value="friends"
                         return-object
                         single-line
+                        persistent-hint
                     ></v-select>
                     <v-select
                         v-model="selectedPets"
@@ -84,6 +85,7 @@ async function validateTrade() {
                         item-value="pets"
                         return-object
                         single-line
+                        persistent-hint
                     ></v-select>
                     <v-select
                         v-model="selectedItems"
@@ -94,12 +96,15 @@ async function validateTrade() {
                         item-value="items"
                         return-object
                         single-line
+                        persistent-hint
                     ></v-select>
                     <v-number-input
-                        v-model="selectedCredits"
+                        :v-model="selectedCredits"
+                        hint="Select Credit Amount"
                         :max="999"
                         :min="0"
                         :step="1"
+                        persistent-hint
                     ></v-number-input>
                     <v-btn class="mt-2" text="Submit" type="submit" @click.prevent="validateTrade"></v-btn>
                 </v-form>
