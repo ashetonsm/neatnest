@@ -1,74 +1,40 @@
 <script setup lang="ts">
-import { generateClient } from "aws-amplify/data";
-import type { Schema } from "../../amplify/data/resource";
 import { userStore } from "@/stores/user";
 import router from "@/router";
+import { PUT_DATA } from "./tools/ddbActions";
 
-const client = generateClient<Schema>();
 const user = userStore();
 
 const props = defineProps<{
-  item: Schema["Item"]["type"];
+  item: any;
 }>();
 
-async function toggleSell(i: Schema["Item"]["type"], action: string) {
+async function toggleSell(i: any, action: string) {
   var updatedItem = i;
-  var updatedShop = user.getShop!;
-  var stringItems = await JSON.parse(updatedShop.items as string);
-  var arrayItems = stringItems as Array<Schema["Item"]["type"]>;
-
+  console.log(i)
   try {
     switch (action) {
       case "add":
-        // Change the item's shop ID
-        updatedItem.shopId = user.getShop?.id as string;
-        // Add the item to the local array of items
-        arrayItems.push(i);
-        // Change the updatedShop's items
-        updatedShop.items = JSON.stringify(arrayItems);
+        // Change the item to Selling = true
+        updatedItem.Selling = true;
         break;
 
       case "remove":
-        console.log("arrayItems.length", arrayItems.length)
-        console.log("remove ID #", i.id)
-        // Change the item's shop ID
-        updatedItem.shopId = "NA";
-        if (arrayItems.length) {
-          const items = arrayItems;
-          // Filter the items to get rid of the one with the matching ID
-          const filteredItems = items.filter(item => 
-            (item.id as string) !== (i.id as string)
-          );
-
-          console.log("filteredItems after filtering: ", filteredItems);
-          // Stringify the filtered items
-          updatedShop.items = JSON.stringify(filteredItems);
-          if (arrayItems.length === 1) {
-            console.log("ArrayItems has one item");
-            // Set the array back to empty.
-            updatedShop.items = JSON.stringify([]);
-          }
-        } else {
-          console.log("ArrayItems is empty");
-          // Do nothing. It's already empty. (This is an error)
-        }
+        updatedItem.Selling = false;
         break;
       default:
         console.log("Invalid action.");
         break;
     }
-    await client.models.Item.update(updatedItem, { authMode: "userPool" }).then(
-      (res: any) => {
-        console.log("Updated Item:", res);
-      }
-    );
-    await client.models.Shop.update(updatedShop, { authMode: "userPool" }).then(
-      (res: any) => {
-        console.log("Updated Shop:", res);
+
+    await PUT_DATA(updatedItem)
+      .then((res: any) => {
+        console.log(res);
+      })
+      .then(() => {
         // Refresh
         router.go(0);
-      }
-    );
+      });
   } catch (error) {
     console.error(error);
   }
@@ -81,11 +47,9 @@ async function toggleSell(i: Schema["Item"]["type"], action: string) {
       <v-card-actions>
         <v-btn
           @click="
-            item.shopId !== user.getShop?.id
-              ? toggleSell(item, 'add')
-              : toggleSell(item, 'remove')
+            item.Selling !== true ? toggleSell(item, 'add') : toggleSell(item, 'remove')
           "
-          :text="item.shopId !== user.getShop?.id ? 'Add to Shop' : 'Remove from Shop'"
+          :text="item.Selling !== true ? 'Add to Shop' : 'Remove from Shop'"
           class="mx-auto"
           variant="elevated"
           color="primary"

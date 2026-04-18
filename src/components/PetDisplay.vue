@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import Pet from "./Pet.vue";
 import { onMounted, ref } from "vue";
-import type { Schema } from "../../amplify/data/resource";
 import { userStore } from "@/stores/user";
 const user = userStore();
 
-const fetchedPets = ref<Array<Schema["Pet"]["type"]>>([]);
-const fetchedItems = ref<Array<Schema["Item"]["type"]>>([]);
+const fetchedPets = ref<Array<any>>([]);
+const fetchedItems = ref<Array<any>>([]);
 var canCreate = true;
 
 async function setCreation() {
@@ -17,8 +16,12 @@ async function setCreation() {
 
 onMounted(async () => {
   await setCreation();
-  fetchedPets.value = JSON.parse(JSON.stringify(user.getPets));
-  fetchedItems.value = JSON.parse(JSON.stringify(user.getInventory));
+  await user.fetchPets(user.getUser.PK)
+  await user.fetchInventory()
+  fetchedPets.value = user.getPets;
+  fetchedItems.value = user.getInventory;
+    console.log("fetchedPets.value:", fetchedPets.value)
+
 });
 </script>
 
@@ -51,16 +54,10 @@ onMounted(async () => {
           color="primary"
           to="/canvas/pet"
           class="mb-4"
-          target="_blank"
           >Launch Canvas
         </v-btn>
 
-        <v-btn
-          color="secondary"
-          to="/trades"
-          class="mb-4"
-          >Your Trades
-        </v-btn>
+        <v-btn color="secondary" to="/trades" class="mb-4">Your Trades </v-btn>
 
         <v-row class="ga-4">
           <Pet

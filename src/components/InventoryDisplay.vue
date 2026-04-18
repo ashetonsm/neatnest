@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import Item from "./Item.vue";
 import { onMounted, ref } from "vue";
-import type { Schema } from "../../amplify/data/resource";
 import { userStore } from "@/stores/user";
 
 // These should be items where the owner is the logged in user
 const user = userStore();
 
 // create a reactive reference to Item[]
-const fetchedItems: any = ref<Array<Schema["Item"]["type"]>>([]);
+const fetchedItems: any = ref<Array<any>>([]);
 var canCreate = true;
 
 async function setCreation() {
@@ -19,7 +18,9 @@ async function setCreation() {
 
 onMounted(async () => {
   await setCreation();
-  fetchedItems.value = JSON.parse(JSON.stringify(user.getInventory));
+  await user.fetchInventory()
+  fetchedItems.value = user.getInventory;
+  console.log("fetchedItems.value:", fetchedItems.value)
 });
 </script>
 
@@ -46,11 +47,10 @@ onMounted(async () => {
           color="primary"
           to="/canvas/item"
           class="mb-4"
-          target="_blank"
           >Launch Canvas
         </v-btn>
 
-        <v-btn color="secondary" :to="'/shop/'+ user.getShop?.name" class="mb-4">Your Shop</v-btn>
+        <!-- <v-btn color="secondary" :to="'/shop/'+ user.getShop?.name" class="mb-4">Your Shop</v-btn> -->
 
         <v-row class="ga-4">
           <Item
@@ -58,7 +58,7 @@ onMounted(async () => {
             v-for="(item, i) in fetchedItems"
             :key="item.name ?? i"
             :item="item"
-            :currentUser="user.getUser?.id!"
+            :currentUser="user.getUser?.PK!"
           />
         </v-row>
       </v-col>

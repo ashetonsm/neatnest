@@ -1,75 +1,69 @@
 import router from "@/router";
-import { uploadData } from "aws-amplify/storage";
+import { uploadData } from "./s3Actions";
+import { PUT_DATA } from "./ddbActions";
 
-export function createItem(
+export async function createItem(
   name: string,
   imgPath: string,
   itemCat: string,
-  userID: string,
   userObj: any,
-  client: any
 ) {
-  if ((userObj.itemsRemaining - 1) < 0) {
-    // Make sure creation won't put the user into negative numbers.
-    console.log("Insufficient itemsRemaining. Aborting process.")
-    return
-  } else {
-    // Query for the canvas
-    const canvas = document.querySelector('canvas')
+  // Query for the canvas
+  const canvas = document.querySelector('canvas')
 
-    // Try uploading the image
-    try {
-      canvas!.toBlob(async (blob) => {
-        try {
-          const result = await uploadData({
-            path: imgPath,
-            data: blob!,
-            options: {
-              contentType: 'image/png'
-            }
-          }).result;
-          console.log('Succeeded: ', result);
-        } catch (error) {
-          console.log('Error : ', error);
-        }
-
-      }, 'image/png')
-
-      // Try creating a new Item
+  // Try uploading the image
+  try {
+    canvas!.toBlob(async (blob) => {
       try {
-        client.models.Item.create({
-          name: name,
-          category: itemCat,
-          price: 1,
-          shopId: "NA",
-          creator: userID,
-          ownerId: userID,
-          health: 99,
-          rarity: 1,
-          image: imgPath
-        }).then(() => {
+        const result = (await uploadData(imgPath, blob));
+
+        if (result && result.$metadata.httpStatusCode == 200) {
+          console.log('Uploaded succeeded');
+        } else {
+          console.log('Something went wrong with the upload.');
+        }
+      } catch (error) {
+        console.log('Error : ', error);
+      }
+
+    }, 'image/png')
+
+    // Try creating a new Item
+    try {
+      await PUT_DATA({
+        PK: userObj.PK,
+        SK: `ITEM#${itemCat}#${name}`,
+        creator: userObj.PK,
+        name: name,
+        owner: userObj.PK,
+        health: 99,
+        selling: false,
+        tradeStatus: 0,
+        image: imgPath,
+        category: itemCat,
+        price: 0,
+        type: 'Item',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+        .then(async () => {
           // Update the user by decreasing itemsRemaining by 1 if itemsRemaining > 0
           var updatedUser = userObj
           // Subtract 1 from itemsRemaining
           updatedUser.itemsRemaining = updatedUser.itemsRemaining - 1
           // Update the updatedAt time for the User
           updatedUser.updatedAt = new Date().toISOString()
-
-          client.models.User.update(updatedUser)
-            .then((res: any) => {
-              console.log("User updated: ", res)
-            })
-            .then(() => {
-              router.push({ name: 'inventory' })
-              router.go(1)
-            })
+          await PUT_DATA(updatedUser)
+        })
+        .then(() => {
+          router.push({ name: 'inventory' })
+          router.go(1)
         });
-      } catch (error: any) {
-        console.log(error)
-      }
-
-    } catch (e: any) {
-      console.log("Error: ", e)
+    } catch (error: any) {
+      console.error(error)
     }
+
+  } catch (e: any) {
+    console.error("Error: ", e)
   }
 }
