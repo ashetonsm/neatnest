@@ -139,7 +139,7 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
  * 2 = Rejected (if both entries are status 2, close the trade)
  * 8 = Closed
  * 9 = Pending for the initiator
- * @param targetTrader The user who is being tradeded with
+ * @param targetTrader The user who is being tradeded with (their relationship record)
  * @param initiatingTrader The user who initiated the trade
  * @param updateType The action being performed on the trade
  * @returns 
@@ -150,7 +150,7 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
     SK: `TRADE#${targetTrader.PK}`,
     status: 0,	// to be changed
     type: 'Trade',
-    tradeUsername: targetTrader.username,
+    tradeUsername: targetTrader.relationshipUsername,
     tradeContents: tradeContents,
     username: initiatingTrader.username,
     createdAt: new Date().toISOString(),
@@ -163,7 +163,7 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
     type: 'Trade',
     tradeUsername: initiatingTrader.username,
     tradeContents: tradeContents,
-    username: targetTrader.username,
+    username: targetTrader.relationshipUsername,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
@@ -219,16 +219,16 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
       Item: targetTrade,
     });
 
-    if (command1.input.TableName !== undefined && command2.input.TableName !== undefined) {
-      await client.send(command1)
-        .then((res) => {
-          console.log("Command1: ", res)
-        })
-      await client.send(command2)
-        .then((res) => {
-          console.log("Command2: ", res)
-        })
-    }
+    console.log("command1.input", command1.input)
+    console.log("command2.input", command2.input)
+    await client.send(command1)
+      .then((res) => {
+        console.log("Command1: ", res)
+      })
+    await client.send(command2)
+      .then((res) => {
+        console.log("Command2: ", res)
+      })
   } catch (error: any) {
     console.error("Error: ", error)
   }
