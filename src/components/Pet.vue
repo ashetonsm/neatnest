@@ -1,56 +1,49 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
-import type { Schema } from "../../amplify/data/resource";
-import { getUrl } from "aws-amplify/storage";
 import PetItemModal from "./PetItemModal.vue";
 import { userStore } from "@/stores/user";
-import { generateClient } from "aws-amplify/api";
-import { deleteStorage } from "./tools/deleteStorage";
 import router from "@/router";
 import { useRoute } from "vue-router";
+import { createPresignedUrlWithClient, DELETE_S3 } from "./tools/s3Actions";
+import { DELETE_DATA } from "./tools/ddbActions";
 
 const route = useRoute();
 const signedSrc = ref("null");
 const petModalRef = ref();
 const user = userStore();
-const client = generateClient<Schema>(); // use this Data client for CRUDL requests
 
 const props = defineProps<{
-  pet: Schema["Pet"]["type"];
-  items: Array<Schema["Item"]["type"]>;
+  pet: any;
+  items: Array<any>;
 }>();
 
 async function getFileUrl(fileName: any) {
   try {
-    const result = await getUrl({
-      path: fileName, // Adjust path as needed (e.g., private/, protected/)
-      options: {
-        expiresIn: 3600, // URL valid for 1 hour
-        validateObjectExistence: true,
-      },
-    });
-    signedSrc.value = result.url.toString();
+    const result = await createPresignedUrlWithClient(fileName as string);
+    console.log(result);
+    signedSrc.value = result;
   } catch (error) {
-    console.error("Error getting URL:", error);
+    console.error(error);
     return null;
   }
   return;
 }
 
-async function handleDelete(pet: Schema["Item"]["type"]) {
+async function handleDelete(pet: any) {
   const choice = confirm(`Delete ${pet.name} forever? (This cannot be undone!)`);
   if (choice) {
     // Do delete logic
-    // Delete the pet
-    await client.models.Pet.delete({ id: pet.id })
-      .then((res: any) => {
-        console.log("Pet deleted: ", res);
-      })
+    await DELETE_S3(pet).then(() => {
+      console.log("Image deleted.");
+    });
+    await DELETE_DATA(pet)
       .then(async () => {
-        await deleteStorage(pet.image!);
+        console.log("DynamoDB data deleted.");
+      })
+      .then(() => {
+        // Refresh
+        router.go(0);
       });
-    // Refresh
-    router.go(0);
   } else {
     return console.log(`${pet.name} was not deleted!`);
   }
@@ -63,7 +56,7 @@ onMounted(async () => {
 
 <template>
   <v-dialog
-    v-if="pet.ownerId == user.getUser?.id && route.name == 'pets'"
+    v-if="pet.owner == user.getUser?.PK && route.name == 'pets'"
     :activator="petModalRef"
     max-width="500"
   >
@@ -86,10 +79,10 @@ onMounted(async () => {
     <v-card-subtitle> Hunger: {{ pet.hunger }} </v-card-subtitle>
     <v-card-subtitle> Mood: {{ pet.mood }} </v-card-subtitle>
 
-    <v-card-actions v-if="pet.ownerId == user.getUser?.id && route.name == 'pets'">
+    <v-card-actions v-if="pet.owner == user.getUser?.PK && route.name == 'pets'">
       <v-btn
         @click="handleDelete(pet)"
-        text="Obliterate"
+        text="Erase"
         class="mx-auto"
         variant="elevated"
         color="error"

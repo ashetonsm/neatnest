@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Trades from '@/components/Trades.vue';
+import Trades from '@/components/trade/Trades.vue';
 
 </script>
 

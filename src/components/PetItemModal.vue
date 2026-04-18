@@ -1,32 +1,30 @@
 <script setup lang="ts">
 import router from "@/router";
-import { generateClient } from "aws-amplify/data";
-import type { Schema } from "../../amplify/data/resource";
-import { onMounted, ref } from "vue";
-import { deleteStorage } from "./tools/deleteStorage";
+import { ref } from "vue";
 import { userStore } from "@/stores/user";
+import { DELETE_S3 } from "./tools/s3Actions";
+import { DELETE_DATA, PUT_DATA } from "./tools/ddbActions";
 
-const client = generateClient<Schema>();
 const user = userStore();
 
 const props = defineProps<{
-  pet: Schema["Pet"]["type"];
-  items: Array<Schema["Item"]["type"]>;
+  pet: any;
+  items: Array<any>;
 }>();
 
-async function handleSubmit(item: Schema["Item"]["type"] | null | undefined) {
+async function handleSubmit(item: any | null | undefined) {
   if (item == undefined || !item) {
     alert(`Hmm, nothing was selected.`);
     return;
   }
-  const pet = JSON.parse(JSON.stringify(props.pet));
+  const pet = props.pet
   try {
     var updatedItem = item;
     var updatedPet = pet;
     var itemWillBeDeleted = false;
-    updatedItem.health!--;
+    updatedItem.Health!--;
 
-    if (updatedItem.health! <= 0 || updatedItem.category == "food") {
+    if (updatedItem.Health! <= 0 || updatedItem.Category == "food") {
       itemWillBeDeleted = true;
     }
 
@@ -34,20 +32,18 @@ async function handleSubmit(item: Schema["Item"]["type"] | null | undefined) {
     if (itemWillBeDeleted) {
       var confirmDeletion = confirm("This item will disappear after use. Continue?");
       if (confirmDeletion == true) {
-        // Delete the item
-        await client.models.Item.delete({ id: item.id })
-          .then((res: any) => {})
-          .then(async () => {
-            await deleteStorage(item.image!);
-          });
+        // Do delete logic
+        await DELETE_S3(item).then(() => {
+          console.log("Image deleted.");
+        });
+        await DELETE_DATA(item).then(async () => {
+          console.log("DynamoDB data deleted.");
+        });
       } else {
-        // Deletion was not confirmed.
         return;
       }
     } else {
-      // Item will not be deleted
-      // Subtract 1 from health
-      await client.models.Item.update(updatedItem).then((res: any) => {});
+      await PUT_DATA(updatedItem);
     }
 
     // Update the pet
@@ -58,14 +54,13 @@ async function handleSubmit(item: Schema["Item"]["type"] | null | undefined) {
       updatedPet.mood++;
     }
     // Food actions
-    if (item.category == "food") {
+    if (item.Category == "food") {
       if (pet.hunger > 0) {
         // decrease hunger by one
         updatedPet.hunger--;
       }
     }
-
-    await client.models.Pet.update(updatedPet).then((res: any) => {});
+    await PUT_DATA(updatedPet);
     router.go(0);
   } catch (error: any) {
     console.error("Error: ", error);
@@ -73,42 +68,41 @@ async function handleSubmit(item: Schema["Item"]["type"] | null | undefined) {
 }
 
 async function handleTrade(
-  friend: { username: string; friendObject: Schema["Friend"]["type"] } | null | undefined
+  friend: { username: string; friendObject: any } | null | undefined
 ) {
   if (friend == undefined || !friend) {
     alert(`Hmm, nothing was selected.`);
     return;
   }
   try {
-    await client.models.Trade.create({
-      recipient: friend.friendObject.friendA! !== user.getUser!.id ? friend.friendObject.friendA : friend.friendObject.friendB,
-      sender: user.getUser?.id,
-      status: "pending",
-      pet: JSON.stringify(props.pet),
-    }).then((res: any) => {
-      console.log(res);
-    });
-    router.go(0);
+    /*
+    
+        await client.models.Trade.create({
+          recipient: friend.friendObject.friendA! !== user.getUser!.id ? friend.friendObject.friendA : friend.friendObject.friendB,
+          sender: user.getUser?.id,
+          status: "pending",
+          pet: JSON.stringify(props.pet),
+        }).then((res: any) => {
+          console.log(res);
+        });
+        router.go(0);
+        */
   } catch (error: any) {
     console.error("Error: ", error);
   }
 }
 
-var foodOptions = ref<Array<Schema["Item"]["type"]>>();
-var playOptions = ref<Array<Schema["Item"]["type"]>>();
-var selectedFoodOption = ref<Schema["Item"]["type"]>();
-var selectedPlayOption = ref<Schema["Item"]["type"]>();
-var selectedFriendOption = ref<Schema["Friend"]["type"]>();
-var friendOptions = ref<
-  Array<{ username: string; friendObject: Schema["Friend"]["type"] }>
->(user.getFriends);
+var foodOptions = ref<Array<any>>();
+var playOptions = ref<Array<any>>();
+var selectedFoodOption = ref<any>();
+var selectedPlayOption = ref<any>();
+var selectedFriendOption = ref<any>();
+var friendOptions = ref<Array<{ username: string; friendObject: any }>>(user.getFriends);
 const itemFilter1 = props.items;
 const itemFilter2 = props.items;
-foodOptions.value = JSON.parse(
-  JSON.stringify(itemFilter1.filter((item) => item.category == "food"))
+foodOptions.value = itemFilter1.filter((item) => item.Category == "food"
 );
-playOptions.value = JSON.parse(
-  JSON.stringify(itemFilter2.filter((item) => item.category == "entertainment"))
+playOptions.value = itemFilter2.filter((item) => item.Category == "entertainment"
 );
 </script>
 <template>
@@ -135,7 +129,7 @@ playOptions.value = JSON.parse(
           v-model="selectedFoodOption"
           label="Food"
           :items="foodOptions"
-          item-title="name"
+          item-title="Name"
           item-value="selectedFoodOption"
           return-object
           single-line
@@ -147,7 +141,7 @@ playOptions.value = JSON.parse(
           v-model="selectedPlayOption"
           label="Entertainment"
           :items="playOptions"
-          item-title="name"
+          item-title="Name"
           item-value="selectedPlayOption"
           return-object
           single-line

@@ -2,8 +2,6 @@
 import { userStore } from "@/stores/user";
 import { createItem } from "./tools/createItem";
 import { createPet } from "./tools/createPet";
-import { generateClient } from "aws-amplify/api";
-import type { Schema } from "amplify/data/resource";
 import { ref } from "vue";
 
 var name: string | null;
@@ -11,35 +9,39 @@ var speciesName: string | null;
 var selectedItemType = ref("");
 var itemTypes: Array<string> = ["food", "entertainment"];
 const user = userStore();
-const client = generateClient<Schema>();
 
 const props = defineProps<{
   thing: string | null;
 }>();
 
 async function handleSubmit() {
-  const path = `images/${user.getUser?.id!}/${props.thing}/${name}.png`;
+  const path = `images/${user.getUser?.PK!}/${props.thing}/${name}.png`;
 
   switch (props.thing) {
     case "item":
-      console.log("Name: ", name);
-      console.log("SelectedItemType: ", selectedItemType);
-      if (name && selectedItemType) {
-        createItem(
-          name,
-          path,
-          selectedItemType.value,
-          user.getUser?.id!,
-          user.getUser,
-          client
-        );
+      if (user.getUser.itemsRemaining - 1 < 0) {
+        // Make sure creation won't put the user into negative numbers.
+        console.log("Insufficient itemsRemaining. Aborting process.");
+        return;
+      } else {
+        console.log("Name: ", name);
+        console.log("SelectedItemType: ", selectedItemType);
+        if (name && selectedItemType) {
+          createItem(name, path, selectedItemType.value, user.getUser);
+        }
       }
       break;
     case "pet":
-      console.log("Name: ", name);
-      console.log("SpeciesName: ", speciesName);
-      if (name && speciesName) {
-        createPet(name, speciesName, path, user.getUser?.id!, user.getUser, client);
+      if (user.getUser.petsRemaining - 1 < 0) {
+        // Make sure creation won't put the user into negative numbers.
+        console.log("Insufficient petsRemaining. Aborting process.");
+        return;
+      } else {
+        console.log("Name: ", name);
+        console.log("SpeciesName: ", speciesName);
+        if (name && speciesName) {
+          createPet(name, path, speciesName, user.getUser);
+        }
       }
       break;
 

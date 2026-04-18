@@ -4,10 +4,11 @@ NeatNest is a pixel pet site inspired by Neopets and classic oekakis (drawing me
 
 Make friends, make art, make something neat!
 
-Play [here](https://main.d2aw0idn5nx6cg.amplifyapp.com)!
 
 ### To do:
 
+- [ ] Recreate database structure
+- [ ] Add Auth
 - [ ] Create comment system
 - [ ] Seed default shops on a timer
 - [ ] Seed pet and item creations on a timer (2x a month, max 5 available)
@@ -29,6 +30,6 @@ Play [here](https://main.d2aw0idn5nx6cg.amplifyapp.com)!
 
 ## Technology Used:
 
-- **Hosting**: Via Amazon Amplify.
-- **Authentication**: Via Amazon Cognito.
-- **Database**: Real-time database powered by Amazon DynamoDB.
+- **Hosting**: Via AWS
+- **Authentication**: Via Auth0
+- **Database**: Amazon DynamoDB
