@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { onMounted, ref, shallowRef, toRaw } from "vue";
-import { userStore } from "@/stores/user";
-import Pet from "../Pet.vue";
+import TradeButtons from "./TradeButtons.vue";
 
 const props = defineProps<{
   trade: any;
 }>();
 
 const textStatus = ref("")
+const buttonValues = ref({
+    cancel: false,
+    accept: false,
+    reject: false
+  })
 
 async function handleTrade(action: string) {
   console.log(toRaw(props.trade.tradeContents[0]))
@@ -18,22 +22,25 @@ onMounted(() => {
   switch (parseInt(props.trade.status)) {
     case 0:
       textStatus.value = "Waiting on You"
+      buttonValues.value.accept = true
+      buttonValues.value.reject = true
       break;
     case 1:
-      textStatus.value  = "Accepted"
+      textStatus.value = "Accepted"
       break;
     case 2:
-      textStatus.value  = "Rejected"
+      textStatus.value = "Rejected"
       break;
     case 8:
-      textStatus.value  = "Closed"
+      textStatus.value = "Closed"
       break;
     case 9:
-      textStatus.value  = "Waiting on Them"
+      textStatus.value = "Waiting on Them"
+      buttonValues.value.cancel = true
       break;
   
     default:
-      textStatus.value  = "Invalid trade status!"
+      textStatus.value = "Invalid trade status!"
       break;
   } 
 })
@@ -70,27 +77,7 @@ onMounted(() => {
           </v-card>
     <h3>Trade Status: {{ textStatus }}</h3>
     <v-card-actions>
-      <v-btn
-        @click="handleTrade('accept')"
-        text="Accept"
-        class="mx-auto"
-        variant="elevated"
-        color="success"
-      ></v-btn>
-      <v-btn
-        @click="handleTrade('reject')"
-        text="Reject"
-        class="mx-auto"
-        variant="elevated"
-        color="error"
-      ></v-btn>
-      <v-btn
-        @click="handleTrade('cancel')"
-        text="Cancel"
-        class="mx-auto"
-        variant="elevated"
-        color="error"
-      ></v-btn>
+      <TradeButtons :buttonValues="buttonValues" :updateTrade="handleTrade"/>
     </v-card-actions>
   </v-card>
 </template>
