@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { onMounted, ref, shallowRef, toRaw } from "vue";
 import TradeButtons from "./TradeButtons.vue";
+import { userStore } from "@/stores/user";
+import {
+  UPDATE_TRADE
+} from "@/components/tools/ddbActions";
 
 const props = defineProps<{
   trade: any;
 }>();
 
+const user = userStore();
 const textStatus = ref("")
 const buttonValues = ref({
     cancel: false,
@@ -14,7 +19,10 @@ const buttonValues = ref({
   })
 
 async function handleTrade(action: string) {
-  console.log(toRaw(props.trade.tradeContents[0]))
+  var traderObj = {PK: '', tradeUsername: ''}
+  traderObj.PK = (props.trade.SK).match(/(?<=#)\S+/)[0]
+  traderObj.tradeUsername = props.trade.tradeUsername
+  await UPDATE_TRADE(traderObj, user.getUser, props.trade.tradeContents[0], action)
 }
 
 onMounted(() => {
@@ -56,19 +64,29 @@ onMounted(() => {
 
     <h3>Pet(s): {{ toRaw(props.trade.tradeContents[0]).length }}</h3>
           <v-card 
+            v-if="toRaw(props.trade.tradeContents[0]).length !== 0"
             class="mx-auto" max-width="200px"
             v-for="(pet, i) in props.trade.tradeContents[0]"
             :key="pet.name ?? i">
             <v-card-title>{{ pet.name }}</v-card-title>
             <v-card-subtitle>{{ pet.creator }}</v-card-subtitle>
           </v-card>
-    <h3>Item(s): {{ toRaw(props.trade.tradeContents[1]).length }}</h3>
+          <v-card v-else
+          class="mx-auto" max-width="200px">
+          <v-card-title>No pets</v-card-title>
+          </v-card>
+    <h3>Item(s):</h3>
           <v-card 
+            v-if="toRaw(props.trade.tradeContents[1]).length > 0"
             class="mx-auto" max-width="200px"
             v-for="(item, i) in props.trade.tradeContents[1]"
             :key="item.name ?? i">
             <v-card-title>{{ item.name }}</v-card-title>
             <v-card-subtitle>{{ item.creator }}</v-card-subtitle>
+          </v-card>
+          <v-card v-else
+          class="mx-auto" max-width="200px">
+            <v-card-title>No items</v-card-title>
           </v-card>
     <h3>Credits:</h3>
           <v-card 

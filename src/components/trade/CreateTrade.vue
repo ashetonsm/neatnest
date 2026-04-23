@@ -2,6 +2,7 @@
 import { userStore } from "@/stores/user";
 import { onMounted, ref, toRaw } from "vue";
 import { UPDATE_TRADE } from "../tools/ddbActions";
+import router from "@/router";
 const user = userStore();
 const tradeForm = ref()
 const selectedFriend = ref()
@@ -36,11 +37,19 @@ async function createTrade() {
             {credits: toRaw(selectedCredits.value)}
         ]
         console.log(contents)
-        var friendObj = {PK: '', relationshipUsername: ''}
+        var friendObj = {PK: '', tradeUsername: ''}
         friendObj.PK = (selectedFriend.value.SK).match(/(?<=#)\S+/)[0]
-        friendObj.relationshipUsername = selectedFriend.value.relationshipUsername
+        friendObj.tradeUsername = selectedFriend.value.relationshipUsername
         // The recipient, the sender, the contents, the action
-        await UPDATE_TRADE(friendObj, user.getUser, contents, 'create')
+        if (friendObj.PK !== undefined && friendObj.tradeUsername !== undefined) {
+            await UPDATE_TRADE(friendObj, user.getUser, contents, 'create')
+            .then(() => {
+                router.push({name: 'trades'})
+                router.go(0);
+            })
+        } else {
+            console.error("Something is wrong with the data.", friendObj)
+        }
     } catch (error: any) {
         console.error(error);
     }

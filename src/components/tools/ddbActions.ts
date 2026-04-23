@@ -150,7 +150,7 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
     SK: `TRADE#${targetTrader.PK}`,
     status: 0,	// to be changed
     type: 'Trade',
-    tradeUsername: targetTrader.relationshipUsername,
+    tradeUsername: targetTrader.tradeUsername,
     tradeContents: tradeContents,
     username: initiatingTrader.username,
     createdAt: new Date().toISOString(),
@@ -163,7 +163,7 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
     type: 'Trade',
     tradeUsername: initiatingTrader.username,
     tradeContents: tradeContents,
-    username: targetTrader.relationshipUsername,
+    username: targetTrader.tradeUsername,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
