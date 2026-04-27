@@ -92,6 +92,18 @@ export const userStore = defineStore('user', {
             }
         },
 
+        async fetchShop(shopkeeperUsername: string) {
+            const shopkeeper = await GET_BY_USERNAME(shopkeeperUsername)
+            const inventory = await LIST_BY_PK_SK(shopkeeper?.PK, "ITEM")
+            try {
+                console.log("The shop's inventory from user.ts:", inventory)
+                return inventory || []
+            } catch (error: any) {
+                console.error("Error fetching the shop's inventory: ", error)
+                return []
+            }
+        },
+
         async fetchFriends(PK: string) {
             const friends = await LIST_BY_PK_SK(PK, "RELATIONSHIP#")
             try {
