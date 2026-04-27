@@ -102,7 +102,13 @@ onMounted(async () => {
       <v-card-subtitle v-if="item.selling"> 🛒 </v-card-subtitle>
 
       <v-card-actions>
-        <v-btn @click="handleDelete(item)" text="Erase" class="mx-auto" variant="elevated" color="error"></v-btn>
+        <v-btn
+          @click="handleDelete(item)"
+          text="Erase"
+          class="mx-auto"
+          variant="elevated"
+          color="error"
+        ></v-btn>
       </v-card-actions>
     </template>
     <template v-else>
