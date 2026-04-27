@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import { userStore } from "@/stores/user";
 import router from "@/router";
 import { PUT_DATA } from "./tools/ddbActions";
-
-const user = userStore();
 
 const props = defineProps<{
   item: any;
@@ -16,11 +13,11 @@ async function toggleSell(i: any, action: string) {
     switch (action) {
       case "add":
         // Change the item to Selling = true
-        updatedItem.Selling = true;
+        updatedItem.selling = true;
         break;
 
       case "remove":
-        updatedItem.Selling = false;
+        updatedItem.selling = false;
         break;
       default:
         console.log("Invalid action.");
@@ -47,9 +44,9 @@ async function toggleSell(i: any, action: string) {
       <v-card-actions>
         <v-btn
           @click="
-            item.Selling !== true ? toggleSell(item, 'add') : toggleSell(item, 'remove')
+            item.selling !== true ? toggleSell(item, 'add') : toggleSell(item, 'remove')
           "
-          :text="item.Selling !== true ? 'Add to Shop' : 'Remove from Shop'"
+          :text="item.selling !== true ? 'Add to Shop' : 'Remove from Shop'"
           class="mx-auto"
           variant="elevated"
           color="primary"
