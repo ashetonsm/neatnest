@@ -425,3 +425,30 @@ export async function LIST_BY_PK_SK(pk: string, sk: string) {
     return response.Items
   }
 }
+
+/**
+ * Remember that the KeyConditionExpression is CASE SENSITIVE. Lowercase "PK"/"SK" will not work.
+ * @param pk Primary Key (the userID)
+ * @param sk Sort Key (the item type)
+ * @returns 
+ */
+export async function LIST_SELLING_BY_PK(pk: string) {
+  const command = new QueryCommand({
+    TableName: "neatnest",
+    KeyConditionExpression: "PK = :pkVal AND begins_with(SK, :skPrefix)",
+    ExpressionAttributeValues:
+    {
+      ":pkVal": pk,
+      ":skPrefix": "ITEM#",
+      ":sellingValue": true
+    },
+    FilterExpression: "selling = :sellingValue"
+  });
+
+  const response = await client.send(command);
+  if (response.Items?.length == 0) {
+    return []
+  } else {
+    return response.Items
+  }
+}
