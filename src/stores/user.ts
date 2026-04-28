@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import { PUT_DATA, GET_BY_PK_SK, LIST_BY_PK_SK, GET_BY_USERNAME } from '@/components/tools/ddbActions';
+import { PUT_DATA, GET_BY_PK_SK, LIST_BY_PK_SK, GET_BY_USERNAME, LIST_SELLING_BY_PK } from '@/components/tools/ddbActions';
 
 export const userStore = defineStore('user', {
     state: () => ({
@@ -93,8 +93,8 @@ export const userStore = defineStore('user', {
         },
 
         async fetchShop(shopkeeperUsername: string) {
-            const shopkeeper = await GET_BY_USERNAME(shopkeeperUsername)
-            const inventory = await LIST_BY_PK_SK(shopkeeper?.PK, "ITEM")
+            const shopkeeper = await GET_BY_USERNAME(shopkeeperUsername, "#METADATA")
+            const inventory = await LIST_SELLING_BY_PK(shopkeeper?.PK)
             try {
                 console.log("The shop's inventory from user.ts:", inventory)
                 return inventory || []
