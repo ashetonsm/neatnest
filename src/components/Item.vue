@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import router from "@/router";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, toRaw } from "vue";
 import { userStore } from "@/stores/user";
 import ItemModal from "./ItemModal.vue";
 import { createPresignedUrlWithClient, DELETE_S3 } from "@/components/tools/s3Actions";
-import { DELETE_DATA, PUT_DATA } from "./tools/ddbActions";
+import { DELETE_DATA, GET_BY_PK_SK, PUT_DATA } from "./tools/ddbActions";
 const user = userStore();
 const itemModalRef = ref();
 
 const signedSrc = ref("null");
+const itemCreator = ref("Loading...");
 
 const props = defineProps<{
   item: any;
@@ -78,6 +79,8 @@ async function handleDelete(i: any) {
 
 onMounted(async () => {
   await getFileUrl(props.item.image);
+  const creatorMetadata = await toRaw(GET_BY_PK_SK(props.item.creator, "#METADATA"))
+  itemCreator.value = creatorMetadata?.username
 });
 </script>
 
@@ -89,31 +92,54 @@ onMounted(async () => {
 
   <v-card class="mx-auto" max-width="300px"
     :color="item.selling && $route.name == 'inventory' ? 'light-green-lighten-5' : 'none'">
-    <v-img ref="itemModalRef" :src="signedSrc" :alt="'an image of ' + item.name"
-      :class="item.owner == 'NA' ? 'cursor-pointer' : 'cursor-default'" class="cursor-pointer" min-width="150px"
+    <v-img 
+      ref="itemModalRef" 
+      :src="signedSrc" 
+      :alt="'an image of ' + item.name"
+      :class="(item.owner == 'NA' || item.owner != user.getUser.PK) ? 
+      'cursor-pointer' : 
+      'cursor-default'" 
+      class="cursor-pointer" 
+      min-width="150px"
       max-width="300px"></v-img>
 
     <v-card-title class="text-center">
       {{ item.name }}
     </v-card-title>
+    <!-- Display the creator and price eregardless of the screen -->
+    <v-card-subtitle> Creator: {{ itemCreator }} </v-card-subtitle>
+      <v-card-subtitle> Price: {{ item.price }} </v-card-subtitle>
 
-    <!-- Items owned by the user and on the inventory page-->
-    <template v-if="item.owner == props.currentUser && $route.name == 'inventory'">
+    <!-- Viewing the currentUser's shop -->
+    <template v-if="$route.path == `/shop/${user.getUser.username}` && item.owner == user.getUser.PK">
       <v-card-subtitle v-if="item.selling"> 🛒 </v-card-subtitle>
-
       <v-card-actions>
         <v-btn
           @click="handleDelete(item)"
+          :disabled="true"
           text="Erase"
           class="mx-auto"
           variant="elevated"
           color="error"
+        >This is your shop!</v-btn>
+      </v-card-actions>
+    </template>
+    
+    <!-- Viewing the currentUser's inventory -->
+    <template v-if="$route.name == 'inventory' && item.owner == user.getUser.PK">
+      <v-card-subtitle v-if="item.selling"> 🛒 </v-card-subtitle>      
+      <v-card-actions>
+        <v-btn
+        @click="handleDelete(item)"
+        text="Erase"
+        class="mx-auto"
+        variant="elevated"
+        color="error"
         ></v-btn>
       </v-card-actions>
     </template>
-    <template v-else>
-      <v-card-subtitle> Price: {{ item.price }} </v-card-subtitle>
-
+    <template v-if="item.owner != user.getUser.PK">
+    <v-card-subtitle> Price: {{ item.price }} </v-card-subtitle>
       <v-card-actions>
         <v-btn
           @click="buyFlow(item)"
