@@ -27,16 +27,19 @@ async function buyFlow(i: any) {
       await PUT_DATA(updatedUser)
       
       // Create the item with a clone.
-      var boughtItem = structuredClone(i)
+      var boughtItem = structuredClone(toRaw(i))
       // Modify the owner and selling status
+      boughtItem.PK = user.getUser.PK
       boughtItem.owner = user.getUser.PK
       boughtItem.selling = false
+
       // Write it to the DB
       await PUT_DATA(boughtItem)
-
       // Delete the old item
-      await DELETE_DATA(i)
-      
+      await DELETE_DATA(toRaw(i))
+      .then(() => {
+        router.go(0);
+      })
     } else {
       alert("You don't have enough credits to buy this!");
     }
