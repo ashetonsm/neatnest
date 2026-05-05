@@ -109,9 +109,9 @@ onMounted(async () => {
     <v-card-title class="text-center">
       {{ item.name }}
     </v-card-title>
-    <!-- Display the creator and price eregardless of the screen -->
+    <!-- Display the creator and price regardless of the screen -->
     <v-card-subtitle> Creator: {{ itemCreator }} </v-card-subtitle>
-      <v-card-subtitle> Price: {{ item.price }} </v-card-subtitle>
+    <v-card-subtitle> Price: {{ item.price }} </v-card-subtitle>
 
     <!-- Viewing the currentUser's shop -->
     <template v-if="$route.path == `/shop/${user.getUser.username}` && item.owner == user.getUser.PK">
@@ -142,7 +142,6 @@ onMounted(async () => {
       </v-card-actions>
     </template>
     <template v-if="item.owner != user.getUser.PK">
-    <v-card-subtitle> Price: {{ item.price }} </v-card-subtitle>
       <v-card-actions>
         <v-btn
           @click="buyFlow(item)"
