@@ -8,17 +8,42 @@ const tradeForm = ref()
 const selectedFriend = ref()
 const selectedPets = ref([])
 const selectedItems = ref([])
-// The table has the name currency right now, which is why this doesn't work.
-// const selectedCredits = ref(user.getCredits)
 const selectedCredits = ref(0)
+
 
 const friends = ref<Array<any>>(user.getFriends);
 const pets = ref<Array<any>>(user.getPets);
 const items = ref<Array<any>>(user.getInventory);
 
+const creditRules = ref([
+    (v: number) => (-1 < v && v < 1001) || 'Min credits: 0; Max credits: 1000',
+    (v: number) => (user.getCredits >= v) || "You don't have enough credits to offer!",
+])
+
+const itemRules = ref([
+    (v: any) => (
+        v.value || 
+        selectedItems.value.length !== 0 ||
+        selectedPets.value.length !== 0) || 
+        selectedCredits.value !== 0 ||
+        "You can't trade nothing!",
+])
+
+const petRules = ref([
+    (v: any) => (
+        v.value || 
+        selectedPets.value.length !== 0 ||
+        selectedItems.value.length !== 0) || 
+        selectedCredits.value !== 0 ||
+        "You can't trade nothing!",
+])
+
 onMounted(async () => {
     if (user.getFriends.length == 0) {
         friends.value = await user.fetchFriends(user.getUser.PK) || []
+        if (friends.value.length) {
+            friends.value.filter((friend: { status: number; }) => {friend.status == 1})
+        }
     }
     if (user.getPets.length == 0) {
         pets.value = await user.fetchPets(user.getUser.PK) || []
@@ -34,7 +59,7 @@ async function createTrade() {
         const contents = [
             { pets: toRaw(selectedPets.value) },
             { items: toRaw(selectedItems.value) },
-            { credits: toRaw(selectedCredits.value) }
+            { credits: selectedCredits.value}
         ]
         var friendObj = { PK: '', tradeUsername: '' }
         friendObj.PK = (selectedFriend.value.SK).match(/(?<=#)\S+/)[0]
@@ -54,14 +79,14 @@ async function createTrade() {
     }
 }
 
+/**
+ * Can't trade with someone you blocked
+ */
 async function validateTrade() {
     const { valid } = await tradeForm.value.validate()
-
-    if (valid) alert('Trade is valid')
-    try {
+    if (valid) {
+        alert('Trade is valid')
         createTrade()
-    } catch (error: any) {
-        console.error(error);
     }
 }
 
@@ -73,16 +98,51 @@ async function validateTrade() {
             <v-expansion-panel-title><span>New Trade</span></v-expansion-panel-title>
             <v-expansion-panel-text>
                 <v-form @submit.prevent ref="tradeForm">
-                    <v-select v-model="selectedFriend" label="Friends" :items="friends"
-                        item-title="relationshipUsername" hint="Choose a Friend" item-value="friends" return-object
+                    <v-select 
+                        v-model="selectedFriend" 
+                        label="Friends" 
+                        :items="friends"
+                        item-title="relationshipUsername" 
+                        hint="Choose a Friend" 
+                        item-value="friends" 
+                        :rules="[v => !!v || 'You must select a friend!']"
+                        return-object
                         single-line persistent-hint></v-select>
-                    <v-select v-model="selectedPets" label="Pets" :items="pets" item-title="name" hint="Choose Pet(s)"
-                        item-value="pets" return-object single-line persistent-hint multiple></v-select>
-                    <v-select v-model="selectedItems" label="Items" :items="items" item-title="name"
-                        hint="Choose Item(s)" item-value="items" return-object single-line persistent-hint
+                    <v-select 
+                        v-model="selectedPets" 
+                        label="Pets" 
+                        :items="pets" 
+                        item-title="name" 
+                        hint="Choose Pet(s)"
+                        item-value="pets" 
+                        :rules="petRules"
+                        return-object 
+                        single-line 
+                        persistent-hint 
                         multiple></v-select>
-                    <v-number-input :v-model="selectedCredits" hint="Select Credit Amount" :max="999" :min="0" :step="1"
-                        persistent-hint></v-number-input>
+                    <v-select 
+                        v-model="selectedItems" 
+                        label="Items" 
+                        :items="items" 
+                        item-title="name"
+                        hint="Choose Item(s)" 
+                        item-value="items" 
+                        :rules="itemRules"
+                        return-object 
+                        single-line 
+                        persistent-hint
+                        multiple></v-select>
+                    <v-number-input 
+                        :v-model="selectedCredits"
+                        :modelValue="selectedCredits" 
+                        v-on:update:model-value="(val) => selectedCredits = val"
+                        hint="Select Credit Amount" 
+                        :max="1000" 
+                        :min="0" 
+                        :step="1"
+                        :rules="creditRules"
+                        persistent-hint
+                    ></v-number-input>
                     <v-btn class="mt-2" text="Submit" type="submit" @click.prevent="validateTrade"></v-btn>
                 </v-form>
             </v-expansion-panel-text>
