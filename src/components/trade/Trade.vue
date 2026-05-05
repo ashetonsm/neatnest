@@ -32,7 +32,6 @@ async function handleTrade(action: string) {
 }
 
 onMounted(() => {
-  console.log(props.trade.status)
   switch (parseInt(props.trade.status)) {
     case 0:
       textStatus.value = "Waiting on You"
