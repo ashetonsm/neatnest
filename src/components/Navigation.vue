@@ -5,14 +5,21 @@ import { RouterLink } from "vue-router";
 
 const user = userStore();
 
-const links = ref<Array<{ title: string; name: string }>>([
+const loggedOutLinks = ref<Array<{ title: string; name: string }>>([
   { title: "Home", name: "/" },
-  { title: "The Emporium", name: "/shop/1" },
-  { title: "The Shack", name: "/shop/2" },
+  { title: "General Store", name: "/shop/1" },
+  { title: "Inventory", name: "/inventory" },
+  { title: "Pets", name: "/pets" },
+  { title: "About", name: "/about" },
+]);
+
+const loggedInLinks = ref<Array<{ title: string; name: string }>>([
+  { title: "Home", name: "/" },
+  { title: "General Store", name: "/shop/1" },
   { title: "Inventory", name: "/inventory" },
   {
     title: "Profile",
-    name: `/profile/null`,
+    name: ``,
   },
   { title: "Pets", name: "/pets" },
   { title: "About", name: "/about" },
@@ -24,7 +31,7 @@ onMounted(async () => {
     console.log("Nav's user: ", user.getUser?.username);
 
     if (mutation.storeId == "user" && user.getUser?.username !== undefined) {
-      links.value[4].name = `/profile/${user.getUser?.username}`;
+      loggedInLinks.value[3].name = `/profile/${user.getUser?.username}`;
     }
   });
 });
@@ -42,11 +49,20 @@ onMounted(async () => {
 
       <v-spacer />
 
-      <RouterLink v-for="(link, i) in links" :key="link.title" :to="link.name">
-        <v-btn width="max-content" :key="i" :value="link.name" color="primary">
-          {{ link.title }}
-        </v-btn>
-      </RouterLink>
+<template v-if="user.getUser">
+  <RouterLink v-for="(link, i) in loggedInLinks" :key="link.title" :to="link.name">
+    <v-btn width="max-content" :key="i" :value="link.name" color="primary">
+      {{ link.title }}
+    </v-btn>
+  </RouterLink>
+</template>
+<template v-else>
+  <RouterLink v-for="(link, i) in loggedOutLinks" :key="link.title" :to="link.name">
+    <v-btn width="max-content" :key="i" :value="link.name" color="primary">
+      {{ link.title }}
+    </v-btn>
+  </RouterLink>
+</template>
     </v-container>
   </v-app-bar>
 </template>
