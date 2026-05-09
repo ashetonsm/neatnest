@@ -36,7 +36,6 @@ export const userStore = defineStore('user', {
                             bio: "Hi, I'm new! Nice to meet you!",
                             createdAt: new Date().toISOString(),
                             credits: 0,
-                            gender: 'NA',
                             itemsRemaining: 3,
                             petsRemaining: 3,
                             type: 'Metadata',
