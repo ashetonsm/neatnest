@@ -49,20 +49,20 @@ onMounted(async () => {
 
       <v-spacer />
 
-<template v-if="user.getUser">
-  <RouterLink v-for="(link, i) in loggedInLinks" :key="link.title" :to="link.name">
-    <v-btn width="max-content" :key="i" :value="link.name" color="primary">
-      {{ link.title }}
-    </v-btn>
-  </RouterLink>
-</template>
-<template v-else>
-  <RouterLink v-for="(link, i) in loggedOutLinks" :key="link.title" :to="link.name">
-    <v-btn width="max-content" :key="i" :value="link.name" color="primary">
-      {{ link.title }}
-    </v-btn>
-  </RouterLink>
-</template>
+      <template v-if="user.getUser">
+        <RouterLink v-for="(link, i) in loggedInLinks" :key="link.title" :to="link.name">
+          <v-btn width="max-content" :key="i" :value="link.name" color="primary">
+            {{ link.title }}
+          </v-btn>
+        </RouterLink>
+      </template>
+      <template v-else>
+        <RouterLink v-for="(link, i) in loggedOutLinks" :key="link.title" :to="link.name">
+          <v-btn width="max-content" :key="i" :value="link.name" color="primary">
+            {{ link.title }}
+          </v-btn>
+        </RouterLink>
+      </template>
     </v-container>
   </v-app-bar>
 </template>
