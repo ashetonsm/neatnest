@@ -2,6 +2,7 @@
 import { userStore } from "@/stores/user";
 import { onMounted, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
+import Notification from "./notifications/Notification.vue";
 
 const user = userStore();
 const collapse = ref(true);
@@ -54,6 +55,14 @@ onMounted(async () => {
   watch(group, () => {
     drawer.value = false
   })
+
+  const notifDrawer = ref(false)
+  const notifGroup = ref(null)
+
+  watch(notifGroup, () => {
+    notifDrawer.value = false
+  })
+
 </script>
   <template>
       <v-app-bar color="primary">
@@ -62,6 +71,12 @@ onMounted(async () => {
         </RouterLink>
         <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
+        <v-avatar 
+          icon="mdi-bell" 
+          variant="text" 
+          :badge="{ color: 'red', location: 'bottom end', floating: true }"
+          class="cursor-pointer"
+          @click.stop="notifDrawer = !notifDrawer"></v-avatar>
         <v-toolbar-title>Nnneatopets</v-toolbar-title>
 
         <!-- 
@@ -77,17 +92,26 @@ onMounted(async () => {
         :location="$vuetify.display.mobile ? 'bottom' : undefined"
         temporary
       >
-      <template v-if="user.getUser?.username !== undefined">
-        <v-list
-        :items="loggedInLinks"
-        :item-props="true"
-        ></v-list>
-      </template>
-      <template v-else>
-        <v-list
-        :items="loggedOutLinks"
-        :item-props="true"
-        ></v-list>
-      </template>
+        <template v-if="user.getUser?.username !== undefined">
+          <v-list
+            :items="loggedInLinks"
+            :item-props="true"
+          ></v-list>
+        </template>
+        <template v-else>
+          <v-list
+            :items="loggedOutLinks"
+            :item-props="true"
+          ></v-list>
+        </template>
+
       </v-navigation-drawer>
+
+      <v-navigation-drawer
+        v-model="notifDrawer"
+        :location="$vuetify.display.mobile ? 'top' : 'right'"
+        temporary
+      >
+      <Notification/>
+    </v-navigation-drawer>
 </template>
