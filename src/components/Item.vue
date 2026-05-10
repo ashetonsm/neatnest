@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import router from "@/router";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, toRaw } from "vue";
 import { userStore } from "@/stores/user";
 import ItemModal from "./ItemModal.vue";
 import { createPresignedUrlWithClient, DELETE_S3 } from "@/components/tools/s3Actions";
-import { DELETE_DATA } from "./tools/ddbActions";
+import { DELETE_DATA, GET_BY_PK_SK, PUT_DATA } from "./tools/ddbActions";
 const user = userStore();
 const itemModalRef = ref();
 
 const signedSrc = ref("null");
+const itemCreator = ref("Loading...");
 
 const props = defineProps<{
   item: any;
@@ -16,32 +17,29 @@ const props = defineProps<{
 }>();
 
 async function buyFlow(i: any) {
-  const choice = confirm("Buy " + i.name + " for " + i.Price + "?");
+  const choice = confirm("Buy " + i.name + " for " + i.price + "?");
   if (choice) {
-    // Have not fetched Credit entry yet
-    if (!user.getCredits) {
-      await user.fetchCredit();
-    }
+    console.log("User has ", user.getCredits, " credit(s).");
+    if (user.getCredits >= i.price) {
+      // Subtract the amount. It doesn't matter if we clone this or not.
+      var updatedUser = user.getUser
+      updatedUser.credits -= i.price
+      await PUT_DATA(updatedUser)
+      
+      // Create the item with a clone.
+      var boughtItem = structuredClone(toRaw(i))
+      // Modify the owner and selling status
+      boughtItem.PK = user.getUser.PK
+      boughtItem.owner = user.getUser.PK
+      boughtItem.selling = false
 
-    // const shopItems = await user.fetchShop(i.ownerId as string)
-    // console.log(shopItems)
-
-    // console.log("User has ", user.getCredits.amount, " credit(s).");
-    if (user.getCredits.amount && i.Price && user.getCredits.amount >= i.Price) {
-      var updatedCredit = user.getCredits;
-      updatedCredit.amount = updatedCredit.amount - i.Price;
-
-      // Subtract the amount.
-      /*
-      await client.models.Credit.update(updatedCredit).then(async () => {
-        // Set the owner to the signed in user
-        i.ownerId = props.currentUser;
-        // Update the item to the current user
-        await client.models.Item.update(i).then(() => {});
-        // Refresh
+      // Write it to the DB
+      await PUT_DATA(boughtItem)
+      // Delete the old item
+      await DELETE_DATA(toRaw(i))
+      .then(() => {
         router.go(0);
-      });
-      */
+      })
     } else {
       alert("You don't have enough credits to buy this!");
     }
@@ -73,10 +71,10 @@ async function handleDelete(i: any) {
     await DELETE_DATA(i).then(async () => {
       console.log("DynamoDB data deleted.");
     })
-    .then(() => {
-      // Refresh
-      router.go(0);
-    })
+      .then(() => {
+        // Refresh
+        router.go(0);
+      })
   } else {
     return console.log("Deletion aborted.");
   }
@@ -84,54 +82,66 @@ async function handleDelete(i: any) {
 
 onMounted(async () => {
   await getFileUrl(props.item.image);
+  const creatorMetadata = await toRaw(GET_BY_PK_SK(props.item.creator, "#METADATA"))
+  itemCreator.value = creatorMetadata?.username
 });
 </script>
 
 <template>
-  <v-dialog
-    v-if="item.owner == user.getUser?.PK && $route.name == 'inventory'"
-    :activator="itemModalRef"
-    max-width="500"
-  >
+  <v-dialog v-if="item.owner == user.getUser?.PK && $route.name == 'inventory'" :activator="itemModalRef"
+    max-width="500">
     <item-modal :item="item" v-slot:default="{ isActive }" />
   </v-dialog>
 
-  <v-card
-    class="mx-auto"
-    max-width="300px"
-    :color="item.Selling && $route.name == 'inventory' ? 'light-green-lighten-5' : 'none'"
-  >
-    <v-img
-      ref="itemModalRef"
-      :src="signedSrc"
+  <v-card class="mx-auto" max-width="300px"
+    :color="item.selling && $route.name == 'inventory' ? 'light-green-lighten-5' : 'none'">
+    <v-img 
+      ref="itemModalRef" 
+      :src="signedSrc" 
       :alt="'an image of ' + item.name"
-      :class="item.owner == 'NA' ? 'cursor-pointer' : 'cursor-default'"
-      class="cursor-pointer"
+      :class="(item.owner == 'NA' || item.owner != user.getUser.PK) ? 
+      'cursor-pointer' : 
+      'cursor-default'" 
+      class="cursor-pointer" 
       min-width="150px"
-      max-width="300px"
-    ></v-img>
+      max-width="300px"></v-img>
 
     <v-card-title class="text-center">
       {{ item.name }}
     </v-card-title>
+    <!-- Display the creator and price regardless of the screen -->
+    <v-card-subtitle> Creator: {{ itemCreator }} </v-card-subtitle>
+    <v-card-subtitle> Price: {{ item.price }} </v-card-subtitle>
 
-    <!-- Items owned by the user and on the inventory page-->
-    <template v-if="item.owner == props.currentUser && $route.name == 'inventory'">
-      <v-card-subtitle v-if="item.Selling"> 🛒 </v-card-subtitle>
-
+    <!-- Viewing the currentUser's shop -->
+    <template v-if="$route.path == `/shop/${user.getUser.username}` && item.owner == user.getUser.PK">
+      <v-card-subtitle v-if="item.selling"> 🛒 </v-card-subtitle>
       <v-card-actions>
         <v-btn
           @click="handleDelete(item)"
+          :disabled="true"
           text="Erase"
           class="mx-auto"
           variant="elevated"
           color="error"
+        >This is your shop!</v-btn>
+      </v-card-actions>
+    </template>
+    
+    <!-- Viewing the currentUser's inventory -->
+    <template v-if="$route.name == 'inventory' && item.owner == user.getUser.PK">
+      <v-card-subtitle v-if="item.selling"> 🛒 </v-card-subtitle>      
+      <v-card-actions>
+        <v-btn
+        @click="handleDelete(item)"
+        text="Erase"
+        class="mx-auto"
+        variant="elevated"
+        color="error"
         ></v-btn>
       </v-card-actions>
     </template>
-    <template v-else>
-      <v-card-subtitle> Price: {{ item.Price }} </v-card-subtitle>
-
+    <template v-if="item.owner != user.getUser.PK">
       <v-card-actions>
         <v-btn
           @click="buyFlow(item)"

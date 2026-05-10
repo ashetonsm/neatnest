@@ -1,43 +1,25 @@
 <script setup lang="ts">
 import Item from "./Item.vue";
-import { useRoute } from "vue-router";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, toRaw } from "vue";
 import { userStore } from "@/stores/user";
+import { useRoute } from "vue-router";
 
-// These should be items that are freely in the pool for this shop
+// These should be items where the owner is the logged in user
 const user = userStore();
 const route = useRoute();
+var shopkeeper = route.params.id;
 
-const fetchedItems = ref<Array<any>>([]);
-
-async function fetchItems() {
-  try {
-    /*
-    const { data: shop } = await client.models.Shop.shopByName(
-      {
-        name: route.params.id.toString(),
-      },
-      {
-        authMode: "userPool",
-      }
-    );
-
-  const stringItems = await JSON.parse(shop[0].items as string) as Array<any>;
-  fetchedItems.value = stringItems
-  */
-  } catch (error: any) {
-    console.log("No items found!");
-  }
-}
+// create a reactive reference to Item[]
+const fetchedItems: any = ref<Array<any>>([]);
 
 onMounted(async () => {
-  await fetchItems();
-  }
-);
+  fetchedItems.value = await toRaw(user.fetchShop(shopkeeper as string))
+  console.log("fetchedItems.value:", fetchedItems.value)
+});
 </script>
 
 <template>
-<v-sheet
+  <v-sheet
     class="d-flex align-center justify-center text-center mx-auto pa-8"
     elevation="4"
     width="100%"
@@ -45,33 +27,25 @@ onMounted(async () => {
   >
     <v-row>
       <v-col md="12" class="text-center">
-        <h2 class="text-h4 font-weight-black ma-4">
-          Welcome to {{ route.params.id.toString() }}'s shop!
-        </h2>
+        <h2 class="text-h4 font-weight-black ma-4">{{shopkeeper}}'s Shop</h2>
 
         <v-alert
-          v-if="!fetchedItems"
-          title="Loading..."
-          type="info"
-          class="ma-4"
-        ></v-alert>
-        <v-alert
-          v-else-if="!fetchedItems.length"
+          v-if="fetchedItems.length == 0"
           title="This shop is empty!"
           type="info"
           class="ma-4"
         ></v-alert>
-      </v-col>
 
-      <v-row class="ga-4">
-        <Item
-          v-if="fetchedItems.length !== 0"
-          v-for="(item, i) in fetchedItems"
-          :key="item.name ?? i"
-          :item="item"
-          :currentUser="user.getUser?.id!"
-        />
-      </v-row>
+        <v-row class="ga-4">
+          <Item
+            v-if="fetchedItems.length !== 0"
+            v-for="(item, i) in fetchedItems"
+            :key="item.name ?? i"
+            :item="item"
+            :currentUser="user.getUser?.PK!"
+          />
+        </v-row>
+      </v-col>
     </v-row>
   </v-sheet>
 </template>

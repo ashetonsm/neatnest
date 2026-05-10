@@ -12,7 +12,11 @@ import { userStore } from './stores/user'
 
 const pinia = createPinia()
 const app = createApp(App)
-const vuetify = createVuetify({})
+const vuetify = createVuetify({
+    theme: {
+        defaultTheme: "system",
+    }
+})
 const auth0 = createAuth0({
     domain: import.meta.env.VITE_AUTH0_DOMAIN,
     clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,

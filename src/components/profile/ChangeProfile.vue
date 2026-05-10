@@ -37,6 +37,7 @@ async function validateBio() {
         updatedUser.bio = bio.value;
         await PUT_DATA(updatedUser).then(async () => {
             router.push(`/profile/${updatedUser.username}`)
+            router.go(0);
         });
     } catch (error: any) {
         console.error(error);

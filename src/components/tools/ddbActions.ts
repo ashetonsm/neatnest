@@ -1,5 +1,5 @@
 import { DeleteItemCommand, DynamoDB } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocument, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { BatchWriteCommand, DynamoDBDocument, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 
 export const config = {
   credentials: {
@@ -34,6 +34,32 @@ export async function PUT_DATA(newData: Object) {
   console.log("DATA PUT SUCCESSFUL");
   return response
 };
+
+/**
+ * Writes or deletes multiple items in the database in one request with the follow array format:
+ * [
+ *    {PutRequest/DeleteRequest: {Item: data}}, 
+ *    {PutRequest/DeleteRequest: {Item: data}}, 
+ *    etc
+ * ]
+ * @param newData The array of new data objects to be written or deleted
+ * @returns 
+ */
+export async function BATCH_MODIFY_DATA(newData: Array<any>) {
+  console.log("newData", newData)
+  try {
+    const command = new BatchWriteCommand({
+      RequestItems: { "neatnest": newData },
+      ReturnConsumedCapacity: "TOTAL"
+    });
+    const response = await client.send(command);
+    console.log("BATCH DATA MODIFY SUCCESSFUL");
+    return response
+
+  } catch (error: any) {
+    console.error("Something went wrong with the BATCH_MODIFY_DATA request:", error)
+  }
+}
 
 /**
  * Creates or updates a relationship in the #RELATIONSHIPS entry for the user
@@ -141,6 +167,12 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
  * 9 = Pending for the initiator
  * @param targetTrader The user who is being tradeded with (their relationship record)
  * @param initiatingTrader The user who initiated the trade
+ * @param tradeContents The contents of the trade.
+ * {
+ *    pets: [],
+ *    items: [],
+ *    credits: number
+ * }
  * @param updateType The action being performed on the trade
  * @returns 
  */
@@ -150,7 +182,7 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
     SK: `TRADE#${targetTrader.PK}`,
     status: 0,	// to be changed
     type: 'Trade',
-    tradeUsername: targetTrader.relationshipUsername,
+    tradeUsername: targetTrader.tradeUsername,
     tradeContents: tradeContents,
     username: initiatingTrader.username,
     createdAt: new Date().toISOString(),
@@ -163,7 +195,7 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
     type: 'Trade',
     tradeUsername: initiatingTrader.username,
     tradeContents: tradeContents,
-    username: targetTrader.relationshipUsername,
+    username: targetTrader.tradeUsername,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
@@ -176,11 +208,74 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
         break
       case "accept":
         initiatingTrade.status = 1
-        // targetTrade.status = 1
+        targetTrade.status = 1
+
+        var petPutList: { PutRequest: { Item: any; }; }[] = []
+        var petDeleteList: { DeleteRequest: { Key: any; }; }[] = []
+        var itemPutList: { PutRequest: { Item: any; }; }[] = []
+        var itemDeleteList: { DeleteRequest: { Key: any; }; }[] = []
+        if (tradeContents[0].pets.length > 0) {
+          // Format a PutRequest for the batch command
+          // Set the PK and owner data correctly
+          tradeContents[0].pets.forEach((item: any) => {
+            // First, add the original item to the batch delete list.
+            // We must use the targetTrader's (AKA the trade creator to the accepting user) 
+            // PK as the original PK because this is inside of a for loop
+            // where the PK will get overwritten at the end of this push.
+            petDeleteList.push(
+              {
+                DeleteRequest: {
+                  Key: {
+                    "PK": targetTrader.PK,
+                    "SK": item.SK
+                  }
+                }
+              }
+            )
+            // Then, edit the item and add it to the batch put list.
+            item.PK = initiatingTrader.PK
+            item.owner = initiatingTrader.PK
+            petPutList.push({ PutRequest: { Item: item } })
+          });
+          console.log("petPutList", petPutList)
+          console.log("petDeleteList", petDeleteList)
+          // Create new data
+          await BATCH_MODIFY_DATA(petPutList)
+          // Delete old data
+          await BATCH_MODIFY_DATA(petDeleteList)
+        }
+
+        if (tradeContents[1].items.length > 0) {
+          // Format a PutRequest for the batch command
+          // Set the PK and owner data correctly
+          tradeContents[1].items.forEach((item: any) => {
+            // First, add the original item to the batch delete list.
+            itemDeleteList.push(
+              {
+                DeleteRequest: {
+                  Key: {
+                    "PK": targetTrader.PK,
+                    "SK": item.SK
+                  }
+                }
+              }
+            )
+            // Then, edit the item and add it to the batch put list.
+            item.PK = initiatingTrader.PK
+            item.owner = initiatingTrader.PK
+            itemPutList.push({ PutRequest: { Item: item } })
+          });
+          console.log("itemPutList", itemPutList)
+          console.log("itemDeleteList", itemDeleteList)
+          // Create new data
+          await BATCH_MODIFY_DATA(itemPutList)
+          // Delete old data
+          await BATCH_MODIFY_DATA(itemDeleteList)
+        }
         break
       case "reject":
         initiatingTrade.status = 2
-        // targetTrade.status = 2
+        targetTrade.status = 2
         break
       case "close":
         initiatingTrade.status = 8
@@ -321,6 +416,33 @@ export async function LIST_BY_PK_SK(pk: string, sk: string) {
       ":pkVal": pk,
       ":skPrefix": sk
     }
+  });
+
+  const response = await client.send(command);
+  if (response.Items?.length == 0) {
+    return []
+  } else {
+    return response.Items
+  }
+}
+
+/**
+ * Remember that the KeyConditionExpression is CASE SENSITIVE. Lowercase "PK"/"SK" will not work.
+ * @param pk Primary Key (the userID)
+ * @param sk Sort Key (the item type)
+ * @returns 
+ */
+export async function LIST_SELLING_BY_PK(pk: string) {
+  const command = new QueryCommand({
+    TableName: "neatnest",
+    KeyConditionExpression: "PK = :pkVal AND begins_with(SK, :skPrefix)",
+    ExpressionAttributeValues:
+    {
+      ":pkVal": pk,
+      ":skPrefix": "ITEM#",
+      ":sellingValue": true
+    },
+    FilterExpression: "selling = :sellingValue"
   });
 
   const response = await client.send(command);
