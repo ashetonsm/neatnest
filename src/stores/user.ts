@@ -8,6 +8,7 @@ export const userStore = defineStore('user', {
         shop: ref<any | null>(null),
         pets: ref<Array<any>>([]),
         inventory: ref<Array<any>>([]),
+        notifications: ref<Array<any>>([]),
         credits: ref<number>(0),
         trades: ref<Array<any>>([]),
         friends: ref<Array<any>>([]),
@@ -17,6 +18,7 @@ export const userStore = defineStore('user', {
         getShop: (state: { shop: any | null }) => state.shop,
         getPets: (state: { pets: any }) => state.pets,
         getInventory: (state: { inventory: any }) => state.inventory,
+        getNotifications: (state: { notifications: any }) => state.notifications,
         getCredits: (state: { credits: number }) => state.credits,
         getTrades: (state: { trades: any }) => state.trades,
         getFriends: (state: { friends: any }) => state.friends,
@@ -36,6 +38,7 @@ export const userStore = defineStore('user', {
                             bio: "Hi, I'm new! Nice to meet you!",
                             createdAt: new Date().toISOString(),
                             credits: 0,
+                            notifications: [],
                             itemsRemaining: 3,
                             petsRemaining: 3,
                             type: 'Metadata',
@@ -43,12 +46,15 @@ export const userStore = defineStore('user', {
                         })
                         this.user = newUser
                         this.credits = 0
+                        this.notifications = []
                         return newUser
                     }
+                } else {
+                    this.user = retrievedUser
+                    this.credits = retrievedUser.credits
+                    this.notifications = retrievedUser.notifications
+                    return retrievedUser
                 }
-                this.user = retrievedUser
-                this.credits = retrievedUser?.credits
-                return retrievedUser
             } catch (error: any) {
                 console.error("An error occurred in fetchUser: ", error)
             }
