@@ -9,9 +9,7 @@ const trades = ref<Array<any>>([]);
 const friends = ref<Array<any>>(user.getFriends);
 
 onMounted(async () => {
-  if (user.getTrades.length == 0) {
     trades.value = await user.fetchTrades() || []
-  }
 })
 
 </script>

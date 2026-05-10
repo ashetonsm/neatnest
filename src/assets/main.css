@@ -24,3 +24,9 @@ canvas {
   width: 300px;
   height: 300px;
 }
+
+@media screen and (width <= 840) {
+  p {
+    color: red;
+  }
+}

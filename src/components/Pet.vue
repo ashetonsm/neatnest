@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, toRaw } from "vue";
 import PetItemModal from "./PetItemModal.vue";
 import { userStore } from "@/stores/user";
 import router from "@/router";
 import { useRoute } from "vue-router";
 import { createPresignedUrlWithClient, DELETE_S3 } from "./tools/s3Actions";
-import { DELETE_DATA } from "./tools/ddbActions";
+import { DELETE_DATA, GET_BY_PK_SK, GET_BY_USERNAME } from "./tools/ddbActions";
 
 const route = useRoute();
 const signedSrc = ref("null");
 const petModalRef = ref();
+const petCreator = ref("Loading...");
 const user = userStore();
 
 const props = defineProps<{
@@ -50,7 +51,9 @@ async function handleDelete(pet: any) {
 }
 
 onMounted(async () => {
-  await getFileUrl(props.pet.image);
+  await getFileUrl(props.pet.image)
+  const creatorMetadata = await toRaw(GET_BY_PK_SK(props.pet.creator, "#METADATA"))
+  petCreator.value = creatorMetadata?.username
 });
 </script>
 
@@ -78,6 +81,7 @@ onMounted(async () => {
     </v-card-title>
     <v-card-subtitle> Hunger: {{ pet.hunger }} </v-card-subtitle>
     <v-card-subtitle> Mood: {{ pet.mood }} </v-card-subtitle>
+    <v-card-subtitle> Creator: {{ petCreator }} </v-card-subtitle>
 
     <v-card-actions v-if="pet.owner == user.getUser?.PK && route.name == 'pets'">
       <v-btn
