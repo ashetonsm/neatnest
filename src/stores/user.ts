@@ -38,7 +38,6 @@ export const userStore = defineStore('user', {
                             bio: "Hi, I'm new! Nice to meet you!",
                             createdAt: new Date().toISOString(),
                             credits: 0,
-                            notifications: [],
                             itemsRemaining: 3,
                             petsRemaining: 3,
                             type: 'Metadata',
@@ -46,13 +45,15 @@ export const userStore = defineStore('user', {
                         })
                         this.user = newUser
                         this.credits = 0
-                        this.notifications = []
+                        await this.fetchFriends(PK)
+                        await this.fetchNotifications()
                         return newUser
                     }
                 } else {
                     this.user = retrievedUser
                     this.credits = retrievedUser.credits
-                    this.notifications = retrievedUser.notifications
+                    await this.fetchFriends(PK)
+                    await this.fetchNotifications()
                     return retrievedUser
                 }
             } catch (error: any) {
@@ -94,6 +95,18 @@ export const userStore = defineStore('user', {
             } catch (error: any) {
                 console.error("Error fetching the inventory: ", error)
                 return this.inventory
+            }
+        },
+
+        async fetchNotifications() {
+            const notifications = await LIST_BY_PK_SK(this.getUser.PK, "NOTIFICATION")
+            try {
+                console.log("The notifications from user.ts:", notifications)
+                this.notifications = notifications || []
+                return this.notifications
+            } catch (error: any) {
+                console.error("Error fetching the notifications: ", error)
+                return this.notifications
             }
         },
 
