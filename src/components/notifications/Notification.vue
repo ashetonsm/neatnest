@@ -2,10 +2,8 @@
 import { onMounted, ref, toRaw } from "vue";
 import { userStore } from "@/stores/user";
 
-// These should be items where the owner is the logged in user
 const user = userStore();
 
-// create a reactive reference to Item[]
 const fetchedNotifications: any = ref<Array<any>>([]);
 
 async function deleteNotification(notification: any) {
@@ -15,12 +13,12 @@ async function deleteNotification(notification: any) {
 
 onMounted(async () => {
 
-    fetchedNotifications.value = [
-        {id: 1, title: 'New Trade', text: 'You have a new trade with xxx', type: 'Trade'}, 
-        {id: 2, title: 'New Friend Request', text: 'You have a new friend request from xxx', type: 'Friend'}, 
-    ]
-//   fetchedNotifications.value = await user.getNotifications;
-//   console.log("fetchedNotifications.value:", fetchedNotifications.value)
+    // fetchedNotifications.value = [
+    //     {id: 1, title: 'New Trade', text: 'You have a new trade with xxx', type: 'Trade'}, 
+    //     {id: 2, title: 'New Friend Request', text: 'You have a new friend request from xxx', type: 'Friend'}, 
+    // ]
+  fetchedNotifications.value = await user.getNotifications;
+  console.log("fetchedNotifications.value:", fetchedNotifications.value)
 });
 </script>
 
