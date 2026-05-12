@@ -25,6 +25,8 @@ const loggedInLinks = ref<Array<{ title: string; to: string, link: boolean }>>([
     link: true
   },
   { title: "Pets", to: "/pets", link: true },
+  { title: "Friends", to: "/friends", link: true },
+  { title: "Trades", to: "/trades", link: true },
   { title: "About", to: "/about", link: true },
 ]);
 
@@ -41,10 +43,10 @@ onMounted(async () => {
   window.addEventListener("resize", resize);
   user.$subscribe((mutation) => {
     // Perform actions here when the state changes
-    console.log("Nav's user: ", user.getUser?.username);
-
+    
     if (mutation.storeId == "user" && user.getUser?.username !== undefined) {
       loggedInLinks.value[3].to = `/profile/${user.getUser?.username}`;
+      console.log(user.getFriends)
     }
   });
 });
