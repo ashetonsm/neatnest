@@ -11,6 +11,7 @@ import {
 import FriendsList from "./FriendsList.vue";
 import ChangeProfile from "./ChangeProfile.vue";
 import FriendButtons from "./FriendButtons.vue";
+import { createNotification } from "../notifications/CreateNotification";
 
 const route = useRoute();
 const user = userStore();
@@ -112,6 +113,11 @@ async function fetchUser() {
 /** Used to block and accept friends */
 async function updateFriend(action: string) {
   await UPDATE_RELATIONSHIP(thisUser.value, user.getUser, action)
+    .then(async () => {
+      if (action == "add") {
+        await createNotification(user.getUser, thisUser.value, "friendRequest")
+      }
+    })
     .then(() => {
       router.push(`/profile/${profile}`);
       router.go(0);
