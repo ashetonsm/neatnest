@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import router from "@/router";
 
 const props = defineProps<{
     username: string;
@@ -7,8 +6,6 @@ const props = defineProps<{
 }>();
 </script>
 
-<!-- Right  now, this will print the user's own username,
- so you should probably fix the username assignment later. -->
 <template>
     <v-sheet border="md" class="pa-4 text-white mx-auto rounded" color="purple">
         <h2 class="text-h4 font-weight-black ma-4">{{ username }}'s Friends:</h2>
