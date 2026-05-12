@@ -40,6 +40,12 @@ const router = createRouter({
       beforeEnter: authGuard
     },
     {
+      path: '/friends',
+      name: 'friends',
+      component: () => import('@/views/FriendsView.vue'),
+      beforeEnter: authGuard
+    },
+    {
       path: '/inventory',
       name: 'inventory',
       component: () => import('@/views/InventoryView.vue'),
