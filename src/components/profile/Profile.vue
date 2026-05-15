@@ -11,7 +11,7 @@ import {
 import FriendsList from "./FriendsList.vue";
 import ChangeProfile from "./ChangeProfile.vue";
 import FriendButtons from "./FriendButtons.vue";
-import { createNotification } from "../notifications/CreateNotification";
+import { createNotification } from "@/components/notifications/createNotification"
 
 const route = useRoute();
 const user = userStore();
@@ -115,7 +115,10 @@ async function updateFriend(action: string) {
   await UPDATE_RELATIONSHIP(thisUser.value, user.getUser, action)
     .then(async () => {
       if (action == "add") {
-        await createNotification(user.getUser, thisUser.value, "friendRequest")
+        await createNotification(user.getUser, thisUser.value, "friendNew")
+      }
+      if (action == "accept") {
+        await createNotification(user.getUser, thisUser.value, "friendAccept")
       }
     })
     .then(() => {
