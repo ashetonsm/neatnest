@@ -46,8 +46,8 @@ onMounted(async () => {
     
     if (mutation.storeId == "user" && user.getUser?.username !== undefined) {
       loggedInLinks.value[3].to = `/profile/${user.getUser?.username}`;
-      console.log(user.getFriends)
     }
+
   });
 });
 
@@ -114,6 +114,6 @@ onMounted(async () => {
         :location="$vuetify.display.mobile ? 'top' : 'right'"
         temporary
       >
-      <Notification/>
+      <Notification :notifications="user.getNotifications"/>
     </v-navigation-drawer>
 </template>
