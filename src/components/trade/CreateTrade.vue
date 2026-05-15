@@ -3,6 +3,7 @@ import { userStore } from "@/stores/user";
 import { onMounted, ref, toRaw } from "vue";
 import { UPDATE_TRADE } from "../tools/ddbActions";
 import router from "@/router";
+import { createNotification } from "../notifications/createNotification";
 const user = userStore();
 const tradeForm = ref()
 const selectedFriend = ref()
@@ -67,6 +68,9 @@ async function createTrade() {
         // The recipient, the sender, the contents, the action
         if (friendObj.PK !== undefined && friendObj.tradeUsername !== undefined) {
             await UPDATE_TRADE(friendObj, user.getUser, contents, 'create')
+              .then(async () => {
+                    await createNotification(user.getUser, friendObj, "tradeNew")
+            })
                 .then(() => {
                     router.push({ name: 'trades' })
                     router.go(0);
