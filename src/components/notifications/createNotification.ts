@@ -9,19 +9,33 @@ export async function createNotification(
 
     var notificationContent = "";
     var url = "";
+    var title = notificationType;
 
     switch (notificationType) {
-      case "friendRequest":
+      case "friendNew":
         notificationContent = `${interactingUser.username} sent you a friend request!`
         url = "/friends"
+        title = "Friend Request"
         break;
-      case "tradeRequest":
+      case "friendAccept":
+        notificationContent = `${interactingUser.username} accepted your friend request!`
+        url = "/friends"
+        title = "Friend Request Accepted"
+        break;
+      case "tradeNew":
         notificationContent = `${interactingUser.username} sent you a trade request!`
         url = "/trades"
+        title = "Trade Request"
         break;
-      case "tradeRejection":
+      case "tradeAccept":
+        notificationContent = `${interactingUser.username} accepted your trade request!`
+        url = "/trades"
+        title = "Trade Request Accepted"
+        break;
+      case "tradeReject":
         notificationContent = `${interactingUser.username} rejected your trade request!`
         url = "/trades"
+        title = "Trade Request Rejected"
         break;
       default:
         console.error("Invalid notification type.")
@@ -33,7 +47,7 @@ export async function createNotification(
       PK: currentUser.PK,
       SK: `NOTIFICATION#${notificationID}`,
       id: notificationID,
-      title: notificationType,
+      title: title,
       content: notificationContent,
       url: url,
       type: 'Notification',
