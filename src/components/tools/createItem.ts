@@ -39,7 +39,7 @@ export async function createItem(
         health: 99,
         selling: false,
         tradeStatus: 0,
-        image: imgPath,
+        url: imgPath,
         category: itemCat,
         price: 0,
         type: 'Item',

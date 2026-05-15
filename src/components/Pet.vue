@@ -51,7 +51,7 @@ async function handleDelete(pet: any) {
 }
 
 onMounted(async () => {
-  await getFileUrl(props.pet.image)
+  await getFileUrl(props.pet.url)
   const creatorMetadata = await toRaw(GET_BY_PK_SK(props.pet.creator, "#METADATA"))
   petCreator.value = creatorMetadata?.username
 });

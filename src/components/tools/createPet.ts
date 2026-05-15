@@ -40,7 +40,7 @@ export async function createPet(
         hunger: 5,
         mood: 0,
         tradeStatus: 0,
-        image: imgPath,
+        url: imgPath,
         type: 'Pet',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
