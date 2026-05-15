@@ -34,7 +34,7 @@ export const userStore = defineStore('user', {
                             SK: '#METADATA',
                             email: inputUser.value.email,
                             username: inputUser.value.name,
-                            avatar: inputUser.value.image,
+                            url: inputUser.value.url,
                             bio: "Hi, I'm new! Nice to meet you!",
                             createdAt: new Date().toISOString(),
                             credits: 0,
@@ -125,7 +125,7 @@ export const userStore = defineStore('user', {
         async fetchFriends(PK: string) {
             const friends = await LIST_BY_PK_SK(PK, "RELATIONSHIP#")
             try {
-                console.log(friends)
+                console.log("The friends from user.ts:", friends)
                 if (PK == this.user.PK) {
                     this.friends = friends || []
                     return this.friends
