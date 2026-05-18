@@ -20,12 +20,14 @@ const props = defineProps<{
     <v-list
         v-if="props.notifications.length == 0"
     >
-        <v-alert
-        key="singleNotif"
-        title="You have no notifications."
-        type="info"
-        class="ma-4"
-        ></v-alert>
+        <v-list-item>
+            <v-alert
+            key="singleNotif"
+            title="You have no notifications."
+            type="info"
+            class="ma-4"
+            ></v-alert>
+        </v-list-item>
     </v-list>
 
     <v-list 
@@ -33,18 +35,19 @@ const props = defineProps<{
         :items="props.notifications"
         :item-props="true"
     >
-
-    <v-alert
-        v-for="(notification, i) in props.notifications"
-            :key="notification.id ?? i"
-            :title="notification.title"
-            :text="notification.content"
-            type="info"
-            class="ma-4"
-            @click:close="deleteNotification(notification)"
-            closable
-        >
-    <v-btn :to=notification.url>View</v-btn>
-    </v-alert>
+        <v-list-item>
+            <v-alert
+                v-for="(notification, i) in props.notifications"
+                :key="notification.id ?? i"
+                :title="notification.title"
+                :text="notification.content"
+                type="info"
+                class="ma-4"
+                @click:close="deleteNotification(notification)"
+                closable
+            >
+                <v-btn :to=notification.url>View</v-btn>
+            </v-alert>
+        </v-list-item>
     </v-list>
 </template>
