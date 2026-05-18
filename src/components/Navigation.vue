@@ -73,12 +73,16 @@ onMounted(async () => {
         </RouterLink>
         <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
-        <v-avatar 
+        
+        <v-badge location="top right" color="success" :content="user.getNotifications.length > 0 ? user.getNotifications.length : null">
+          <v-avatar 
           icon="mdi-bell" 
           variant="text" 
           :badge="{ color: 'red', location: 'bottom end', floating: true }"
           class="cursor-pointer"
           @click.stop="notifDrawer = !notifDrawer"></v-avatar>
+        </v-badge>
+
         <v-toolbar-title>Nnneatopets</v-toolbar-title>
 
         <!-- 
