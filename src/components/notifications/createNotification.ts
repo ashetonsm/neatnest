@@ -13,27 +13,30 @@ export async function createNotification(
 
     switch (notificationType) {
       case "friendNew":
-        notificationContent = `${interactingUser.username} sent you a friend request!`
+        notificationContent = `${currentUser.username} sent you a friend request!`
         url = "/friends"
         title = "Friend Request"
         break;
       case "friendAccept":
-        notificationContent = `${interactingUser.username} accepted your friend request!`
+        // This notif should be currentUser.username going out to interactingUser
+        notificationContent = `${currentUser.username} accepted your friend request!`
         url = "/friends"
         title = "Friend Request Accepted"
         break;
       case "tradeNew":
-        notificationContent = `${interactingUser.username} sent you a trade request!`
+        notificationContent = `${currentUser.username} sent you a trade request!`
         url = "/trades"
         title = "Trade Request"
         break;
       case "tradeAccept":
-        notificationContent = `${interactingUser.username} accepted your trade request!`
+        // This notif should be currentUser.username going out to interactingUser
+        notificationContent = `${currentUser.username} accepted your trade request!`
         url = "/trades"
         title = "Trade Request Accepted"
         break;
       case "tradeReject":
-        notificationContent = `${interactingUser.username} rejected your trade request!`
+        // This notif should be currentUser.username going out to interactingUser
+        notificationContent = `${currentUser.username} rejected your trade request!`
         url = "/trades"
         title = "Trade Request Rejected"
         break;
@@ -44,7 +47,7 @@ export async function createNotification(
 
     const notificationID = new Date().toISOString()
     await PUT_DATA({
-      PK: currentUser.PK,
+      PK: interactingUser.PK,
       SK: `NOTIFICATION#${notificationID}`,
       id: notificationID,
       title: title,
