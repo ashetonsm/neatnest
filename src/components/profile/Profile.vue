@@ -115,7 +115,6 @@ async function updateFriend(action: string) {
   var relationshipObj = { PK: '', relationshipUsername: '' }
   relationshipObj.PK = thisUser.value.PK
   relationshipObj.relationshipUsername = thisUser.value.username
-  console.log("relationshipObj", relationshipObj) 
   await UPDATE_RELATIONSHIP(relationshipObj, user.getUser, action)
     .then(async () => {
       if (action == "add") {
