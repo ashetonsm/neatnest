@@ -32,22 +32,21 @@ const buttonValues = ref<{
 
 /** Used to block and accept friends */
 async function updateFriend(action: string) {
-    var relationshipObj = { PK: '', relationshipUsername: '' }
-    relationshipObj.PK = (props.friend.SK).match(/(?<=#)\S+/)[0]
-    relationshipObj.relationshipUsername = props.friend.relationshipUsername
-
-  await UPDATE_RELATIONSHIP(relationshipObj, user.getUser, action)
-    .then(async () => {
-      if (action == "add") {
-        await createNotification(user.getUser, relationshipObj, "friendNew")
-      }
-      if (action == "accept") {
-        await createNotification(user.getUser, relationshipObj, "friendAccept")
-      }
-    })
-    .then(() => {
-      router.go(0);
-    })
+  var relationshipObj = { PK: '', relationshipUsername: '' }
+  relationshipObj.PK = (props.friend.SK).match(/(?<=#)\S+/)[0]
+  relationshipObj.relationshipUsername = props.friend.relationshipUsername
+    await UPDATE_RELATIONSHIP(relationshipObj, user.getUser, action)
+      .then(async () => {
+        if (action == "add") {
+          await createNotification(user.getUser, relationshipObj, "friendNew")
+        }
+        if (action == "accept") {
+          await createNotification(user.getUser, relationshipObj, "friendAccept")
+        }
+      })
+      .then(() => {
+        router.go(0);
+      })
 }
 
 onMounted(() => {
@@ -61,8 +60,9 @@ onMounted(() => {
     */
   switch (parseInt(props.friend.status)) {
         case 0:
-            textStatus.value = "Waiting on Them"
-            buttonValues.value.cancel = true
+            textStatus.value = "Waiting on You"
+            buttonValues.value.accept = true
+            buttonValues.value.reject = true
             buttonValues.value.block = true
           return
         case 1:
@@ -71,17 +71,16 @@ onMounted(() => {
             buttonValues.value.block = true
           return
         case 2:
-            textStatus.value = "THEY BLOCKED YOU"
-          return
-        case 8:
             textStatus.value = "Blocked"
             console.log("You blocked this user.")
             buttonValues.value.unblock = true
           return
+        case 8:
+            textStatus.value = "THEY BLOCKED YOU"
+          return
         case 9:
-            textStatus.value = "Waiting on You"
-            buttonValues.value.accept = true
-            buttonValues.value.reject = true
+            textStatus.value = "Waiting on Them"
+            buttonValues.value.cancel = true
             buttonValues.value.block = true
           return
         default:
