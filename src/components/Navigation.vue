@@ -74,7 +74,7 @@ onMounted(async () => {
         <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
         
-        <v-badge location="top right" color="success" :content="user.getNotifications.length > 0 ? user.getNotifications.length : null">
+        <v-badge location="top right" color="success" :model-value="user.getNotifications.length > 0 ? true : false" :content="user.getNotifications.length">
           <v-avatar 
           icon="mdi-bell" 
           variant="text" 
