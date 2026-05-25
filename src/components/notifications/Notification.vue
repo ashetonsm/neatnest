@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { onMounted, ref, toRaw } from "vue";
 import { userStore } from "@/stores/user";
-
+import {DELETE_DATA} from "@/components/tools/ddbActions";
 const user = userStore();
 
 async function deleteNotification(notification: any) {
-    // Running into issues with this due to everything being a proxy and the notifs being a list.
-    console.log(notification)
+    try {
+        console.log(notification)
+        await DELETE_DATA(notification)
+    } catch (error: any) {
+        console.error("Something went wrong deleting the notif:", error)
+    }
 }
 
 const props = defineProps<{
