@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import router from "@/router";
-import { onMounted, ref, toRaw } from "vue";
 
 const props = defineProps<{
   buttonValues: {
