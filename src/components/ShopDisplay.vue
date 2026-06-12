@@ -7,14 +7,23 @@ import { useRoute } from "vue-router";
 // These should be items where the owner is the logged in user
 const user = userStore();
 const route = useRoute();
-var shopkeeper = route.params.id;
+var shopkeeper = ref(route.params.id);
 
 // create a reactive reference to Item[]
 const fetchedItems: any = ref<Array<any>>([]);
 
 onMounted(async () => {
-  fetchedItems.value = await toRaw(user.fetchShop(shopkeeper as string))
-  console.log("fetchedItems.value:", fetchedItems.value)
+  try {
+    if (route.params.id == "1") {
+      shopkeeper.value = "General Store"
+      fetchedItems.value = await toRaw(user.fetchShop("GENERAL STORE"))
+    } else {
+      shopkeeper.value = route.params.id.concat("'s Shop")
+      fetchedItems.value = await toRaw(user.fetchShop(route.params.id as string))
+    }
+  } catch (error: any) {
+    console.error(error)
+  }
 });
 </script>
 
@@ -27,7 +36,7 @@ onMounted(async () => {
   >
     <v-row>
       <v-col md="12" class="text-center">
-        <h2 class="text-h4 font-weight-black ma-4">{{shopkeeper}}'s Shop</h2>
+        <h2 class="text-h4 font-weight-black ma-4">{{shopkeeper}}</h2>
 
         <v-alert
           v-if="fetchedItems.length == 0"
