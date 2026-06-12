@@ -32,7 +32,7 @@ const props = defineProps<{
   >Accept</v-btn>
   <v-btn 
     v-if="props.buttonValues.reject" 
-    @click="updateTrade('remove')"
+    @click="updateTrade('reject')"
     text="Reject"
     class="mx-auto"
     variant="elevated"

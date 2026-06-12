@@ -79,7 +79,7 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
     SK: `RELATIONSHIP#${targetRelationship.PK}`,
     status: 0,	// to be changed
     type: 'Relationship',
-    relationshipUsername: targetRelationship.username,
+    relationshipUsername: targetRelationship.relationshipUsername,
     username: initiatingRelationship.username,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -90,7 +90,7 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
     status: 0,	// to be changed
     type: 'Relationship',
     relationshipUsername: initiatingRelationship.username,
-    username: targetRelationship.username,
+    username: targetRelationship.relationshipUsername,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }

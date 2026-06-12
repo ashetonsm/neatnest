@@ -2,6 +2,7 @@
 import { userStore } from "@/stores/user";
 import { onMounted, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
+import Notification from "./notifications/Notification.vue";
 
 const user = userStore();
 const collapse = ref(true);
@@ -24,6 +25,8 @@ const loggedInLinks = ref<Array<{ title: string; to: string, link: boolean }>>([
     link: true
   },
   { title: "Pets", to: "/pets", link: true },
+  { title: "Friends", to: "/friends", link: true },
+  { title: "Trades", to: "/trades", link: true },
   { title: "About", to: "/about", link: true },
 ]);
 
@@ -40,11 +43,11 @@ onMounted(async () => {
   window.addEventListener("resize", resize);
   user.$subscribe((mutation) => {
     // Perform actions here when the state changes
-    console.log("Nav's user: ", user.getUser?.username);
-
+    
     if (mutation.storeId == "user" && user.getUser?.username !== undefined) {
       loggedInLinks.value[3].to = `/profile/${user.getUser?.username}`;
     }
+
   });
 });
 
@@ -54,6 +57,14 @@ onMounted(async () => {
   watch(group, () => {
     drawer.value = false
   })
+
+  const notifDrawer = ref(false)
+  const notifGroup = ref(null)
+
+  watch(notifGroup, () => {
+    notifDrawer.value = false
+  })
+
 </script>
   <template>
       <v-app-bar color="primary">
@@ -61,6 +72,16 @@ onMounted(async () => {
           <v-avatar image="@/assets/logo.svg"></v-avatar>
         </RouterLink>
         <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+
+        
+        <v-badge location="top right" color="success" :model-value="user.getNotifications.length > 0 ? true : false" :content="user.getNotifications.length">
+          <v-avatar 
+          icon="mdi-bell" 
+          variant="text" 
+          :badge="{ color: 'red', location: 'bottom end', floating: true }"
+          class="cursor-pointer"
+          @click.stop="notifDrawer = !notifDrawer"></v-avatar>
+        </v-badge>
 
         <v-toolbar-title>Nnneatopets</v-toolbar-title>
 
@@ -77,17 +98,26 @@ onMounted(async () => {
         :location="$vuetify.display.mobile ? 'bottom' : undefined"
         temporary
       >
-      <template v-if="user.getUser?.username !== undefined">
-        <v-list
-        :items="loggedInLinks"
-        :item-props="true"
-        ></v-list>
-      </template>
-      <template v-else>
-        <v-list
-        :items="loggedOutLinks"
-        :item-props="true"
-        ></v-list>
-      </template>
+        <template v-if="user.getUser?.username !== undefined">
+          <v-list
+            :items="loggedInLinks"
+            :item-props="true"
+          ></v-list>
+        </template>
+        <template v-else>
+          <v-list
+            :items="loggedOutLinks"
+            :item-props="true"
+          ></v-list>
+        </template>
+
       </v-navigation-drawer>
+
+      <v-navigation-drawer
+        v-model="notifDrawer"
+        :location="$vuetify.display.mobile ? 'top' : 'right'"
+        temporary
+      >
+      <Notification :notifications="user.getNotifications"/>
+    </v-navigation-drawer>
 </template>

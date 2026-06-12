@@ -11,12 +11,13 @@ import {
 import FriendsList from "./FriendsList.vue";
 import ChangeProfile from "./ChangeProfile.vue";
 import FriendButtons from "./FriendButtons.vue";
+import { createNotification } from "@/components/notifications/createNotification"
 
 const route = useRoute();
 const user = userStore();
 var profile = route.params.username;
 const thisProfileDesc = ref<String>("Lorum ipsum this is a description");
-const friends = ref<Array<Record<string, any>> | undefined>([])
+const friends = ref<Array<Record<string, any>>>([])
 const buttonValues = ref<{
   add: boolean,
   cancel: boolean,
@@ -45,7 +46,7 @@ async function fetchUser() {
         console.log(res)
         thisUser.value = res
         thisProfileDesc.value = thisUser.value.bio as string;
-        friends.value = await user.fetchFriends(res!.PK)
+        friends.value = await user.fetchFriends(res!.PK) || []
         console.log(res!.PK)
       })
   } catch (error: any) {
@@ -111,7 +112,18 @@ async function fetchUser() {
 
 /** Used to block and accept friends */
 async function updateFriend(action: string) {
-  await UPDATE_RELATIONSHIP(thisUser.value, user.getUser, action)
+  var relationshipObj = { PK: '', relationshipUsername: '' }
+  relationshipObj.PK = thisUser.value.PK
+  relationshipObj.relationshipUsername = thisUser.value.username
+  await UPDATE_RELATIONSHIP(relationshipObj, user.getUser, action)
+    .then(async () => {
+      if (action == "add") {
+        await createNotification(user.getUser, thisUser.value, "friendNew")
+      }
+      if (action == "accept") {
+        await createNotification(user.getUser, thisUser.value, "friendAccept")
+      }
+    })
     .then(() => {
       router.push(`/profile/${profile}`);
       router.go(0);
@@ -128,7 +140,7 @@ onMounted(async () => {
     thisUser.value = user.getUser!;
     thisProfileDesc.value = thisUser.value.bio as string;
     thesePets.value = user.getPets;
-    friends.value = await user.fetchFriends(user.getUser.PK)
+    friends.value = await user.fetchFriends(user.getUser.PK) || []
   }
 });
 </script>

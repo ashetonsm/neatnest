@@ -8,6 +8,7 @@ export const userStore = defineStore('user', {
         shop: ref<any | null>(null),
         pets: ref<Array<any>>([]),
         inventory: ref<Array<any>>([]),
+        notifications: ref<Array<any>>([]),
         credits: ref<number>(0),
         trades: ref<Array<any>>([]),
         friends: ref<Array<any>>([]),
@@ -17,6 +18,7 @@ export const userStore = defineStore('user', {
         getShop: (state: { shop: any | null }) => state.shop,
         getPets: (state: { pets: any }) => state.pets,
         getInventory: (state: { inventory: any }) => state.inventory,
+        getNotifications: (state: { notifications: any }) => state.notifications,
         getCredits: (state: { credits: number }) => state.credits,
         getTrades: (state: { trades: any }) => state.trades,
         getFriends: (state: { friends: any }) => state.friends,
@@ -32,7 +34,7 @@ export const userStore = defineStore('user', {
                             SK: '#METADATA',
                             email: inputUser.value.email,
                             username: inputUser.value.name,
-                            avatar: inputUser.value.image,
+                            url: inputUser.value.url,
                             bio: "Hi, I'm new! Nice to meet you!",
                             createdAt: new Date().toISOString(),
                             credits: 0,
@@ -43,12 +45,17 @@ export const userStore = defineStore('user', {
                         })
                         this.user = newUser
                         this.credits = 0
+                        await this.fetchFriends(PK)
+                        await this.fetchNotifications()
                         return newUser
                     }
+                } else {
+                    this.user = retrievedUser
+                    this.credits = retrievedUser.credits
+                    await this.fetchFriends(PK)
+                    await this.fetchNotifications()
+                    return retrievedUser
                 }
-                this.user = retrievedUser
-                this.credits = retrievedUser?.credits
-                return retrievedUser
             } catch (error: any) {
                 console.error("An error occurred in fetchUser: ", error)
             }
@@ -91,6 +98,18 @@ export const userStore = defineStore('user', {
             }
         },
 
+        async fetchNotifications() {
+            const notifications = await LIST_BY_PK_SK(this.getUser.PK, "NOTIFICATION")
+            try {
+                console.log("The notifications from user.ts:", notifications)
+                this.notifications = notifications || []
+                return this.notifications
+            } catch (error: any) {
+                console.error("Error fetching the notifications: ", error)
+                return this.notifications
+            }
+        },
+
         async fetchShop(shopkeeperUsername: string) {
             const shopkeeper = await GET_BY_USERNAME(shopkeeperUsername, "#METADATA")
             const inventory = await LIST_SELLING_BY_PK(shopkeeper?.PK)
@@ -106,7 +125,7 @@ export const userStore = defineStore('user', {
         async fetchFriends(PK: string) {
             const friends = await LIST_BY_PK_SK(PK, "RELATIONSHIP#")
             try {
-                console.log(friends)
+                console.log("The friends from user.ts:", friends)
                 if (PK == this.user.PK) {
                     this.friends = friends || []
                     return this.friends

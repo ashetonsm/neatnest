@@ -1,4 +1,4 @@
-## About NeatNest (AWS Amplify)
+## About NeatNest
 
 NeatNest is a pixel pet site inspired by Neopets and classic oekakis (drawing message boards). After creating an account, you can design your own items and pets with the pixel canvas.
 
@@ -10,13 +10,13 @@ Make friends, make art, make something neat!
 - [ ] Add tests (90% coverage)
 - [ ] Seed default shops on a timer
 - [ ] Seed pet and item creations on a timer (1x a month, max 3 available)
-- [ ] Add notification system for trades and friend requests
 - [ ] Add games
 - [ ] Set active pet and display while browsing
 - [ ] Add additional canvas features
     - [ ] Undo button
     - [ ] Edit an existing pet/item
     - [ ] Frames for animated gifs (2 frames standard)
+- [x] Add notification system for trades and friend requests
 - [x] Recreate database structure
 - [x] Add Auth
 - [x] Create user stores
@@ -35,6 +35,6 @@ Make friends, make art, make something neat!
 
 ## Technology Used:
 
-- **Hosting**: Via AWS
+- **Hosting**: Via Route 53
 - **Authentication**: Via Auth0
 - **Database**: Amazon DynamoDB

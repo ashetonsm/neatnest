@@ -64,7 +64,7 @@ or the multipart upload API (5TB max).`,
 export const DELETE_S3 = async (itemKey: any) => {
     const command = {
         Bucket: import.meta.env.VITE_S3_BUCKET_NAME,
-        Key: itemKey.image
+        Key: itemKey.url
     };
 
     try {
