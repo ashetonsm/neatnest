@@ -31,12 +31,8 @@ async function handleSubmit(item: any | null | undefined) {
       var confirmDeletion = confirm("This item will disappear after use. Continue?");
       if (confirmDeletion == true) {
         // Do delete logic
-        await DELETE_S3(item).then(() => {
-          console.log("Image deleted.");
-        });
-        await DELETE_DATA(item).then(async () => {
-          console.log("DynamoDB data deleted.");
-        });
+        await DELETE_S3(item)
+        await DELETE_DATA(item)
       } else {
         return;
       }
@@ -60,31 +56,6 @@ async function handleSubmit(item: any | null | undefined) {
     }
     await PUT_DATA(updatedPet);
     router.go(0);
-  } catch (error: any) {
-    console.error("Error: ", error);
-  }
-}
-
-async function handleTrade(
-  friend: { username: string; friendObject: any } | null | undefined
-) {
-  if (friend == undefined || !friend) {
-    alert(`Hmm, nothing was selected.`);
-    return;
-  }
-  try {
-    /*
-    
-        await client.models.Trade.create({
-          recipient: friend.friendObject.friendA! !== user.getUser!.id ? friend.friendObject.friendA : friend.friendObject.friendB,
-          sender: user.getUser?.id,
-          status: "pending",
-          pet: JSON.stringify(props.pet),
-        }).then((res: any) => {
-          console.log(res);
-        });
-        router.go(0);
-        */
   } catch (error: any) {
     console.error("Error: ", error);
   }
