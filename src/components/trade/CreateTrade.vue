@@ -89,7 +89,6 @@ async function createTrade() {
 async function validateTrade() {
     const { valid } = await tradeForm.value.validate()
     if (valid) {
-        alert('Trade is valid')
         createTrade()
     }
 }
