@@ -35,6 +35,6 @@ Make friends, make art, make something neat!
 
 ## Technology Used:
 
-- **Hosting**: Via AWS
+- **Hosting**: Via Route 53
 - **Authentication**: Via Auth0
 - **Database**: Amazon DynamoDB
