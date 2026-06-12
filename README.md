@@ -8,7 +8,7 @@ Make friends, make art, make something neat!
 ### To do:
 
 - [ ] Add tests (90% coverage)
-- [ ] Seed default shops on a timer
+- [ ] Seed default shops with some basic items
 - [ ] Seed pet and item creations on a timer (1x a month, max 3 available)
 - [ ] Add games
 - [ ] Set active pet and display while browsing
