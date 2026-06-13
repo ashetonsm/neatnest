@@ -12,7 +12,7 @@ const selectedItems = ref([])
 const selectedCredits = ref(0)
 
 
-const friends = ref<Array<any>>(user.getFriends);
+const friends = ref<Array<any>>([]);
 const pets = ref<Array<any>>(user.getPets);
 const items = ref<Array<any>>(user.getInventory);
 
@@ -40,11 +40,11 @@ const petRules = ref([
 ])
 
 onMounted(async () => {
-    if (user.getFriends.length == 0) {
-        friends.value = await user.fetchFriends(user.getUser.PK) || []
-        if (friends.value.length) {
-            friends.value.filter((friend: { status: number; }) => {friend.status == 1})
-        }
+    const fetchedFriends = await user.fetchFriends(user.getUser.PK) || []
+    if (fetchedFriends.length) {
+        // fetchedFriends.filter((f) => f.status == 1)
+        // console.log("fetchedFriends:", toRaw(fetchedFriends.filter((f) => f.status == 1)))
+        friends.value = toRaw(fetchedFriends.filter((f) => f.status == 1))
     }
     if (user.getPets.length == 0) {
         pets.value = await user.fetchPets(user.getUser.PK) || []
@@ -89,7 +89,6 @@ async function createTrade() {
 async function validateTrade() {
     const { valid } = await tradeForm.value.validate()
     if (valid) {
-        alert('Trade is valid')
         createTrade()
     }
 }

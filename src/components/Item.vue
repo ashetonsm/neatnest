@@ -3,7 +3,7 @@ import router from "@/router";
 import { onMounted, ref, toRaw } from "vue";
 import { userStore } from "@/stores/user";
 import ItemModal from "./ItemModal.vue";
-import { createPresignedUrlWithClient, DELETE_S3 } from "@/components/tools/s3Actions";
+import { copyData, createPresignedUrlWithClient, DELETE_S3 } from "@/components/tools/s3Actions";
 import { DELETE_DATA, GET_BY_PK_SK, PUT_DATA } from "./tools/ddbActions";
 const user = userStore();
 const itemModalRef = ref();
@@ -19,39 +19,49 @@ const props = defineProps<{
 async function buyFlow(i: any) {
   const choice = confirm("Buy " + i.name + " for " + i.price + "?");
   if (choice) {
-    console.log("User has ", user.getCredits, " credit(s).");
     if (user.getCredits >= i.price) {
       // Subtract the amount. It doesn't matter if we clone this or not.
       var updatedUser = user.getUser
       updatedUser.credits -= i.price
-      await PUT_DATA(updatedUser)
-      
-      // Create the item with a clone.
-      var boughtItem = structuredClone(toRaw(i))
-      // Modify the owner and selling status
-      boughtItem.PK = user.getUser.PK
-      boughtItem.owner = user.getUser.PK
-      boughtItem.selling = false
+      // await PUT_DATA(updatedUser)
 
-      // Write it to the DB
-      await PUT_DATA(boughtItem)
-      // Delete the old item
-      await DELETE_DATA(toRaw(i))
-      .then(() => {
-        router.go(0);
-      })
+      // Regardless of who it was bought from, it should be copied to the user's S3 bucket folder
+      const newPath = `images/${user.getUser.PK}/item/${i.name}.png`
+      await copyData(i.url, newPath)
+        .then(async (res) => {
+          // Create the item with a clone.
+          var boughtItem = structuredClone(toRaw(i))
+          // Modify the owner and selling status
+          boughtItem.PK = user.getUser.PK
+          boughtItem.owner = user.getUser.PK
+          boughtItem.url = newPath
+          boughtItem.selling = false
+    
+          // Write it to the DB
+          await PUT_DATA(boughtItem)
+    
+          if (i.PK !== "GENERALSTORE") {
+            // Delete the old item
+            await DELETE_DATA(toRaw(i))
+            .then(() => {
+              router.go(0);
+            })
+          } else {
+            router.go(0);
+          }
+        })
+
     } else {
       alert("You don't have enough credits to buy this!");
     }
   } else {
-    return console.log(choice);
+    return
   }
 }
 
 async function getFileUrl(fileName: any) {
   try {
     const result = await createPresignedUrlWithClient(fileName as string);
-    console.log(result);
     signedSrc.value = result;
   } catch (error) {
     console.error(error);
@@ -63,20 +73,18 @@ async function getFileUrl(fileName: any) {
 
 async function handleDelete(i: any) {
   const choice = confirm("Delete " + i.name + "?");
-  if (choice) {
-    // Do delete logic
-    await DELETE_S3(i).then(() => {
-      console.log("Image deleted.");
-    });
-    await DELETE_DATA(i).then(async () => {
-      console.log("DynamoDB data deleted.");
-    })
-      .then(() => {
-        // Refresh
-        router.go(0);
-      })
-  } else {
-    return console.log("Deletion aborted.");
+  try {
+    if (choice) {
+      // Do delete logic
+      await DELETE_S3(i)
+      await DELETE_DATA(i)
+        .then(() => {
+          // Refresh
+          router.go(0);
+        })
+    }
+  } catch (error: any) {
+    console.error(error)
   }
 }
 

@@ -29,17 +29,17 @@ async function validateUsername() {
 async function validateBio() {
     const { valid } = await bioForm.value.validate()
 
-    if (valid) alert('Form is valid')
-
-    var updatedUser = user.getUser!;
-    try {
-        updatedUser.bio = bio.value;
-        await PUT_DATA(updatedUser).then(async () => {
-            router.push(`/profile/${updatedUser.username}`)
-            router.go(0);
-        });
-    } catch (error: any) {
-        console.error(error);
+    if (valid) {
+        var updatedUser = user.getUser!;
+        try {
+            updatedUser.bio = bio.value;
+            await PUT_DATA(updatedUser).then(async () => {
+                router.push(`/profile/${updatedUser.username}`)
+                router.go(0);
+            });
+        } catch (error: any) {
+            console.error(error);
+        }
     }
 }
 
