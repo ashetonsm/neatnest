@@ -56,7 +56,7 @@ export async function createPet(
         })
         .then(() => {
           router.push({ name: 'pets' })
-          router.go(1)
+          router.go(0)
         });
     } catch (error: any) {
       console.error(error)

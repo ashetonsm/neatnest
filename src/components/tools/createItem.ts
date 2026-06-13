@@ -57,7 +57,7 @@ export async function createItem(
         })
         .then(() => {
           router.push({ name: 'inventory' })
-          router.go(1)
+          router.go(0)
         });
     } catch (error: any) {
       console.error(error)
