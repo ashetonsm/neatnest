@@ -13,17 +13,16 @@ const bio = ref(user.getUser!.bio)
 async function validateUsername() {
     const { valid } = await usernameForm.value.validate()
 
-    if (valid) alert('Form is valid')
-
-    // Update the username
-    var updatedUser = user.getUser!;
-    try {
-        updatedUser.username = username.value;
-        await PUT_DATA(updatedUser).then(async () => {
-            router.push(`/profile/${updatedUser.username}`)
-        });
-    } catch (error: any) {
-        console.error(error);
+    if (valid) {
+        var updatedUser = user.getUser!;
+        try {
+            updatedUser.username = username.value.toLowerCase().replace(/\s/g, "_").replace(/\W+/g, "");
+            await PUT_DATA(updatedUser).then(async () => {
+                router.push(`/profile/${updatedUser.username}`)
+            });
+        } catch (error: any) {
+            console.error(error);
+        }
     }
 }
 
