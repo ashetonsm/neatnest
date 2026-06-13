@@ -33,7 +33,7 @@ export const userStore = defineStore('user', {
                             PK: PK,
                             SK: '#METADATA',
                             email: inputUser.value.email,
-                            username: inputUser.value.name,
+                            username: inputUser.value.name.toLowerCase().replace(/\s/g, "_").replace(/\W+/g, ""),
                             url: inputUser.value.url,
                             bio: "Hi, I'm new! Nice to meet you!",
                             createdAt: new Date().toISOString(),

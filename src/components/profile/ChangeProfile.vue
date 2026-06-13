@@ -16,7 +16,7 @@ async function validateUsername() {
     if (valid) {
         var updatedUser = user.getUser!;
         try {
-            updatedUser.username = username.value;
+            updatedUser.username = username.value.toLowerCase().replace(/\s/g, "_").replace(/\W+/g, "");
             await PUT_DATA(updatedUser).then(async () => {
                 router.push(`/profile/${updatedUser.username}`)
             });
