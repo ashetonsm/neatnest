@@ -15,15 +15,9 @@ export async function createPet(
   try {
     canvas!.toBlob(async (blob) => {
       try {
-        const result = (await uploadData(imgPath, blob));
-
-        if (result && result.$metadata.httpStatusCode == 200) {
-          console.log('Uploaded succeeded');
-        } else {
-          console.log('Something went wrong with the upload.');
-        }
+        await uploadData(imgPath, blob)
       } catch (error) {
-        console.log('Error : ', error);
+        console.error('Error : ', error);
       }
 
     }, 'image/png')
@@ -39,7 +33,7 @@ export async function createPet(
         health: 100,
         hunger: 5,
         mood: 0,
-        tradeStatus: 0,
+        status: 0,
         url: imgPath,
         type: 'Pet',
         createdAt: new Date().toISOString(),
@@ -56,7 +50,7 @@ export async function createPet(
         })
         .then(() => {
           router.push({ name: 'pets' })
-          router.go(0)
+          router.go(1)
         });
     } catch (error: any) {
       console.error(error)
