@@ -9,6 +9,8 @@ export const config = {
   region: import.meta.env.VITE_AWS_DEFAULT_REGION
 }
 
+const tableName = import.meta.env.VITE_DYNAMODB_TABLE
+
 export const client = DynamoDBDocument.from(new DynamoDB(config), {
   marshallOptions: {
     convertEmptyValues: true,
@@ -26,7 +28,7 @@ export async function PUT_DATA(newData: Object) {
   console.log("NEW DATA:", newData)
 
   const command = new PutCommand({
-    TableName: "neatnest",
+    TableName: tableName,
     Item: newData,
   });
 
@@ -49,7 +51,7 @@ export async function BATCH_MODIFY_DATA(newData: Array<any>) {
   console.log("newData", newData)
   try {
     const command = new BatchWriteCommand({
-      RequestItems: { "neatnest": newData },
+      RequestItems: { tableName: newData },
       ReturnConsumedCapacity: "TOTAL"
     });
     const response = await client.send(command);
@@ -134,11 +136,11 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
     }
 
     const command1 = new PutCommand({
-      TableName: "neatnest",
+      TableName: tableName,
       Item: initiatingRel,
     });
     const command2 = new PutCommand({
-      TableName: "neatnest",
+      TableName: tableName,
       Item: targetRel,
     });
 
@@ -306,11 +308,11 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
     }
 
     const command1 = new PutCommand({
-      TableName: "neatnest",
+      TableName: tableName,
       Item: initiatingTrade,
     });
     const command2 = new PutCommand({
-      TableName: "neatnest",
+      TableName: tableName,
       Item: targetTrade,
     });
 
@@ -339,7 +341,7 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
 export async function DELETE_DATA(newData: any) {
 
   const command = {
-    TableName: "neatnest",
+    TableName: tableName,
     Key: {
       PK: { S: newData.PK as string },
       SK: { S: newData.SK as string }
@@ -359,7 +361,7 @@ export async function DELETE_DATA(newData: any) {
  */
 export async function GET_BY_PK_SK(pk: string, sk: string) {
   const command = new QueryCommand({
-    TableName: "neatnest",
+    TableName: tableName,
     KeyConditionExpression: "PK = :pkVal AND begins_with(SK, :skPrefix)",
     ExpressionAttributeValues:
     {
@@ -383,7 +385,7 @@ export async function GET_BY_PK_SK(pk: string, sk: string) {
  */
 export async function GET_BY_USERNAME(un: string, SK?: string) {
   const command = new QueryCommand({
-    TableName: "neatnest",
+    TableName: tableName,
     IndexName: "Username",
     KeyConditionExpression: "username = :unVal AND begins_with(SK, :skPrefix)",
     ExpressionAttributeValues:
@@ -409,7 +411,7 @@ export async function GET_BY_USERNAME(un: string, SK?: string) {
  */
 export async function LIST_BY_PK_SK(pk: string, sk: string) {
   const command = new QueryCommand({
-    TableName: "neatnest",
+    TableName: tableName,
     KeyConditionExpression: "PK = :pkVal AND begins_with(SK, :skPrefix)",
     ExpressionAttributeValues:
     {
@@ -434,7 +436,7 @@ export async function LIST_BY_PK_SK(pk: string, sk: string) {
  */
 export async function LIST_SELLING_BY_PK(pk: string) {
   const command = new QueryCommand({
-    TableName: "neatnest",
+    TableName: tableName,
     KeyConditionExpression: "PK = :pkVal AND begins_with(SK, :skPrefix)",
     ExpressionAttributeValues:
     {
