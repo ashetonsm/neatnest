@@ -66,7 +66,8 @@ onMounted(async () => {
     <PetItemModal :pet="pet" :items="items" v-slot:default="{ isActive }" />
   </v-dialog>
 
-  <v-card class="mx-auto" max-width="300px">
+  <v-card class="mx-auto" max-width="300px"
+    :color="pet.status == 1 && $route.name == 'pets' ? 'light-green-lighten-5' : 'none'">
     <v-img
       ref="petModalRef"
       :src="signedSrc"
