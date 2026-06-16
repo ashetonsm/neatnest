@@ -61,6 +61,17 @@ async function handleSubmit(item: any | null | undefined) {
   }
 }
 
+async function handleStatus(newStatus: number) {
+  try { 
+      var updatedPet = props.pet;
+      updatedPet.status = newStatus
+      await PUT_DATA(updatedPet);
+      router.go(0);
+    } catch (error: any) {
+      console.error("Error: ", error);
+    }
+  }
+
 var foodOptions = ref<Array<any>>();
 var playOptions = ref<Array<any>>();
 var selectedFoodOption = ref<any>();
@@ -76,6 +87,15 @@ playOptions.value = itemFilter2.filter((item) => item.category == "entertainment
   <v-card class="mx-auto">
     <v-col class="text-center">
       <v-card-title> What would you like to do with {{ pet.name }}? </v-card-title>
+
+        <v-btn
+          :color='props.pet.status == 1 ? "error" : "primary"'
+          @click="handleStatus(props.pet.status == 1 ? 0 : 1)"
+          class="mb-4"
+          >{{props.pet.status == 1 ? "Set Inactive" : "Set Active"}}
+        </v-btn>
+
+
       <v-form @submit.prevent="handleSubmit(selectedFoodOption as any)">
         <v-select
           v-model="selectedFoodOption"
