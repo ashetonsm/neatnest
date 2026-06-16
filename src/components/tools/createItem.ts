@@ -38,7 +38,7 @@ export async function createItem(
         owner: userObj.PK,
         health: 99,
         selling: false,
-        tradeStatus: 0,
+        status: 0,
         url: imgPath,
         category: itemCat,
         price: 0,
@@ -57,7 +57,7 @@ export async function createItem(
         })
         .then(() => {
           router.push({ name: 'inventory' })
-          router.go(0)
+          router.go(1)
         });
     } catch (error: any) {
       console.error(error)
