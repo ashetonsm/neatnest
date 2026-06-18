@@ -51,7 +51,7 @@ export async function BATCH_MODIFY_DATA(newData: Array<any>) {
   console.log("newData", newData)
   try {
     const command = new BatchWriteCommand({
-      RequestItems: { tableName: newData },
+      RequestItems: { [tableName]: newData },
       ReturnConsumedCapacity: "TOTAL"
     });
     const response = await client.send(command);
