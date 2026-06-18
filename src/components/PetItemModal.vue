@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import router from "@/router";
-import { ref } from "vue";
+import { ref, toRaw } from "vue";
 import { userStore } from "@/stores/user";
 import { DELETE_S3 } from "./tools/s3Actions";
-import { DELETE_DATA, PUT_DATA } from "./tools/ddbActions";
+import { BATCH_MODIFY_DATA, DELETE_DATA, PUT_DATA } from "./tools/ddbActions";
 
+const user = userStore()
 const props = defineProps<{
   pet: any;
   items: Array<any>;
@@ -61,12 +62,25 @@ async function handleSubmit(item: any | null | undefined) {
   }
 }
 
-async function handleStatus(newStatus: number) {
+async function handleStatus() {
   try { 
-      var updatedPet = props.pet;
-      updatedPet.status = newStatus
-      await PUT_DATA(updatedPet);
-      router.go(0);
+      var petPutList: { PutRequest: { Item: any; }; }[] = []
+      // const allPets = user.getPets
+      user.getPets.filter((pet: { status: number; name: any; }) => {
+        if (pet.status == 0 && pet.name == props.pet.name) {
+          pet.status = 1
+        } else {
+          pet.status = 0
+        }
+        petPutList.push({ PutRequest: { Item: toRaw(pet) } });
+        })
+
+        console.log("petPutList", petPutList)
+      await BATCH_MODIFY_DATA(petPutList)
+        .then((res) => {
+          console.log(res)
+          router.go(0);
+        })
     } catch (error: any) {
       console.error("Error: ", error);
     }
@@ -90,7 +104,7 @@ playOptions.value = itemFilter2.filter((item) => item.category == "entertainment
 
         <v-btn
           :color='props.pet.status == 1 ? "error" : "primary"'
-          @click="handleStatus(props.pet.status == 1 ? 0 : 1)"
+          @click="handleStatus()"
           class="mb-4"
           >{{props.pet.status == 1 ? "Set Inactive" : "Set Active"}}
         </v-btn>
