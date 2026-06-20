@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { userStore } from "@/stores/user";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, toRaw, watch } from "vue";
 import { RouterLink } from "vue-router";
 import Notification from "./notifications/Notification.vue";
 
 const user = userStore();
 const collapse = ref(true);
+var activePet: any = null
+const drawer = ref(false)
+const group = ref(null)
+const notifDrawer = ref(false)
+const notifGroup = ref(null)
 
 const loggedOutLinks = ref<Array<{ title: string; to: string, link: boolean }>>([
   { title: "Home", to: "/", link: true },
@@ -39,31 +44,37 @@ function resize(e:any) {
   return
 }
 
+watch(group, () => {
+  drawer.value = false
+})
+
+watch(notifGroup, () => {
+  notifDrawer.value = false
+})
+
 onMounted(async () => {
-  window.addEventListener("resize", resize);
-  user.$subscribe((mutation) => {
-    // Perform actions here when the state changes
-    
-    if (mutation.storeId == "user" && user.getUser?.username !== undefined) {
-      loggedInLinks.value[3].to = `/profile/${user.getUser?.username}`;
-    }
+  try {
+    window.addEventListener("resize", resize);
+    user.$subscribe((mutation) => {
+      // Perform actions here when the state changes
+      
+      if (mutation.storeId == "user" && user.getUser?.username !== undefined) {
+        loggedInLinks.value[3].to = `/profile/${user.getUser?.username}`;
+        if (!activePet) {
+          var allPets = structuredClone(toRaw(user.getPets))
+          allPets.filter((pet: any) => {
+            if (pet.status == 1) {
+              activePet = pet
+            }
+          })
+        }
+      }
+    });
 
-  });
+  } catch (error: any) {
+    console.error(error)
+  }
 });
-
-  const drawer = ref(false)
-  const group = ref(null)
-
-  watch(group, () => {
-    drawer.value = false
-  })
-
-  const notifDrawer = ref(false)
-  const notifGroup = ref(null)
-
-  watch(notifGroup, () => {
-    notifDrawer.value = false
-  })
 
 </script>
   <template>
@@ -72,8 +83,6 @@ onMounted(async () => {
           <v-avatar image="@/assets/logo.svg"></v-avatar>
         </RouterLink>
         <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-
-        
         <v-badge location="top right" color="success" :model-value="user.getNotifications.length > 0 ? true : false" :content="user.getNotifications.length">
           <v-avatar 
           icon="mdi-bell" 
@@ -91,6 +100,13 @@ onMounted(async () => {
           <v-btn icon="mdi-magnify" variant="text"></v-btn>
         </template> 
         -->
+
+        <template v-if="user.getUser?.username !== undefined">
+
+      <h2>
+        Active pet: {{activePet ? activePet.name : "None"}}
+      </h2>
+        </template>
       </v-app-bar>
 
       <v-navigation-drawer
