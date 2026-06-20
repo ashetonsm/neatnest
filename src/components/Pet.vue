@@ -21,7 +21,6 @@ const props = defineProps<{
 async function getFileUrl(fileName: any) {
   try {
     const result = await createPresignedUrlWithClient(fileName as string);
-    console.log(result);
     signedSrc.value = result;
   } catch (error) {
     console.error(error);
@@ -34,19 +33,14 @@ async function handleDelete(pet: any) {
   const choice = confirm(`Delete ${pet.name} forever? (This cannot be undone!)`);
   if (choice) {
     // Do delete logic
-    await DELETE_S3(pet).then(() => {
-      console.log("Image deleted.");
-    });
+    await DELETE_S3(pet)
     await DELETE_DATA(pet)
-      .then(async () => {
-        console.log("DynamoDB data deleted.");
-      })
       .then(() => {
         // Refresh
         router.go(0);
       });
   } else {
-    return console.log(`${pet.name} was not deleted!`);
+    return
   }
 }
 
