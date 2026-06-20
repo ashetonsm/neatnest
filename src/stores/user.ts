@@ -64,7 +64,6 @@ export const userStore = defineStore('user', {
         async fetchPets(PK: string) {
             const pets = await LIST_BY_PK_SK(PK, "PET#")
             try {
-                console.log(pets)
                 if (PK == this.user.PK) {
                     this.pets = pets || []
                     return this.pets
@@ -78,7 +77,6 @@ export const userStore = defineStore('user', {
         async fetchTrades() {
             const trades = await LIST_BY_PK_SK(this.getUser.PK, "TRADE#")
             try {
-                console.log(trades)
                 this.trades = trades || []
                 return this.trades
             } catch (error: any) {
@@ -89,7 +87,6 @@ export const userStore = defineStore('user', {
         async fetchInventory() {
             const inventory = await LIST_BY_PK_SK(this.getUser.PK, "ITEM")
             try {
-                console.log("The inventory from user.ts:", inventory)
                 this.inventory = inventory || []
                 return this.inventory
             } catch (error: any) {
@@ -101,7 +98,6 @@ export const userStore = defineStore('user', {
         async fetchNotifications() {
             const notifications = await LIST_BY_PK_SK(this.getUser.PK, "NOTIFICATION")
             try {
-                console.log("The notifications from user.ts:", notifications)
                 this.notifications = notifications || []
                 return this.notifications
             } catch (error: any) {
@@ -114,7 +110,6 @@ export const userStore = defineStore('user', {
             const shopkeeper = await GET_BY_USERNAME(shopkeeperUsername, "#METADATA")
             const inventory = await LIST_SELLING_BY_PK(shopkeeper?.PK)
             try {
-                console.log("The shop's inventory from user.ts:", inventory)
                 return inventory || []
             } catch (error: any) {
                 console.error("Error fetching the shop's inventory: ", error)
@@ -125,7 +120,6 @@ export const userStore = defineStore('user', {
         async fetchFriends(PK: string) {
             const friends = await LIST_BY_PK_SK(PK, "RELATIONSHIP#")
             try {
-                console.log("The friends from user.ts:", friends)
                 if (PK == this.user.PK) {
                     this.friends = friends || []
                     return this.friends
