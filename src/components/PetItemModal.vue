@@ -62,23 +62,23 @@ async function handleSubmit(item: any | null | undefined) {
   }
 }
 
-async function handleStatus() {
+async function handleStatus(newStatus : number) {
   try { 
       var petPutList: { PutRequest: { Item: any; }; }[] = []
-      // const allPets = user.getPets
-      user.getPets.filter((pet: { status: number; name: any; }) => {
-        if (pet.status == 0 && pet.name == props.pet.name) {
-          pet.status = 1
+      user.getPets.filter((pet: any) => {
+        var changedPet = structuredClone(toRaw(pet))
+        if (newStatus == 1 && changedPet.status == 0 && changedPet.name == props.pet.name) {
+          // Pet was not active and is now active
+          changedPet.status = 1
         } else {
-          pet.status = 0
+          // Pet was active and is now inactive
+          changedPet.status = 0
         }
-        petPutList.push({ PutRequest: { Item: toRaw(pet) } });
+        petPutList.push({ PutRequest: { Item: changedPet } });
         })
-
-        console.log("petPutList", petPutList)
       await BATCH_MODIFY_DATA(petPutList)
-        .then((res) => {
-          console.log(res)
+        .then(async (res) => {
+          await user.fetchPets(user.getUser.PK)
           router.go(0);
         })
     } catch (error: any) {
@@ -104,7 +104,7 @@ playOptions.value = itemFilter2.filter((item) => item.category == "entertainment
 
         <v-btn
           :color='props.pet.status == 1 ? "error" : "primary"'
-          @click="handleStatus()"
+          @click="handleStatus(props.pet.status == 0 ? 1 : 0)"
           class="mb-4"
           >{{props.pet.status == 1 ? "Set Inactive" : "Set Active"}}
         </v-btn>
