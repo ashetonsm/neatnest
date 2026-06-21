@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import router from "@/router";
-import { ref } from "vue";
+import { ref, toRaw } from "vue";
 import { userStore } from "@/stores/user";
 import { DELETE_S3 } from "./tools/s3Actions";
-import { DELETE_DATA, PUT_DATA } from "./tools/ddbActions";
+import { BATCH_MODIFY_DATA, DELETE_DATA, PUT_DATA } from "./tools/ddbActions";
 
+const user = userStore()
 const props = defineProps<{
   pet: any;
   items: Array<any>;
@@ -61,6 +62,30 @@ async function handleSubmit(item: any | null | undefined) {
   }
 }
 
+async function handleStatus(newStatus : number) {
+  try { 
+      var petPutList: { PutRequest: { Item: any; }; }[] = []
+      user.getPets.filter((pet: any) => {
+        var changedPet = structuredClone(toRaw(pet))
+        if (newStatus == 1 && changedPet.status == 0 && changedPet.name == props.pet.name) {
+          // Pet was not active and is now active
+          changedPet.status = 1
+        } else {
+          // Pet was active and is now inactive
+          changedPet.status = 0
+        }
+        petPutList.push({ PutRequest: { Item: changedPet } });
+        })
+      await BATCH_MODIFY_DATA(petPutList)
+        .then(async (res) => {
+          await user.fetchPets(user.getUser.PK)
+          router.go(0);
+        })
+    } catch (error: any) {
+      console.error("Error: ", error);
+    }
+  }
+
 var foodOptions = ref<Array<any>>();
 var playOptions = ref<Array<any>>();
 var selectedFoodOption = ref<any>();
@@ -76,6 +101,15 @@ playOptions.value = itemFilter2.filter((item) => item.category == "entertainment
   <v-card class="mx-auto">
     <v-col class="text-center">
       <v-card-title> What would you like to do with {{ pet.name }}? </v-card-title>
+
+        <v-btn
+          :color='props.pet.status == 1 ? "error" : "primary"'
+          @click="handleStatus(props.pet.status == 0 ? 1 : 0)"
+          class="mb-4"
+          >{{props.pet.status == 1 ? "Set Inactive" : "Set Active"}}
+        </v-btn>
+
+
       <v-form @submit.prevent="handleSubmit(selectedFoodOption as any)">
         <v-select
           v-model="selectedFoodOption"
