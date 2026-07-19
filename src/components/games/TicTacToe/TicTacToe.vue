@@ -85,11 +85,15 @@ const sendScore = async () => {
   var updatedUser = user.getUser
   updatedUser.credits = user.credits + 5
   await PUT_DATA(updatedUser)
+  .then(async () => {
+    // Updates the credits in the nav bar by re-fetching
+    await user.fetchUser(user.getUser.PK, '#METADATA')
+  })
   return
 }
 
 watch(gameOver, async (newValue) => {
-  if (newValue == true && winner.value == "nobody") {
+  if (newValue == true && winner.value !== "Nobody") {
     await sendScore()
   }
 })
