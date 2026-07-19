@@ -26,7 +26,7 @@ const props = defineProps<{
             <!-- The route is NOT the friends page. List only status 1 -->
             <template v-else>
                 <v-list 
-                    v-for="friend in props.friends.filter((f: { status?: number; }) => f.status == 1)">
+                    v-for="friend in props.friends.filter((f: { status?: number }) => {f.status == 1})">
                     <Friend :friend="friend"/>
                 </v-list>
             </template>

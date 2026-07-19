@@ -10,11 +10,11 @@ Make friends, make art, make something neat!
 - [ ] Add tests (90% coverage)
 - [ ] Seed pet and item creations on a timer (1x a month, max 3 available)
 - [ ] Add games
-- [ ] Set active pet and display while browsing
 - [ ] Add additional canvas features
     - [ ] Undo button
     - [ ] Edit an existing pet/item
     - [ ] Frames for animated gifs (2 frames standard)
+- [x] Set active pet and display while browsing
 - [x] Seed default shops with some basic items
 - [x] Add notification system for trades and friend requests
 - [x] Recreate database structure

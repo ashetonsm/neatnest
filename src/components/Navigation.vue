@@ -102,10 +102,17 @@ onMounted(async () => {
         -->
 
         <template v-if="user.getUser?.username !== undefined">
+        
+        <v-toolbar-title>Hi, {{user.getUser?.username}}!</v-toolbar-title>
 
-      <h2>
-        Active pet: {{activePet ? activePet.name : "None"}}
-      </h2>
+          <div class="text-center">
+            <v-chip
+              class="ma-2"
+              variant="outlined"
+            >
+              Active pet: {{activePet ? activePet.name : "None"}}
+            </v-chip>
+          </div>
         </template>
       </v-app-bar>
 
