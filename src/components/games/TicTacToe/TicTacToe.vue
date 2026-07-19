@@ -200,7 +200,31 @@ watch([clicked_p1, clicked_cpu], () => {
     </div>
   <template v-if="gameOver">
     <h1>{{ winner }} wins!</h1>
-    <button @click="() => resetGame()">Play again?</button>
+    <v-btn @click="() => resetGame()">Play again?</v-btn>
   </template>
 
 </template>
+
+<style lang="css" scoped>
+  .row-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 75vw;
+  height: 75vw;
+}
+
+.row-container div {
+  border-radius: 1em;
+  background-color: #f1f1f1;
+  width: 30%;
+  height: auto;
+  margin: 2px;
+  flex: 1 1 auto;
+  text-align: center;  
+  font-size: 1em;
+  color: black;
+}
+
+</style>
