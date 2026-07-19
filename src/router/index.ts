@@ -2,6 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import CanvasView from '@/views/CanvasView.vue'
 import { authGuard } from '@auth0/auth0-vue'
+import GamesView from '@/views/GamesView.vue'
+import GamesList from '@/components/games/GamesList.vue'
+import GamesDisplay from '@/components/games/GamesDisplay.vue'
 
 const router = createRouter({
   history: createWebHistory('/'),
@@ -67,6 +70,24 @@ const router = createRouter({
       path: '/canvas/:type',
       name: 'canvas',
       component: CanvasView,
+      beforeEnter: authGuard
+    },
+    {
+      path: '/games',
+      name: 'games',
+      component: GamesView,
+      beforeEnter: authGuard
+    },
+    {
+      path: '/games',
+      name: 'games',
+      component: GamesList,
+      beforeEnter: authGuard
+    },
+    {
+      path: '/games/:id',
+      name: 'gameDisplay',
+      component: GamesDisplay,
       beforeEnter: authGuard
     },
   ],

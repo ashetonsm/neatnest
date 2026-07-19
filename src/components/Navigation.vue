@@ -30,6 +30,7 @@ const loggedInLinks = ref<Array<{ title: string; to: string, link: boolean }>>([
     link: true
   },
   { title: "Pets", to: "/pets", link: true },
+  { title: "Games", to: "/games", link: true },
   { title: "Friends", to: "/friends", link: true },
   { title: "Trades", to: "/trades", link: true },
   { title: "About", to: "/about", link: true },
@@ -106,6 +107,12 @@ onMounted(async () => {
         <v-toolbar-title>Hi, {{user.getUser?.username}}!</v-toolbar-title>
 
           <div class="text-center">
+            <v-chip
+              class="ma-2"
+              variant="outlined"
+            >
+              Credits: {{ user.getCredits }}
+            </v-chip>
             <v-chip
               class="ma-2"
               variant="outlined"
