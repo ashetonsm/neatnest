@@ -3,6 +3,7 @@ import { userStore } from "@/stores/user";
 import { onMounted, ref, toRaw, watch } from "vue";
 import { RouterLink } from "vue-router";
 import Notification from "./notifications/Notification.vue";
+import { useAuth0 } from "@auth0/auth0-vue";
 
 const user = userStore();
 const collapse = ref(true);
@@ -12,15 +13,22 @@ const group = ref(null)
 const notifDrawer = ref(false)
 const notifGroup = ref(null)
 
-const loggedOutLinks = ref<Array<{ title: string; to: string, link: boolean }>>([
+const { loginWithRedirect, logout: auth0Logout } = useAuth0();
+const logout = async () => {
+  document.cookie = "currentUser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; 
+  await auth0Logout({ logoutParams: { returnTo: window.location.origin } })
+}
+
+const loggedOutLinks = ref<Array<{ title: string; to?: string, link: boolean, onClick?: any}>>([
   { title: "Home", to: "/", link: true },
   { title: "General Store", to: "/shop/1", link: true },
   { title: "Inventory", to: "/inventory", link: true },
   { title: "Pets", to: "/pets", link: true },
   { title: "About", to: "/about", link: true },
+  { title: "Login", onClick: () => {loginWithRedirect({ appState: { target: '/callback' } })}, link: true },
 ]);
 
-const loggedInLinks = ref<Array<{ title: string; to: string, link: boolean }>>([
+const loggedInLinks = ref<Array<{ title: string; to?: string, link: boolean, onClick?: any }>>([
   { title: "Home", to: "/", link: true},
   { title: "General Store", to: "/shop/1", link: true },
   { title: "Inventory", to: "/inventory", link: true },
@@ -34,6 +42,7 @@ const loggedInLinks = ref<Array<{ title: string; to: string, link: boolean }>>([
   { title: "Friends", to: "/friends", link: true },
   { title: "Trades", to: "/trades", link: true },
   { title: "About", to: "/about", link: true },
+  { title: "Logout", onClick: logout, link: true },
 ]);
 
 function resize(e:any) {
