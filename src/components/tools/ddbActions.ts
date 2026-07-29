@@ -83,8 +83,8 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
     type: 'Relationship',
     relationshipUsername: targetRelationship.relationshipUsername,
     username: initiatingRelationship.username,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: new Date().getTime(),
+    updatedAt: new Date().getTime(),
   }
   var targetRel = {
     PK: targetRelationship.PK,
@@ -93,8 +93,8 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
     type: 'Relationship',
     relationshipUsername: initiatingRelationship.username,
     username: targetRelationship.relationshipUsername,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: new Date().getTime(),
+    updatedAt: new Date().getTime(),
   }
 
   try {
@@ -187,8 +187,8 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
     tradeUsername: targetTrader.tradeUsername,
     tradeContents: tradeContents,
     username: initiatingTrader.username,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: new Date().getTime(),
+    updatedAt: new Date().getTime(),
   }
   var targetTrade = {
     PK: targetTrader.PK,
@@ -198,8 +198,8 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
     tradeUsername: initiatingTrader.username,
     tradeContents: tradeContents,
     username: targetTrader.tradeUsername,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: new Date().getTime(),
+    updatedAt: new Date().getTime(),
   }
 
   try {

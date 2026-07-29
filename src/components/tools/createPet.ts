@@ -36,8 +36,8 @@ export async function createPet(
         status: 0,
         url: imgPath,
         type: 'Pet',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: new Date().getTime(),
+        updatedAt: new Date().getTime(),
       })
         .then(async () => {
           // Update the user by decreasing itemsRemaining by 1 if itemsRemaining > 0
@@ -45,7 +45,7 @@ export async function createPet(
           // Subtract 1 from itemsRemaining
           updatedUser.petsRemaining = updatedUser.petsRemaining - 1
           // Update the updatedAt time for the User
-          updatedUser.updatedAt = new Date().toISOString()
+          updatedUser.updatedAt = new Date().getTime()
           await PUT_DATA(updatedUser)
         })
         .then(() => {
