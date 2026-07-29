@@ -24,10 +24,10 @@ function resetCanvas() {
       context!.fillStyle = "rgb(255, 255, 255)";
       context!.fillRect(0, 0, canvas.width, canvas.height);
     } else {
-      console.log("Canvas not found!");
+      console.error("Canvas not found!");
     }
   } catch (error: any) {
-    console.log(error);
+    console.error(error);
   }
 }
 
@@ -45,7 +45,7 @@ async function handleSubmit(this: any, t: string) {
     case "item":
       break;
     default:
-      console.log("Invalid route param: ", t);
+      console.error("Invalid route param: ", t);
       return;
   }
 }

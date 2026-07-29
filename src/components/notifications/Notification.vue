@@ -6,7 +6,6 @@ const user = userStore();
 
 async function deleteNotification(notification: any) {
     try {
-        console.log(notification)
         await DELETE_DATA(notification)
     } catch (error: any) {
         console.error("Something went wrong deleting the notif:", error)

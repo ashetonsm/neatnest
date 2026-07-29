@@ -24,7 +24,7 @@ async function toggleSell(i: any, action: string) {
         updatedItem.selling = false;
         break;
       default:
-        console.log("Invalid action.");
+        console.error("Invalid action.");
         break;
     }
 

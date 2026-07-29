@@ -18,14 +18,12 @@ export async function createItem(
         const result = (await uploadData(imgPath, blob));
 
         if (result && result.$metadata.httpStatusCode == 200) {
-          console.log('Uploaded succeeded');
         } else {
-          console.log('Something went wrong with the upload.');
+          console.error('Something went wrong with the upload.');
         }
       } catch (error) {
-        console.log('Error : ', error);
+        console.error('Error : ', error);
       }
-
     }, 'image/png')
 
     // Try creating a new Item
