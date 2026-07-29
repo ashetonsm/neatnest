@@ -15,15 +15,9 @@ export async function createPet(
   try {
     canvas!.toBlob(async (blob) => {
       try {
-        const result = (await uploadData(imgPath, blob));
-
-        if (result && result.$metadata.httpStatusCode == 200) {
-          console.log('Uploaded succeeded');
-        } else {
-          console.log('Something went wrong with the upload.');
-        }
+        await uploadData(imgPath, blob)
       } catch (error) {
-        console.log('Error : ', error);
+        console.error('Error : ', error);
       }
 
     }, 'image/png')
@@ -39,11 +33,11 @@ export async function createPet(
         health: 100,
         hunger: 5,
         mood: 0,
-        tradeStatus: 0,
-        image: imgPath,
+        status: 0,
+        url: imgPath,
         type: 'Pet',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: new Date().getTime(),
+        updatedAt: new Date().getTime(),
       })
         .then(async () => {
           // Update the user by decreasing itemsRemaining by 1 if itemsRemaining > 0
@@ -51,7 +45,7 @@ export async function createPet(
           // Subtract 1 from itemsRemaining
           updatedUser.petsRemaining = updatedUser.petsRemaining - 1
           // Update the updatedAt time for the User
-          updatedUser.updatedAt = new Date().toISOString()
+          updatedUser.updatedAt = new Date().getTime()
           await PUT_DATA(updatedUser)
         })
         .then(() => {

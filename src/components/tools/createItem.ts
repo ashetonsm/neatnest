@@ -18,14 +18,12 @@ export async function createItem(
         const result = (await uploadData(imgPath, blob));
 
         if (result && result.$metadata.httpStatusCode == 200) {
-          console.log('Uploaded succeeded');
         } else {
-          console.log('Something went wrong with the upload.');
+          console.error('Something went wrong with the upload.');
         }
       } catch (error) {
-        console.log('Error : ', error);
+        console.error('Error : ', error);
       }
-
     }, 'image/png')
 
     // Try creating a new Item
@@ -38,13 +36,13 @@ export async function createItem(
         owner: userObj.PK,
         health: 99,
         selling: false,
-        tradeStatus: 0,
-        image: imgPath,
+        status: 0,
+        url: imgPath,
         category: itemCat,
         price: 0,
         type: 'Item',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: new Date().getTime(),
+        updatedAt: new Date().getTime(),
       })
         .then(async () => {
           // Update the user by decreasing itemsRemaining by 1 if itemsRemaining > 0
@@ -52,7 +50,7 @@ export async function createItem(
           // Subtract 1 from itemsRemaining
           updatedUser.itemsRemaining = updatedUser.itemsRemaining - 1
           // Update the updatedAt time for the User
-          updatedUser.updatedAt = new Date().toISOString()
+          updatedUser.updatedAt = new Date().getTime()
           await PUT_DATA(updatedUser)
         })
         .then(() => {

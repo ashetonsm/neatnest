@@ -24,15 +24,12 @@ async function toggleSell(i: any, action: string) {
         updatedItem.selling = false;
         break;
       default:
-        console.log("Invalid action.");
+        console.error("Invalid action.");
         break;
     }
 
     await PUT_DATA(updatedItem)
-      .then((res: any) => {
-      })
       .then(() => {
-        // Refresh
         router.go(0);
       });
   } catch (error) {
@@ -46,10 +43,7 @@ async function setPrice() {
     updatedItem.price = price
 
     await PUT_DATA(updatedItem)
-      .then((res: any) => {
-      })
       .then(() => {
-        // Refresh
         router.go(0);
       });
   } catch (error) {
@@ -57,19 +51,15 @@ async function setPrice() {
   }
 }
 
-
-
-/**
- * Can't trade with someone you blocked
- */
 async function validateItem() {
     const { valid } = await itemForm.value.validate()
 
-    if (valid) alert('Item is valid')
-    try {
-        setPrice()
-    } catch (error: any) {
-        console.error(error);
+    if (valid) {
+      try {
+          setPrice()
+      } catch (error: any) {
+          console.error(error);
+      }
     }
 }
 

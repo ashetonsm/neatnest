@@ -6,6 +6,7 @@ import {
   UPDATE_TRADE
 } from "@/components/tools/ddbActions";
 import router from "@/router";
+import { createNotification } from "../notifications/createNotification";
 
 const props = defineProps<{
   trade: any;
@@ -25,6 +26,19 @@ async function handleTrade(action: string) {
   traderObj.tradeUsername = props.trade.tradeUsername
 
   await UPDATE_TRADE(traderObj, user.getUser, toRaw(props.trade.tradeContents), action)
+  .then(async () => {
+    switch (action) {
+      case "accept":
+        await createNotification(user.getUser, traderObj, "tradeAccept")
+        break;
+      case "reject":
+        await createNotification(user.getUser, traderObj, "tradeReject")
+        break;
+      default:
+        console.error("Invalid notificaton action for trade switch sequence.")
+        break;
+    }
+  })
   .then(() => {
       router.push({name: 'trades'})
       router.go(0);

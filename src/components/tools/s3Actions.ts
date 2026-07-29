@@ -3,7 +3,8 @@ import {
     PutObjectCommand,
     S3Client,
     S3ServiceException,
-    GetObjectCommand
+    GetObjectCommand,
+    CopyObjectCommand
 } from "@aws-sdk/client-s3";
 import {
     getSignedUrl,
@@ -32,7 +33,43 @@ export const uploadData = async (imgPath: string, imgBlob: Blob | null) => {
     });
 
     try {
-        // console.log(command)
+        const response = await client.send(command);
+        return response
+    } catch (caught) {
+        if (
+            caught instanceof S3ServiceException &&
+            caught.name === "EntityTooLarge"
+        ) {
+            console.error(
+                `Error from S3 while uploading object to ${import.meta.env.VITE_S3_BUCKET_NAME}. \
+The object was too large. To upload objects larger than 5GB, use the S3 console (160GB max) \
+or the multipart upload API (5TB max).`,
+            );
+        } else if (caught instanceof S3ServiceException) {
+            console.error(
+                `Error from S3 while uploading object to ${import.meta.env.VITE_S3_BUCKET_NAME}.  ${caught.name}: ${caught.message}`,
+            );
+        } else {
+            throw caught;
+        }
+    }
+};
+
+/**
+ * Copy an existing file to a new location
+ * @param oldPath 
+ * @param newPath 
+ * @returns 
+ */
+export const copyData = async (oldPath: string, newPath: string) => {
+
+    const command = new CopyObjectCommand({
+        Bucket: import.meta.env.VITE_S3_BUCKET_NAME,
+        CopySource: import.meta.env.VITE_S3_BUCKET_NAME + "/" + oldPath,
+        Key: newPath
+    });
+
+    try {
         const response = await client.send(command);
         return response
     } catch (caught) {
@@ -64,15 +101,14 @@ or the multipart upload API (5TB max).`,
 export const DELETE_S3 = async (itemKey: any) => {
     const command = {
         Bucket: import.meta.env.VITE_S3_BUCKET_NAME,
-        Key: itemKey.image
+        Key: itemKey.url
     };
 
     try {
         const data = await client.send(new DeleteObjectCommand(command))
-        console.log("Success. Object deleted.", data)
         return data
     } catch (err) {
-        console.log("Error", err);
+        console.error("Error", err);
     }
 };
 

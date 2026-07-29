@@ -11,12 +11,13 @@ import {
 import FriendsList from "./FriendsList.vue";
 import ChangeProfile from "./ChangeProfile.vue";
 import FriendButtons from "./FriendButtons.vue";
+import { createNotification } from "@/components/notifications/createNotification"
 
 const route = useRoute();
 const user = userStore();
 var profile = route.params.username;
 const thisProfileDesc = ref<String>("Lorum ipsum this is a description");
-const friends = ref<Array<Record<string, any>> | undefined>([])
+const friends = ref<Array<Record<string, any>>>([])
 const buttonValues = ref<{
   add: boolean,
   cancel: boolean,
@@ -42,11 +43,9 @@ async function fetchUser() {
   try {
     await GET_BY_USERNAME(profile.toString(), "#METADATA")
       .then(async (res) => {
-        console.log(res)
         thisUser.value = res
         thisProfileDesc.value = thisUser.value.bio as string;
-        friends.value = await user.fetchFriends(res!.PK)
-        console.log(res!.PK)
+        friends.value = await user.fetchFriends(res!.PK) || []
       })
   } catch (error: any) {
     console.error(error); // The user probably doesn't exist in the db.
@@ -60,7 +59,6 @@ async function fetchUser() {
         if ((friend.SK as string).match('(?<=\#).*'))
           return targetFriend.value = friend
       });
-      console.log(targetFriend.value)
     }
 
     if (targetFriend.value !== undefined) {
@@ -74,7 +72,7 @@ async function fetchUser() {
       */
       switch (targetFriend.value.status) {
         case 0:
-          console.log("You are waiting for a response from this user.")
+          // console.log("You are waiting for a response from this user.")
           buttonValues.value.cancel = true
           buttonValues.value.block = true
           return
@@ -83,20 +81,20 @@ async function fetchUser() {
           buttonValues.value.block = true
           return
         case 2:
-          console.log("You are blocked (don't tell them this, obviously.)")
+          // console.log("You are blocked (don't tell them this, obviously.)")
           return
         case 8:
-          console.log("You blocked this user.")
+          // console.log("You blocked this user.")
           buttonValues.value.unblock = true
           return
         case 9:
-          console.log("This user is waiting for a response from you.")
+          // console.log("This user is waiting for a response from you.")
           buttonValues.value.accept = true
           buttonValues.value.reject = true
           buttonValues.value.block = true
           return
         default:
-          console.log("No friend status found.")
+          // console.log("No friend status found.")
           buttonValues.value.add = true
           buttonValues.value.block = true
       }
@@ -111,7 +109,18 @@ async function fetchUser() {
 
 /** Used to block and accept friends */
 async function updateFriend(action: string) {
-  await UPDATE_RELATIONSHIP(thisUser.value, user.getUser, action)
+  var relationshipObj = { PK: '', relationshipUsername: '' }
+  relationshipObj.PK = thisUser.value.PK
+  relationshipObj.relationshipUsername = thisUser.value.username
+  await UPDATE_RELATIONSHIP(relationshipObj, user.getUser, action)
+    .then(async () => {
+      if (action == "add") {
+        await createNotification(user.getUser, thisUser.value, "friendNew")
+      }
+      if (action == "accept") {
+        await createNotification(user.getUser, thisUser.value, "friendAccept")
+      }
+    })
     .then(() => {
       router.push(`/profile/${profile}`);
       router.go(0);
@@ -128,7 +137,7 @@ onMounted(async () => {
     thisUser.value = user.getUser!;
     thisProfileDesc.value = thisUser.value.bio as string;
     thesePets.value = user.getPets;
-    friends.value = await user.fetchFriends(user.getUser.PK)
+    friends.value = await user.fetchFriends(user.getUser.PK) || []
   }
 });
 </script>

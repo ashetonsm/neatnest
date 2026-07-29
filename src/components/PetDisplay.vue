@@ -15,12 +15,15 @@ async function setCreation() {
 }
 
 onMounted(async () => {
-  await setCreation();
-  await user.fetchPets(user.getUser.PK)
-  await user.fetchInventory()
-  fetchedPets.value = user.getPets;
-  fetchedItems.value = user.getInventory;
-    console.log("fetchedPets.value:", fetchedPets.value)
+  try {
+    await setCreation();
+    await user.fetchPets(user.getUser.PK)
+    await user.fetchInventory()
+    fetchedPets.value = user.getPets;
+    fetchedItems.value = user.getInventory;
+  } catch (error: any) {
+    console.error(error)
+  }
 
 });
 </script>

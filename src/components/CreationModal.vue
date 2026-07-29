@@ -4,9 +4,9 @@ import { createItem } from "./tools/createItem";
 import { createPet } from "./tools/createPet";
 import { ref } from "vue";
 
-var name: string | null;
-var speciesName: string | null;
-var selectedItemType = ref("");
+const name = ref("");
+const speciesName = ref("")
+const selectedItemType = ref("");
 var itemTypes: Array<string> = ["food", "entertainment"];
 const user = userStore();
 
@@ -15,38 +15,39 @@ const props = defineProps<{
 }>();
 
 async function handleSubmit() {
-  const path = `images/${user.getUser?.PK!}/${props.thing}/${name}.png`;
+  var sanitizedName = name.value.toLowerCase().replace(/\s/g, "_").replace(/\W+/g, "")
+  name.value = sanitizedName
+  const path = `images/${user.getUser?.PK!}/${props.thing}/${name.value}.png`;
 
   switch (props.thing) {
     case "item":
       if (user.getUser.itemsRemaining - 1 < 0) {
         // Make sure creation won't put the user into negative numbers.
-        console.log("Insufficient itemsRemaining. Aborting process.");
         return;
       } else {
-        console.log("Name: ", name);
-        console.log("SelectedItemType: ", selectedItemType);
-        if (name && selectedItemType) {
-          createItem(name, path, selectedItemType.value, user.getUser);
+        if (name.value && selectedItemType.value) {
+          createItem(name.value, path, selectedItemType.value, user.getUser);
+        } else {
+          alert("Please use half-width alphanumeric characters (A-Z, 0-9).")
+          return
         }
       }
       break;
     case "pet":
       if (user.getUser.petsRemaining - 1 < 0) {
         // Make sure creation won't put the user into negative numbers.
-        console.log("Insufficient petsRemaining. Aborting process.");
         return;
       } else {
-        console.log("Name: ", name);
-        console.log("SpeciesName: ", speciesName);
-        if (name && speciesName) {
-          createPet(name, path, speciesName, user.getUser);
+        if (name.value && speciesName.value) {
+          createPet(name.value, path, speciesName.value, user.getUser);
+        } else {
+          alert("Please use half-width alphanumeric characters (A-Z, 0-9).")
+          return
         }
       }
       break;
 
     default:
-      console.error("Invalid thing type.");
       break;
   }
 }

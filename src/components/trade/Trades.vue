@@ -6,7 +6,6 @@ import Trade from "@/components/trade/Trade.vue"
 const user = userStore();
 
 const trades = ref<Array<any>>([]);
-const friends = ref<Array<any>>(user.getFriends);
 
 onMounted(async () => {
     trades.value = await user.fetchTrades() || []

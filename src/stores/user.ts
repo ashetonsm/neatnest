@@ -8,6 +8,7 @@ export const userStore = defineStore('user', {
         shop: ref<any | null>(null),
         pets: ref<Array<any>>([]),
         inventory: ref<Array<any>>([]),
+        notifications: ref<Array<any>>([]),
         credits: ref<number>(0),
         trades: ref<Array<any>>([]),
         friends: ref<Array<any>>([]),
@@ -17,11 +18,19 @@ export const userStore = defineStore('user', {
         getShop: (state: { shop: any | null }) => state.shop,
         getPets: (state: { pets: any }) => state.pets,
         getInventory: (state: { inventory: any }) => state.inventory,
+        getNotifications: (state: { notifications: any }) => state.notifications,
         getCredits: (state: { credits: number }) => state.credits,
         getTrades: (state: { trades: any }) => state.trades,
         getFriends: (state: { friends: any }) => state.friends,
     },
     actions: {
+        /**
+         * Used in the Callback function after login. Should noot be used anywhere else.
+         * @param PK The Primary Key of the user to fetch
+         * @param SK The Sort Key of the user to fetch
+         * @param inputUser The initial values when a user creates an account for the first time
+         * @returns 
+         */
         async fetchUser(PK: string, SK: string, inputUser?: any) {
             try {
                 const retrievedUser = await GET_BY_PK_SK(PK, SK)
@@ -31,24 +40,30 @@ export const userStore = defineStore('user', {
                             PK: PK,
                             SK: '#METADATA',
                             email: inputUser.value.email,
-                            username: inputUser.value.name,
-                            avatar: inputUser.value.image,
+                            username: inputUser.value.name.toLowerCase().replace(/\s/g, "_").replace(/\W+/g, ""),
+                            url: inputUser.value.url,
                             bio: "Hi, I'm new! Nice to meet you!",
-                            createdAt: new Date().toISOString(),
+                            createdAt: new Date().getTime(),
                             credits: 0,
                             itemsRemaining: 3,
                             petsRemaining: 3,
                             type: 'Metadata',
-                            updatedAt: new Date().toISOString(),
+                            updatedAt: new Date().getTime(),    // Stores when creation credits were last added
+                            lastLogin: new Date().getTime(),
                         })
                         this.user = newUser
                         this.credits = 0
+                        await this.fetchFriends(PK)
+                        await this.fetchNotifications()
                         return newUser
                     }
+                } else {
+                    this.user = retrievedUser
+                    this.credits = retrievedUser.credits
+                    await this.fetchFriends(PK)
+                    await this.fetchNotifications()
+                    return retrievedUser
                 }
-                this.user = retrievedUser
-                this.credits = retrievedUser?.credits
-                return retrievedUser
             } catch (error: any) {
                 console.error("An error occurred in fetchUser: ", error)
             }
@@ -57,7 +72,6 @@ export const userStore = defineStore('user', {
         async fetchPets(PK: string) {
             const pets = await LIST_BY_PK_SK(PK, "PET#")
             try {
-                console.log(pets)
                 if (PK == this.user.PK) {
                     this.pets = pets || []
                     return this.pets
@@ -71,7 +85,6 @@ export const userStore = defineStore('user', {
         async fetchTrades() {
             const trades = await LIST_BY_PK_SK(this.getUser.PK, "TRADE#")
             try {
-                console.log(trades)
                 this.trades = trades || []
                 return this.trades
             } catch (error: any) {
@@ -82,7 +95,6 @@ export const userStore = defineStore('user', {
         async fetchInventory() {
             const inventory = await LIST_BY_PK_SK(this.getUser.PK, "ITEM")
             try {
-                console.log("The inventory from user.ts:", inventory)
                 this.inventory = inventory || []
                 return this.inventory
             } catch (error: any) {
@@ -91,11 +103,21 @@ export const userStore = defineStore('user', {
             }
         },
 
+        async fetchNotifications() {
+            const notifications = await LIST_BY_PK_SK(this.getUser.PK, "NOTIFICATION")
+            try {
+                this.notifications = notifications || []
+                return this.notifications
+            } catch (error: any) {
+                console.error("Error fetching the notifications: ", error)
+                return this.notifications
+            }
+        },
+
         async fetchShop(shopkeeperUsername: string) {
             const shopkeeper = await GET_BY_USERNAME(shopkeeperUsername, "#METADATA")
             const inventory = await LIST_SELLING_BY_PK(shopkeeper?.PK)
             try {
-                console.log("The shop's inventory from user.ts:", inventory)
                 return inventory || []
             } catch (error: any) {
                 console.error("Error fetching the shop's inventory: ", error)
@@ -106,7 +128,6 @@ export const userStore = defineStore('user', {
         async fetchFriends(PK: string) {
             const friends = await LIST_BY_PK_SK(PK, "RELATIONSHIP#")
             try {
-                console.log(friends)
                 if (PK == this.user.PK) {
                     this.friends = friends || []
                     return this.friends
