@@ -8,11 +8,11 @@ Make friends, make art, make something neat!
 ### To do:
 
 - [ ] Add tests (90% coverage)
-- [ ] Seed pet and item creations on a timer (1x a month, max 3 available)
 - [ ] Add additional canvas features
     - [ ] Undo button
     - [ ] Edit an existing pet/item
     - [ ] Frames for animated gifs (2 frames standard)
+- [x] Seed pet and item creations on a timer (1x a month, max 3 available)
 - [x] Add games
 - [x] Set active pet and display while browsing
 - [x] Seed default shops with some basic items
