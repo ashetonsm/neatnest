@@ -40,22 +40,32 @@ export async function createNotification(
         url = "/trades"
         title = "Trade Request Rejected"
         break;
+      case "addedPetCredit":
+        notificationContent = `You can create one new pet! Pets remaining: ${currentUser.petsRemaining}`
+        url = "/pets"
+        title = "Pet Creation Credit Added"
+        break;
+      case "addedItemCredit":
+        notificationContent = `You can create one new item! Items remaining: ${currentUser.itemsRemaining}`
+        url = "/inventory"
+        title = "Item Creation Credit Added"
+        break;
       default:
         console.error("Invalid notification type.")
         break;
     }
 
-    const notificationID = new Date().toISOString()
+    const notificationID = new Date().getTime()
     await PUT_DATA({
-      PK: interactingUser.PK,
+      PK: interactingUser ? interactingUser.PK : currentUser.PK,
       SK: `NOTIFICATION#${notificationID}`,
       id: notificationID,
       title: title,
       content: notificationContent,
       url: url,
       type: 'Notification',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date().getTime(),
+      updatedAt: new Date().getTime(),
     })
   } catch (error: any) {
     console.error("Something went wrong creating a notification:", error)
