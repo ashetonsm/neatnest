@@ -196,6 +196,7 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
         var petDeleteList: { DeleteRequest: { Key: any; }; }[] = []
         var itemPutList: { PutRequest: { Item: any; }; }[] = []
         var itemDeleteList: { DeleteRequest: { Key: any; }; }[] = []
+        var creditPutList: { PutRequest: { Item: any; }; }[] = []
         if (tradeContents[0].pets.length > 0) {
           // Format a PutRequest for the batch command
           // Set the PK and owner data correctly
@@ -249,6 +250,23 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
           await BATCH_MODIFY_DATA(itemPutList)
           // Delete old data
           await BATCH_MODIFY_DATA(itemDeleteList)
+        }
+
+        if (tradeContents[2].credits > 0) {
+          // In this case, the TARGET is the one who STARTED the trade. They're LOSING credits.
+          var fullTargetTrader = await GET_BY_USERNAME(targetTrader.tradeUsername, "#METADATA")
+		  
+          // In this case, the INITIATOR is the one who's APPROVING the trade. They're GAINING credits.
+          // I know, this is all very backwards and I'm confused but it works now.
+          var updatedInitiatingTrader = initiatingTrader
+
+          fullTargetTrader!.credits = fullTargetTrader!.credits - tradeContents[2].credits
+          updatedInitiatingTrader.credits = updatedInitiatingTrader.credits + tradeContents[2].credits
+          console.log("updatedInitiatingTrader", updatedInitiatingTrader)
+          console.log("fullTargetTrader", fullTargetTrader)
+          creditPutList.push({ PutRequest: { Item: updatedInitiatingTrader } })
+          creditPutList.push({ PutRequest: { Item: fullTargetTrader } })
+          await BATCH_MODIFY_DATA(creditPutList)
         }
         break
       case "reject":
