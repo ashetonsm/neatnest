@@ -43,11 +43,9 @@ async function fetchUser() {
   try {
     await GET_BY_USERNAME(profile.toString(), "#METADATA")
       .then(async (res) => {
-        console.log(res)
         thisUser.value = res
         thisProfileDesc.value = thisUser.value.bio as string;
         friends.value = await user.fetchFriends(res!.PK) || []
-        console.log(res!.PK)
       })
   } catch (error: any) {
     console.error(error); // The user probably doesn't exist in the db.
@@ -61,7 +59,6 @@ async function fetchUser() {
         if ((friend.SK as string).match('(?<=\#).*'))
           return targetFriend.value = friend
       });
-      console.log(targetFriend.value)
     }
 
     if (targetFriend.value !== undefined) {
@@ -75,7 +72,7 @@ async function fetchUser() {
       */
       switch (targetFriend.value.status) {
         case 0:
-          console.log("You are waiting for a response from this user.")
+          // console.log("You are waiting for a response from this user.")
           buttonValues.value.cancel = true
           buttonValues.value.block = true
           return
@@ -84,20 +81,20 @@ async function fetchUser() {
           buttonValues.value.block = true
           return
         case 2:
-          console.log("You are blocked (don't tell them this, obviously.)")
+          // console.log("You are blocked (don't tell them this, obviously.)")
           return
         case 8:
-          console.log("You blocked this user.")
+          // console.log("You blocked this user.")
           buttonValues.value.unblock = true
           return
         case 9:
-          console.log("This user is waiting for a response from you.")
+          // console.log("This user is waiting for a response from you.")
           buttonValues.value.accept = true
           buttonValues.value.reject = true
           buttonValues.value.block = true
           return
         default:
-          console.log("No friend status found.")
+          // console.log("No friend status found.")
           buttonValues.value.add = true
           buttonValues.value.block = true
       }

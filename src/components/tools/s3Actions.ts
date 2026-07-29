@@ -33,7 +33,6 @@ export const uploadData = async (imgPath: string, imgBlob: Blob | null) => {
     });
 
     try {
-        // console.log(command)
         const response = await client.send(command);
         return response
     } catch (caught) {
@@ -71,7 +70,6 @@ export const copyData = async (oldPath: string, newPath: string) => {
     });
 
     try {
-        // console.log(command)
         const response = await client.send(command);
         return response
     } catch (caught) {
@@ -108,10 +106,9 @@ export const DELETE_S3 = async (itemKey: any) => {
 
     try {
         const data = await client.send(new DeleteObjectCommand(command))
-        console.log("Success. Object deleted.", data)
         return data
     } catch (err) {
-        console.log("Error", err);
+        console.error("Error", err);
     }
 };
 

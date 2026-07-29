@@ -42,8 +42,6 @@ const petRules = ref([
 onMounted(async () => {
     const fetchedFriends = await user.fetchFriends(user.getUser.PK) || []
     if (fetchedFriends.length) {
-        // fetchedFriends.filter((f) => f.status == 1)
-        // console.log("fetchedFriends:", toRaw(fetchedFriends.filter((f) => f.status == 1)))
         friends.value = toRaw(fetchedFriends.filter((f) => f.status == 1))
     }
     if (user.getPets.length == 0) {

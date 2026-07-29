@@ -50,7 +50,6 @@ async function updateFriend(action: string) {
 }
 
 onMounted(() => {
-  console.log(props.friend)
     /*
     * 0 = Your incoming friend request is pending.
     * 1 = accepted
@@ -72,7 +71,6 @@ onMounted(() => {
           return
         case 2:
             textStatus.value = "Blocked"
-            console.log("You blocked this user.")
             buttonValues.value.unblock = true
           return
         case 8:

@@ -31,8 +31,6 @@ const handleSpace = (spaceObj: any) => {
       if (spaceObj.id) {
         blockNumber = parseInt(spaceObj.id.split("_")[1])
         if (!clicked_all.value.includes(blockNumber.toString())) {
-          
-          console.log("Pressed a space", spaceObj.id, spaceObj.id.split("_")[1])
           var textToReplace = document.getElementById(spaceObj.id);
           if (textToReplace) {
             textToReplace.innerHTML = "X"

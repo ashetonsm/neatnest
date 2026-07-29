@@ -25,15 +25,11 @@ export const client = DynamoDBDocument.from(new DynamoDB(config), {
  * @returns 
  */
 export async function PUT_DATA(newData: Object) {
-  console.log("NEW DATA:", newData)
-
   const command = new PutCommand({
     TableName: tableName,
     Item: newData,
   });
-
   const response = await client.send(command);
-  console.log("DATA PUT SUCCESSFUL");
   return response
 };
 
@@ -48,16 +44,13 @@ export async function PUT_DATA(newData: Object) {
  * @returns 
  */
 export async function BATCH_MODIFY_DATA(newData: Array<any>) {
-  console.log("newData", newData)
   try {
     const command = new BatchWriteCommand({
       RequestItems: { [tableName]: newData },
       ReturnConsumedCapacity: "TOTAL"
     });
     const response = await client.send(command);
-    console.log("BATCH DATA MODIFY SUCCESSFUL");
     return response
-
   } catch (error: any) {
     console.error("Something went wrong with the BATCH_MODIFY_DATA request:", error)
   }
@@ -116,15 +109,8 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
           PK: targetRelationship.PK,
           SK: `RELATIONSHIP#${initiatingRelationship.PK}`
         }
-
         await DELETE_DATA(initiatingRelDelete)
-          .then((res) => {
-            console.log("Delete initiatingRel: ", res)
-          })
         await DELETE_DATA(targetRelDelete)
-          .then((res) => {
-            console.log("Delete targetRel: ", res)
-          })
         return
       case "block":
         initiatingRel.status = 2
@@ -146,13 +132,7 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
 
     if (command1.input.TableName !== undefined && command2.input.TableName !== undefined) {
       await client.send(command1)
-        .then((res) => {
-          console.log("Command1: ", res)
-        })
       await client.send(command2)
-        .then((res) => {
-          console.log("Command2: ", res)
-        })
     }
   } catch (error: any) {
     console.error("Error: ", error)
@@ -239,8 +219,6 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
             item.owner = initiatingTrader.PK
             petPutList.push({ PutRequest: { Item: item } })
           });
-          console.log("petPutList", petPutList)
-          console.log("petDeleteList", petDeleteList)
           // Create new data
           await BATCH_MODIFY_DATA(petPutList)
           // Delete old data
@@ -267,8 +245,6 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
             item.owner = initiatingTrader.PK
             itemPutList.push({ PutRequest: { Item: item } })
           });
-          console.log("itemPutList", itemPutList)
-          console.log("itemDeleteList", itemDeleteList)
           // Create new data
           await BATCH_MODIFY_DATA(itemPutList)
           // Delete old data
@@ -292,15 +268,8 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
           PK: targetTrader.PK,
           SK: `TRADE#${initiatingTrader.PK}`
         }
-
         await DELETE_DATA(initiatingTradeDelete)
-          .then((res) => {
-            console.log("Delete initiatingTrade: ", res)
-          })
         await DELETE_DATA(targetTradeDelete)
-          .then((res) => {
-            console.log("Delete targetTrade: ", res)
-          })
         return
       default:
         console.error("Invalid updateType")
@@ -315,17 +284,8 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
       TableName: tableName,
       Item: targetTrade,
     });
-
-    console.log("command1.input", command1.input)
-    console.log("command2.input", command2.input)
     await client.send(command1)
-      .then((res) => {
-        console.log("Command1: ", res)
-      })
     await client.send(command2)
-      .then((res) => {
-        console.log("Command2: ", res)
-      })
   } catch (error: any) {
     console.error("Error: ", error)
   }
@@ -339,7 +299,6 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
  * @returns 
  */
 export async function DELETE_DATA(newData: any) {
-
   const command = {
     TableName: tableName,
     Key: {
@@ -347,9 +306,7 @@ export async function DELETE_DATA(newData: any) {
       SK: { S: newData.SK as string }
     },
   };
-
   const response = await client.send(new DeleteItemCommand(command));
-  console.log("DATA DELETION SUCCESSFUL");
   return response
 };
 
