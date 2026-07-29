@@ -102,7 +102,7 @@ onMounted(async () => {
           @click.stop="notifDrawer = !notifDrawer"></v-avatar>
         </v-badge>
 
-        <v-toolbar-title>Nnneatopets</v-toolbar-title>
+        <v-toolbar-title>Neatnest</v-toolbar-title>
 
         <!-- 
         Might be used later for site searching.
