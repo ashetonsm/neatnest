@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import Friend from './Friend.vue';
 
 
@@ -6,9 +7,14 @@ const props = defineProps<{
     username: string;
     friends: Record<string, any>[];
 }>();
+
+const allRelationships = props.friends
+const allFriends = props.friends.filter((f: { status?: number }) => {f.status == 1})
+
+onMounted(() => {
+    props.friends.filter((f: { status?: number }) => {f.status == 1})
+})
 </script>
-
-
 
 <template>
     <v-sheet border="md" class="pa-4 text-white mx-auto rounded" color="purple">
@@ -18,7 +24,7 @@ const props = defineProps<{
 
             <!-- The route is the friends page. List everyone regardless of status -->
             <template v-if="$route.name == 'friends'">
-                <v-list v-for="friend in props.friends">
+                <v-list v-for="friend in allRelationships">
                     <Friend :friend="friend"/>
                 </v-list>
             </template>
@@ -26,7 +32,7 @@ const props = defineProps<{
             <!-- The route is NOT the friends page. List only status 1 -->
             <template v-else>
                 <v-list 
-                    v-for="friend in props.friends.filter((f: { status?: number }) => {f.status == 1})">
+                    v-for="friend in allFriends">
                     <Friend :friend="friend"/>
                 </v-list>
             </template>
