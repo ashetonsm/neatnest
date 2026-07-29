@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import Callback from "@/components/Callback.vue";
+import { Suspense } from "vue";
 </script>
 
 <template>
-  <Callback />
+  <Suspense>
+    <Callback />
+  </Suspense>
 </template>
