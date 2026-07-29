@@ -48,7 +48,7 @@ export const userStore = defineStore('user', {
                             itemsRemaining: 3,
                             petsRemaining: 3,
                             type: 'Metadata',
-                            updatedAt: new Date().getTime(),
+                            updatedAt: new Date().getTime(),    // Stores when creation credits were last added
                             lastLogin: new Date().getTime(),
                         })
                         this.user = newUser
