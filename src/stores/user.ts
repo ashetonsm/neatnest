@@ -24,6 +24,13 @@ export const userStore = defineStore('user', {
         getFriends: (state: { friends: any }) => state.friends,
     },
     actions: {
+        /**
+         * Used in the Callback function after login. Should noot be used anywhere else.
+         * @param PK The Primary Key of the user to fetch
+         * @param SK The Sort Key of the user to fetch
+         * @param inputUser The initial values when a user creates an account for the first time
+         * @returns 
+         */
         async fetchUser(PK: string, SK: string, inputUser?: any) {
             try {
                 const retrievedUser = await GET_BY_PK_SK(PK, SK)
@@ -36,12 +43,13 @@ export const userStore = defineStore('user', {
                             username: inputUser.value.name.toLowerCase().replace(/\s/g, "_").replace(/\W+/g, ""),
                             url: inputUser.value.url,
                             bio: "Hi, I'm new! Nice to meet you!",
-                            createdAt: new Date().toISOString(),
+                            createdAt: new Date().getTime(),
                             credits: 0,
                             itemsRemaining: 3,
                             petsRemaining: 3,
                             type: 'Metadata',
-                            updatedAt: new Date().toISOString(),
+                            updatedAt: new Date().getTime(),
+                            lastLogin: new Date().getTime(),
                         })
                         this.user = newUser
                         this.credits = 0
