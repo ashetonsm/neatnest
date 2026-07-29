@@ -3,6 +3,7 @@ import { onMounted, ref, shallowRef, toRaw } from "vue";
 import TradeButtons from "./TradeButtons.vue";
 import { userStore } from "@/stores/user";
 import {
+  GET_BY_PK_SK,
   UPDATE_TRADE
 } from "@/components/tools/ddbActions";
 import router from "@/router";
@@ -46,6 +47,28 @@ async function handleTrade(action: string) {
 }
 
 onMounted(() => {
+
+  // These are expensive, change these to batch requests or something
+  props.trade.tradeContents[0].pets.forEach(async (pet: { creator: string; }) => {
+      await toRaw(GET_BY_PK_SK(pet.creator, "#METADATA"))
+        .then((res) => {
+          if (res) {
+            console.log(res)
+            pet.creator = res.username
+          }
+        })
+  });
+
+  props.trade.tradeContents[1].items.forEach(async (item: { creator: string; }) => {
+      await toRaw(GET_BY_PK_SK(item.creator, "#METADATA"))
+        .then((res) => {
+          if (res) {
+            console.log(res)
+            item.creator = res.username
+          }
+        })
+  });
+
   switch (parseInt(props.trade.status)) {
     case 0:
       textStatus.value = "Waiting on You"
@@ -75,17 +98,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <v-card class="mx-auto" max-width="300px">
-    <v-card-title class="text-center">{{ new Date(props.trade.createdAt).toUTCString() }}</v-card-title>
+  <v-card max-width="300px">
+    <v-card-title class="text-center">{{
+      new Date(props.trade.createdAt).toLocaleDateString() + 
+      " @ " 
+      + new Date(props.trade.createdAt).toLocaleTimeString() 
+    }}</v-card-title>
     <v-card-subtitle>{{
       `Trade between ${props.trade.username} and ${props.trade.tradeUsername}`
     }}</v-card-subtitle>
-
     <h3>Pet(s): {{ toRaw(props.trade.tradeContents[0].pets).length }}</h3>
     <v-card v-if="toRaw(props.trade.tradeContents[0].pets).length !== 0" class="mx-auto" max-width="200px"
       v-for="(pet, i) in props.trade.tradeContents[0].pets" :key="pet.name ?? i">
       <v-card-title>{{ pet.name }}</v-card-title>
-      <v-card-subtitle>{{ pet.creator }}</v-card-subtitle>
+      <v-card-subtitle>{{pet.creator}}</v-card-subtitle>
     </v-card>
     <v-card v-else class="mx-auto" max-width="200px">
       <v-card-title>No pets</v-card-title>
