@@ -22,7 +22,7 @@ const logout = () => {
       </v-container>
       <v-container class="d-flex align-center justify-center text-center mx-auto pa-8">
         <v-btn v-if="user.getUser" @click="logout" color="secondary"> Log Out </v-btn>
-        <v-btn v-if="!user.getUser" @click="loginWithRedirect({ appState: { target: '/callback' } })" color="primary">Log in</v-btn>
+        <v-btn v-if="!user.getUser" @click="loginWithRedirect()" color="primary">Log in</v-btn>
       </v-container>
     </v-main>
   </v-app>
