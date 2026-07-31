@@ -26,8 +26,10 @@ async function buyFlow(i: any) {
       await PUT_DATA(updatedUser)
       if (i.PK !== "GENERALSTORE") {
         var originalOwner = await GET_BY_PK_SK(i.PK, "#METADATA")
-        originalOwner.credits += i.price
-        await PUT_DATA(originalOwner)
+        if (originalOwner) {
+          originalOwner.credits += i.price
+          await PUT_DATA(originalOwner)
+        }
       }
 
       // Regardless of who it was bought from, it should be copied to the user's S3 bucket folder
