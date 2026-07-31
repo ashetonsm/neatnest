@@ -23,7 +23,14 @@ async function buyFlow(i: any) {
       // Subtract the amount. It doesn't matter if we clone this or not.
       var updatedUser = user.getUser
       updatedUser.credits -= i.price
-      // await PUT_DATA(updatedUser)
+      await PUT_DATA(updatedUser)
+      if (i.PK !== "GENERALSTORE") {
+        var originalOwner = await GET_BY_PK_SK(i.PK, "#METADATA")
+        if (originalOwner) {
+          originalOwner.credits += i.price
+          await PUT_DATA(originalOwner)
+        }
+      }
 
       // Regardless of who it was bought from, it should be copied to the user's S3 bucket folder
       const newPath = `images/${user.getUser.PK}/item/${i.name}.png`

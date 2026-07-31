@@ -25,7 +25,7 @@ const loggedOutLinks = ref<Array<{ title: string; to?: string, link: boolean, on
   { title: "Inventory", to: "/inventory", link: true },
   { title: "Pets", to: "/pets", link: true },
   { title: "About", to: "/about", link: true },
-  { title: "Login", onClick: () => {loginWithRedirect({ appState: { target: '/callback' } })}, link: true },
+  { title: "Login", onClick: () => {loginWithRedirect()}, link: true },
 ]);
 
 const loggedInLinks = ref<Array<{ title: string; to?: string, link: boolean, onClick?: any }>>([
