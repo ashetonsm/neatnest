@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import router from "@/router";
 import { userStore } from "@/stores/user";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, toRaw } from "vue";
 import { useRoute } from "vue-router";
 import Pet from "@/components/Pet.vue"
 import {
@@ -54,14 +54,13 @@ async function fetchUser() {
 
   // Set the target friend.
   try {
-    if (friends.value !== undefined) {
-      friends.value.forEach((friend: { SK?: string; }) => {
-        if ((friend.SK as string).match('(?<=\#).*'))
-          return targetFriend.value = friend
-      });
-    }
-
-    if (targetFriend.value !== undefined) {
+    var filteredFriend = structuredClone(toRaw(friends.value))
+    filteredFriend = filteredFriend.filter((f: { status?: number }) => {
+      if (f.status == 1) {
+        targetFriend.value = f
+      }
+    })
+    if (toRaw(targetFriend.value) !== undefined) {
 
       /*
       * 0 = Your incoming friend request is pending.
@@ -70,7 +69,7 @@ async function fetchUser() {
       * 8 = blocked for the initiator
       * 9 = Your outgoing friend request is pending.
       */
-      switch (targetFriend.value.status) {
+      switch (toRaw(targetFriend.value).status) {
         case 0:
           // console.log("You are waiting for a response from this user.")
           buttonValues.value.cancel = true
