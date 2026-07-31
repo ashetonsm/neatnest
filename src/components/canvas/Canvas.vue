@@ -97,6 +97,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <div class="grid-overlay"></div>
   <canvas
     @touchstart="mouseDown"
     @touchend="mouseUp"
@@ -105,3 +106,24 @@ onMounted(() => {
     ref="canvasRef"
   ></canvas>
 </template>
+
+<style lang="css" scoped>
+.grid-overlay {
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+  width: 300px;
+  height: 300px;
+  position: absolute;
+  /* canvas size / pixel size */
+  background-size: 12.4px 12.4px;   
+  background-image:
+    linear-gradient(to right, rgba(0, 255, 240, 0.25) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(0, 255, 240, 0.25) 1px, transparent 1px);
+  background-repeat: repeat;
+  left: 0; 
+  right: 0; 
+  margin-inline: auto; 
+}
+
+</style>
