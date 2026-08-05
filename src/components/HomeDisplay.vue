@@ -1,17 +1,36 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-
+import { onMounted, ref, toRaw } from 'vue';
+const posts = ref()
+const blogID = "neatnest-news"
 
 onMounted(() => {
-  getTumblrBlog()
+  getNewsPosts()
 })
 
-const getTumblrBlog = () => {
-  const script = document.createElement("script")
-  script.type = "text/html"
-  script.src = "https://neatnest-news.tumblr.com/js"
-  // document.getElementById("newsfeed")?.appendChild(script)
-  document.body.appendChild(script)
+const getNewsPosts = () => {
+  const headers = {};
+
+  fetch(`https://api.tumblr.com/v2/blog/${blogID}/posts?api_key=${import.meta.env.VITE_TUMBLR_CONSUMER_KEY}`, 
+  {
+    method: 'GET'
+  })
+  .then(async (response) => {
+    const res =  await response.json()
+      .then((res) => {
+        console.log(res.response.posts)
+        posts.value = res.response.posts
+      })
+  })
+  .then(() => {
+    // The div that the news will be displayed in
+    const feed = document.getElementById("newsfeed")
+
+    posts.value.forEach((post: { body: string; }) => {
+      var newsPost = document.createElement('div');
+      newsPost.innerHTML = post.body;
+      feed?.appendChild(newsPost)
+    });
+  })
 }
 
 </script>
@@ -27,8 +46,6 @@ const getTumblrBlog = () => {
       <v-col md="12" class="text-center">
         <h2 class="text-h4 font-weight-black ma-4">Home</h2>
         <div id="newsfeed">
-          This is where the latest news would be if I'd managed 
-          to get that together before actually launching the site, but alas I did not...
         </div>
       </v-col>
     </v-row>
