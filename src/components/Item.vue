@@ -85,12 +85,10 @@ async function getFileUrl(fileName: any) {
             signedSrc.value = res.body
           })
     })
-
   } catch (error) {
     console.error(error);
     return null;
   }
-
   return;
 }
 

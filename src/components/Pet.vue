@@ -20,8 +20,23 @@ const props = defineProps<{
 
 async function getFileUrl(fileName: any) {
   try {
-    const result = await createPresignedUrlWithClient(fileName as string);
-    signedSrc.value = result;
+    const body = {
+      "Action": "GET_SIGNED_URL",
+      "Data": {"Key": fileName}
+      }
+
+    fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/s3`, 
+    {
+      method: 'POST',
+      body: JSON.stringify(body)
+    })
+    .then(async (response) => {
+        await response.json()
+          .then((res) => {
+            console.log(res)
+            signedSrc.value = res.body
+          })
+    })
   } catch (error) {
     console.error(error);
     return null;
