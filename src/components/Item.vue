@@ -3,7 +3,7 @@ import router from "@/router";
 import { onMounted, ref, toRaw } from "vue";
 import { userStore } from "@/stores/user";
 import ItemModal from "./ItemModal.vue";
-import { copyData, createPresignedUrlWithClient, DELETE_S3 } from "@/components/tools/s3Actions";
+import { copyData, DELETE_S3 } from "@/components/tools/s3Actions";
 import { DELETE_DATA, GET_BY_PK_SK, PUT_DATA } from "./tools/ddbActions";
 const user = userStore();
 const itemModalRef = ref();
@@ -68,8 +68,24 @@ async function buyFlow(i: any) {
 
 async function getFileUrl(fileName: any) {
   try {
-    const result = await createPresignedUrlWithClient(fileName as string);
-    signedSrc.value = result;
+    const body = {
+      "Action": "GET_SIGNED_URL",
+      "Data": {"Key": fileName}
+      }
+
+    fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/s3`, 
+    {
+      method: 'POST',
+      body: JSON.stringify(body)
+    })
+    .then(async (response) => {
+        await response.json()
+          .then((res) => {
+            console.log(res)
+            signedSrc.value = res.body
+          })
+    })
+
   } catch (error) {
     console.error(error);
     return null;
