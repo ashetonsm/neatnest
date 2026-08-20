@@ -1,12 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref, shallowRef, toRaw } from "vue";
 
 const props = defineProps<{
     post: any;
 }>();
-
-
-const reveal = ref(false)
 
 </script>
 

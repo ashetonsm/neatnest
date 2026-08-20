@@ -2,21 +2,24 @@
 import { onMounted, ref } from 'vue';
 import NewsPost from './news/NewsPost.vue';
 const posts = ref()
-const blogID = "neatnest-news"
 
 onMounted(() => {
   getNewsPosts()
 })
 
+const headers = new Headers()
+headers.append('Access-Control-Allow-Origin', '*')
+
 const getNewsPosts = () => {
-  fetch(`https://api.tumblr.com/v2/blog/${blogID}/posts?api_key=${import.meta.env.VITE_TUMBLR_CONSUMER_KEY}`, 
+  fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/news`, 
   {
-    method: 'GET'
+    method: 'GET',
+    headers: headers
   })
   .then(async (response) => {
     const res =  await response.json()
       .then((res) => {
-        console.log(res.response.posts)
+        // console.log(res.response.posts)
         posts.value = res.response.posts
       })
   })
