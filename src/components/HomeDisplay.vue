@@ -9,7 +9,7 @@ onMounted(() => {
 
 const headers = new Headers()
 
-const getNewsPosts = () => {
+const getNewsPosts: any = () => {
   fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/news`, 
   {
     method: 'GET',
