@@ -3,7 +3,7 @@ import router from "@/router";
 import { onMounted, ref, toRaw } from "vue";
 import { userStore } from "@/stores/user";
 import ItemModal from "./ItemModal.vue";
-import { copyData, DELETE_S3, GET_SIGNED_URL } from "@/components/tools/s3Actions";
+import { COPY_OBJECT, DELETE_OBJECT, GET_SIGNED_URL } from "@/components/tools/s3Actions";
 import { DELETE_DATA, GET_BY_PK_SK, PUT_DATA } from "./tools/ddbActions";
 const user = userStore();
 const itemModalRef = ref();
@@ -34,7 +34,7 @@ async function buyFlow(i: any) {
 
       // Regardless of who it was bought from, it should be copied to the user's S3 bucket folder
       const newPath = `images/${user.getUser.PK}/item/${i.name}.png`
-      await copyData(i.url, newPath)
+      await COPY_OBJECT(i.url, newPath)
         .then(async (res) => {
           // Create the item with a clone.
           var boughtItem = structuredClone(toRaw(i))
@@ -79,7 +79,7 @@ async function handleDelete(i: any) {
   try {
     if (choice) {
       // Do delete logic
-      await DELETE_S3(i)
+      await DELETE_OBJECT(i)
       await DELETE_DATA(i)
         .then(() => {
           // Refresh
