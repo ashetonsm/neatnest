@@ -1,5 +1,5 @@
 import router from '@/router'
-import { uploadData } from "./s3Actions";
+import { UPLOAD_OBJECT } from "./s3Actions";
 import { PUT_DATA } from "./ddbActions";
 
 export async function createPet(
@@ -15,7 +15,7 @@ export async function createPet(
   try {
     canvas!.toBlob(async (blob) => {
       try {
-        await uploadData(imgPath, blob)
+        await UPLOAD_OBJECT(imgPath, blob)
       } catch (error) {
         console.error('Error : ', error);
       }

@@ -1,5 +1,5 @@
 import router from "@/router";
-import { uploadData } from "./s3Actions";
+import { UPLOAD_OBJECT } from "./s3Actions";
 import { PUT_DATA } from "./ddbActions";
 
 export async function createItem(
@@ -15,7 +15,7 @@ export async function createItem(
   try {
     canvas!.toBlob(async (blob) => {
       try {
-        const result = (await uploadData(imgPath, blob));
+        const result = (await UPLOAD_OBJECT(imgPath, blob));
 
         if (result && result.$metadata.httpStatusCode == 200) {
         } else {
