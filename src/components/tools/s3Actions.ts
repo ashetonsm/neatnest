@@ -1,58 +1,28 @@
-import {
-    DeleteObjectCommand,
-    PutObjectCommand,
-    S3Client,
-    S3ServiceException,
-    GetObjectCommand,
-    CopyObjectCommand
-} from "@aws-sdk/client-s3";
-import {
-    getSignedUrl,
-} from "@aws-sdk/s3-request-presigner";
-
-const client = new S3Client({
-    region: import.meta.env.VITE_AWS_DEFAULT_REGION,
-    credentials: {
-        accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID,
-        secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY,
-    },
-    requestChecksumCalculation: "WHEN_REQUIRED"
-});
-
-
 /**
  * Upload a file to an S3 bucket.
  * @param {{ bucketName: string, key: string, filePath: string }}
  */
-export const uploadData = async (imgPath: string, imgBlob: Blob | null) => {
-
-    const command = new PutObjectCommand({
-        Bucket: import.meta.env.VITE_S3_BUCKET_NAME,
-        Key: imgPath,
-        Body: imgBlob
-    });
-
-    try {
-        const response = await client.send(command);
-        return response
-    } catch (caught) {
-        if (
-            caught instanceof S3ServiceException &&
-            caught.name === "EntityTooLarge"
-        ) {
-            console.error(
-                `Error from S3 while uploading object to ${import.meta.env.VITE_S3_BUCKET_NAME}. \
-The object was too large. To upload objects larger than 5GB, use the S3 console (160GB max) \
-or the multipart upload API (5TB max).`,
-            );
-        } else if (caught instanceof S3ServiceException) {
-            console.error(
-                `Error from S3 while uploading object to ${import.meta.env.VITE_S3_BUCKET_NAME}.  ${caught.name}: ${caught.message}`,
-            );
-        } else {
-            throw caught;
+export const UPLOAD_OBJECT = async (imgPath: string, imgBlob: Blob | null) => {
+  try {
+    const body = {
+      "Action": "UPLOAD_OBJECT",
+      "Data": {
+        "File": imgBlob,
+        "Path": imgPath
         }
     }
+
+    return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/s3`, 
+    {
+      method: 'POST',
+      body: JSON.stringify(body)
+    })
+    .then(async (response) => {
+        return response.json()
+    })
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 /**
@@ -61,35 +31,27 @@ or the multipart upload API (5TB max).`,
  * @param newPath 
  * @returns 
  */
-export const copyData = async (oldPath: string, newPath: string) => {
-
-    const command = new CopyObjectCommand({
-        Bucket: import.meta.env.VITE_S3_BUCKET_NAME,
-        CopySource: import.meta.env.VITE_S3_BUCKET_NAME + "/" + oldPath,
-        Key: newPath
-    });
-
-    try {
-        const response = await client.send(command);
-        return response
-    } catch (caught) {
-        if (
-            caught instanceof S3ServiceException &&
-            caught.name === "EntityTooLarge"
-        ) {
-            console.error(
-                `Error from S3 while uploading object to ${import.meta.env.VITE_S3_BUCKET_NAME}. \
-The object was too large. To upload objects larger than 5GB, use the S3 console (160GB max) \
-or the multipart upload API (5TB max).`,
-            );
-        } else if (caught instanceof S3ServiceException) {
-            console.error(
-                `Error from S3 while uploading object to ${import.meta.env.VITE_S3_BUCKET_NAME}.  ${caught.name}: ${caught.message}`,
-            );
-        } else {
-            throw caught;
+export const COPY_OBJECT = async (oldPath: string, newPath: string) => {
+  try {
+    const body = {
+      "Action": "COPY_OBJECT",
+      "Data": {
+        "CopyFrom": oldPath,
+        "CopyTo": newPath
         }
     }
+
+    return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/s3`, 
+    {
+      method: 'POST',
+      body: JSON.stringify(body)
+    })
+    .then(async (response) => {
+        return response.json()
+    })
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 
@@ -98,18 +60,26 @@ or the multipart upload API (5TB max).`,
  * @param itemKey The item to be deleted
  * @returns 
  */
-export const DELETE_S3 = async (itemKey: any) => {
-    const command = {
-        Bucket: import.meta.env.VITE_S3_BUCKET_NAME,
-        Key: itemKey.url
-    };
-
-    try {
-        const data = await client.send(new DeleteObjectCommand(command))
-        return data
-    } catch (err) {
-        console.error("Error", err);
+export const DELETE_OBJECT = async (itemKey: any) => {
+  try {
+    const body = {
+      "Action": "DELETE_OBJECT",
+      "Data": {
+        "Key": itemKey
+        }
     }
+
+    return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/s3`, 
+    {
+      method: 'POST',
+      body: JSON.stringify(body)
+    })
+    .then(async (response) => {
+        return response.json()
+    })
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 export const GET_SIGNED_URL = async (key: string) => {
