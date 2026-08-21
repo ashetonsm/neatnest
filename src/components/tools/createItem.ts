@@ -13,54 +13,43 @@ export async function createItem(
 
   // Try uploading the image
   try {
-    canvas!.toBlob(async (blob) => {
-      try {
-        const result = (await UPLOAD_OBJECT(imgPath, blob));
-
-        if (result && result.$metadata.httpStatusCode == 200) {
-        } else {
-          console.error('Something went wrong with the upload.');
-        }
-      } catch (error) {
-        console.error('Error : ', error);
-      }
-    }, 'image/png')
-
-    // Try creating a new Item
-    try {
-      await PUT_DATA({
-        PK: userObj.PK,
-        SK: `ITEM#${itemCat}#${name}`,
-        creator: userObj.PK,
-        name: name,
-        owner: userObj.PK,
-        health: 99,
-        selling: false,
-        status: 0,
-        url: imgPath,
-        category: itemCat,
-        price: 0,
-        type: 'Item',
-        createdAt: new Date().getTime(),
-        updatedAt: new Date().getTime(),
-      })
-        .then(async () => {
-          // Update the user by decreasing itemsRemaining by 1 if itemsRemaining > 0
-          var updatedUser = userObj
-          // Subtract 1 from itemsRemaining
-          updatedUser.itemsRemaining = updatedUser.itemsRemaining - 1
-          // Update the updatedAt time for the User
-          updatedUser.updatedAt = new Date().getTime()
-          await PUT_DATA(updatedUser)
+    if (canvas) {
+      await UPLOAD_OBJECT(imgPath, canvas.toDataURL())
+        .then(async (res) => {
+          if (res.statusCode == 200) {
+            // Try creating a new Item
+            await PUT_DATA({
+              PK: userObj.PK,
+              SK: `ITEM#${itemCat}#${name}`,
+              creator: userObj.PK,
+              name: name,
+              owner: userObj.PK,
+              health: 99,
+              selling: false,
+              status: 0,
+              url: imgPath,
+              category: itemCat,
+              price: 0,
+              type: 'Item',
+              createdAt: new Date().getTime(),
+              updatedAt: new Date().getTime(),
+            })
+              .then(async () => {
+                // Update the user by decreasing itemsRemaining by 1 if itemsRemaining > 0
+                var updatedUser = userObj
+                // Subtract 1 from itemsRemaining
+                updatedUser.itemsRemaining = updatedUser.itemsRemaining - 1
+                // Update the updatedAt time for the User
+                updatedUser.updatedAt = new Date().getTime()
+                await PUT_DATA(updatedUser)
+                  .then(() => {
+                    router.push({ name: 'inventory' })
+                    router.go(1)
+                  })
+              });
+          }
         })
-        .then(() => {
-          router.push({ name: 'inventory' })
-          router.go(1)
-        });
-    } catch (error: any) {
-      console.error(error)
     }
-
   } catch (e: any) {
     console.error("Error: ", e)
   }
