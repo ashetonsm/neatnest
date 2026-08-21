@@ -4,7 +4,7 @@ import PetItemModal from "./PetItemModal.vue";
 import { userStore } from "@/stores/user";
 import router from "@/router";
 import { useRoute } from "vue-router";
-import { DELETE_S3, GET_SIGNED_URL } from "./tools/s3Actions";
+import { DELETE_OBJECT, GET_SIGNED_URL } from "./tools/s3Actions";
 import { DELETE_DATA, GET_BY_PK_SK } from "./tools/ddbActions";
 
 const route = useRoute();
@@ -30,7 +30,7 @@ async function handleDelete(pet: any) {
   const choice = confirm(`Delete ${pet.name} forever? (This cannot be undone!)`);
   if (choice) {
     // Do delete logic
-    await DELETE_S3(pet)
+    await DELETE_OBJECT(pet)
     await DELETE_DATA(pet)
       .then(() => {
         // Refresh
