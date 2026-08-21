@@ -112,7 +112,22 @@ export const DELETE_S3 = async (itemKey: any) => {
     }
 };
 
-export const createPresignedUrlWithClient = (key: string) => {
-    const command = new GetObjectCommand({ Bucket: import.meta.env.VITE_S3_BUCKET_NAME, Key: key });
-    return getSignedUrl(client, command, { expiresIn: 3600 });
+export const GET_SIGNED_URL = async (key: string) => {
+  try {
+    const body = {
+      "Action": "GET_SIGNED_URL",
+      "Data": {"Key": key}
+      }
+
+    return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/s3`, 
+    {
+      method: 'POST',
+      body: JSON.stringify(body)
+    })
+    .then(async (response) => {
+        return response.json()
+    })
+  } catch (error) {
+    console.error(error);
+  }
 };
