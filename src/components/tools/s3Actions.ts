@@ -2,13 +2,14 @@
  * Upload a file to an S3 bucket.
  * @param {{ bucketName: string, key: string, filePath: string }}
  */
-export const UPLOAD_OBJECT = async (imgPath: string, imgBlob: Blob | null) => {
+export const UPLOAD_OBJECT = async (imgPath: string, imgData: string) => {
   try {
     const body = {
       "Action": "UPLOAD_OBJECT",
       "Data": {
-        "File": imgBlob,
-        "Path": imgPath
+        "File": imgData,
+        "Path": imgPath,
+        "Name": imgPath
         }
     }
 
@@ -65,10 +66,11 @@ export const DELETE_OBJECT = async (itemKey: any) => {
     const body = {
       "Action": "DELETE_OBJECT",
       "Data": {
-        "Key": itemKey
+        "Key": itemKey.url
         }
     }
 
+    console.log(JSON.stringify(body))
     return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/s3`, 
     {
       method: 'POST',
