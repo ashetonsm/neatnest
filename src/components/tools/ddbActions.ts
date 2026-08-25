@@ -341,9 +341,13 @@ export async function DELETE_DATA(newData: any) {
  * @returns 
  */
 export async function GET_BY_PK_SK(pk: string, sk: string) {
+  // The pound symbol needs to be encoded in order to get through the API Gateway...
+  // Then it's replaced again within the lambda function because that works somehow.
+  sk == "#METADATA" ? sk = "%23METADATA" : sk = sk
   const encodedURI = encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?PK=${pk}&SK=${sk}`)
+  console.log("encodedURI", encodedURI)
   try {
-    return fetch((encodedURI), 
+    return fetch(encodedURI, 
     {
       method: 'GET',
     })
@@ -362,7 +366,7 @@ export async function GET_BY_PK_SK(pk: string, sk: string) {
  */
 export async function GET_BY_USERNAME(un: string, sk?: string) {
   try {
-    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?username=${un}&SK=${sk}`), 
+    return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?username=${un}&SK=${sk}`, 
     {
       method: 'GET',
     })
