@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import { PUT_DATA, GET_BY_PK_SK, LIST_BY_PK_SK, GET_BY_USERNAME, LIST_SELLING_BY_PK } from '@/components/tools/ddbActions';
+import { GET_BY_PK_SK, GET_BY_USERNAME, LIST_SELLING_BY_PK, PUT_DATA } from '@/components/tools/ddbActions';
 
 export const userStore = defineStore('user', {
     state: () => ({
@@ -33,12 +33,17 @@ export const userStore = defineStore('user', {
          */
         async fetchUser(PK: string, SK: string, inputUser?: any) {
             try {
-                const retrievedUser = await GET_BY_PK_SK(PK, SK)
+                // This is the PK value for any user
+                console.log("inputUser", inputUser)
+                console.log("PK", PK)
+                const retrievedUser = await GET_BY_PK_SK(inputUser.sub, SK)
+                console.log(retrievedUser)
+                /*
                 if (!retrievedUser) {
                     if (inputUser.value) {
                         const newUser = await PUT_DATA({
                             PK: PK,
-                            SK: '#METADATA',
+                            SK: '%23METADATA',
                             email: inputUser.value.email,
                             username: inputUser.value.nickname.toLowerCase().replace(/\s/g, "_").replace(/\W+/g, ""),
                             url: inputUser.value.picture,
@@ -59,18 +64,20 @@ export const userStore = defineStore('user', {
                     }
                 } else {
                     this.user = retrievedUser
-                    this.credits = retrievedUser.credits
-                    await this.fetchFriends(PK)
-                    await this.fetchNotifications()
-                    return retrievedUser
-                }
+                this.credits = retrievedUser.credits
+                await this.fetchFriends(PK)
+                await this.fetchNotifications()
+                console.log(retrievedUser)
+                return retrievedUser
+            }
+            */
             } catch (error: any) {
                 console.error("An error occurred in fetchUser: ", error)
             }
         },
 
         async fetchPets(PK: string) {
-            const pets = await LIST_BY_PK_SK(PK, "PET#")
+            const pets = await GET_BY_PK_SK(PK, "PET#")
             try {
                 if (PK == this.user.PK) {
                     this.pets = pets || []
@@ -83,7 +90,7 @@ export const userStore = defineStore('user', {
         },
 
         async fetchTrades() {
-            const trades = await LIST_BY_PK_SK(this.getUser.PK, "TRADE#")
+            const trades = await GET_BY_PK_SK(this.getUser.PK, "TRADE#")
             try {
                 this.trades = trades || []
                 return this.trades
@@ -93,7 +100,7 @@ export const userStore = defineStore('user', {
         },
 
         async fetchInventory() {
-            const inventory = await LIST_BY_PK_SK(this.getUser.PK, "ITEM")
+            const inventory = await GET_BY_PK_SK(this.getUser.PK, "ITEM")
             try {
                 this.inventory = inventory || []
                 return this.inventory
@@ -104,7 +111,7 @@ export const userStore = defineStore('user', {
         },
 
         async fetchNotifications() {
-            const notifications = await LIST_BY_PK_SK(this.getUser.PK, "NOTIFICATION")
+            const notifications = await GET_BY_PK_SK(this.getUser.PK, "NOTIFICATION")
             try {
                 this.notifications = notifications || []
                 return this.notifications
@@ -115,8 +122,9 @@ export const userStore = defineStore('user', {
         },
 
         async fetchShop(shopkeeperUsername: string) {
-            const shopkeeper = await GET_BY_USERNAME(shopkeeperUsername, "#METADATA")
-            const inventory = await LIST_SELLING_BY_PK(shopkeeper?.PK)
+            const shopkeeper = await GET_BY_USERNAME(shopkeeperUsername, "%23METADATA")
+            const inventory = await LIST_SELLING_BY_PK(
+                shopkeeperUsername == "GENERALSTORE" ? "GENERALSTORE" : shopkeeper?.PK)
             try {
                 return inventory || []
             } catch (error: any) {
@@ -126,7 +134,7 @@ export const userStore = defineStore('user', {
         },
 
         async fetchFriends(PK: string) {
-            const friends = await LIST_BY_PK_SK(PK, "RELATIONSHIP#")
+            const friends = await GET_BY_PK_SK(PK, "RELATIONSHIP")
             try {
                 if (PK == this.user.PK) {
                     this.friends = friends || []
