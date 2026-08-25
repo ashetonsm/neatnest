@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref, shallowRef, toRaw } from "vue";
+import { onMounted, ref, toRaw } from "vue";
 import TradeButtons from "./TradeButtons.vue";
 import { userStore } from "@/stores/user";
 import {
-  GET_BY_PK_SK,
   UPDATE_TRADE
 } from "@/components/tools/ddbActions";
-import router from "@/router";
 import { createNotification } from "../notifications/createNotification";
+import { useRouter } from "vue-router";
 
 const props = defineProps<{
   trade: any;
@@ -41,8 +40,8 @@ async function handleTrade(action: string) {
     }
   })
   .then(() => {
-      router.push({name: 'trades'})
-      router.go(0);
+      useRouter().push({name: 'trades'})
+      useRouter().go(0);
   })
 }
 
