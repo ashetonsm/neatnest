@@ -16,7 +16,7 @@ onMounted(async () => {
   try {
     if (route.params.id == "1") {
       shopkeeper.value = "General Store"
-      fetchedItems.value = await toRaw(user.fetchShop("GENERAL STORE"))
+      fetchedItems.value = await toRaw(user.fetchShop("GENERALSTORE"))
     } else {
       shopkeeper.value = route.params.id.concat("'s Shop")
       fetchedItems.value = await toRaw(user.fetchShop(route.params.id as string))
