@@ -5,6 +5,7 @@ import { userStore } from "@/stores/user";
 import ItemModal from "./ItemModal.vue";
 import { COPY_OBJECT, DELETE_OBJECT, GET_SIGNED_URL } from "@/components/tools/s3Actions";
 import { DELETE_DATA, GET_BY_PK_SK, PUT_DATA } from "./tools/ddbActions";
+import { useRouter } from "vue-router";
 const user = userStore();
 const itemModalRef = ref();
 
@@ -51,10 +52,10 @@ async function buyFlow(i: any) {
             // Delete the old item
             await DELETE_DATA(toRaw(i))
             .then(() => {
-              router.go(0);
+              useRouter().go(0);
             })
           } else {
-            router.go(0);
+            useRouter().go(0);
           }
         })
 
@@ -83,7 +84,7 @@ async function handleDelete(i: any) {
       await DELETE_DATA(i)
         .then(() => {
           // Refresh
-          router.go(0);
+          useRouter().go(0);
         })
     }
   } catch (error: any) {
