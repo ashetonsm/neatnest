@@ -1,5 +1,5 @@
 import { DeleteItemCommand, DynamoDB } from "@aws-sdk/client-dynamodb";
-import { BatchWriteCommand, DynamoDBDocument, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { BatchWriteCommand, DynamoDBDocument, PutCommand } from "@aws-sdk/lib-dynamodb";
 
 export const config = {
   credentials: {
@@ -25,12 +25,18 @@ export const client = DynamoDBDocument.from(new DynamoDB(config), {
  * @returns 
  */
 export async function PUT_DATA(newData: Object) {
-  const command = new PutCommand({
-    TableName: tableName,
-    Item: newData,
-  });
-  const response = await client.send(command);
-  return response
+  try {
+    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`), 
+    {
+      method: 'PUT',
+      body: JSON.stringify(newData)
+    })
+    .then(async (response) => {
+        return response.json()
+    })
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 /**
@@ -254,7 +260,7 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
 
         if (tradeContents[2].credits > 0) {
           // In this case, the TARGET is the one who STARTED the trade. They're LOSING credits.
-          var fullTargetTrader = await GET_BY_USERNAME(targetTrader.tradeUsername, "#METADATA")
+          var fullTargetTrader = await GET_BY_USERNAME(targetTrader.tradeUsername, "%23METADATA")
 		  
           // In this case, the INITIATOR is the one who's APPROVING the trade. They're GAINING credits.
           // I know, this is all very backwards and I'm confused but it works now.
@@ -335,21 +341,17 @@ export async function DELETE_DATA(newData: any) {
  * @returns 
  */
 export async function GET_BY_PK_SK(pk: string, sk: string) {
-  const command = new QueryCommand({
-    TableName: tableName,
-    KeyConditionExpression: "PK = :pkVal AND begins_with(SK, :skPrefix)",
-    ExpressionAttributeValues:
+  const encodedURI = encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?PK=${pk}&SK=${sk}`)
+  try {
+    return fetch((encodedURI), 
     {
-      ":pkVal": pk,
-      ":skPrefix": sk
-    }
-  });
-
-  const response = await client.send(command);
-  if (response.Items?.length == 0) {
-    return null
-  } else {
-    return response.Items![0]
+      method: 'GET',
+    })
+    .then(async (response) => {
+        return response.json()
+    })
+  } catch (error) {
+    console.error(error);
   }
 }
 
@@ -358,48 +360,17 @@ export async function GET_BY_PK_SK(pk: string, sk: string) {
  * @param un Primary Key (the username)
  * @returns 
  */
-export async function GET_BY_USERNAME(un: string, SK?: string) {
-  const command = new QueryCommand({
-    TableName: tableName,
-    IndexName: "Username",
-    KeyConditionExpression: "username = :unVal AND begins_with(SK, :skPrefix)",
-    ExpressionAttributeValues:
+export async function GET_BY_USERNAME(un: string, sk?: string) {
+  try {
+    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?username=${un}&SK=${sk}`), 
     {
-      ":unVal": un,
-      ":skPrefix": SK || "",
-    }
-  });
-
-  const response = await client.send(command);
-  if (response.Items?.length == 0) {
-    return null
-  } else {
-    return response.Items![0]
-  }
-}
-
-/**
- * Remember that the KeyConditionExpression is CASE SENSITIVE. Lowercase "PK"/"SK" will not work.
- * @param pk Primary Key (the userID)
- * @param sk Sort Key (the item type)
- * @returns 
- */
-export async function LIST_BY_PK_SK(pk: string, sk: string) {
-  const command = new QueryCommand({
-    TableName: tableName,
-    KeyConditionExpression: "PK = :pkVal AND begins_with(SK, :skPrefix)",
-    ExpressionAttributeValues:
-    {
-      ":pkVal": pk,
-      ":skPrefix": sk
-    }
-  });
-
-  const response = await client.send(command);
-  if (response.Items?.length == 0) {
-    return []
-  } else {
-    return response.Items
+      method: 'GET',
+    })
+    .then(async (response) => {
+        return response.json()
+    })
+  } catch (error) {
+    console.error(error);
   }
 }
 
@@ -410,22 +381,15 @@ export async function LIST_BY_PK_SK(pk: string, sk: string) {
  * @returns 
  */
 export async function LIST_SELLING_BY_PK(pk: string) {
-  const command = new QueryCommand({
-    TableName: tableName,
-    KeyConditionExpression: "PK = :pkVal AND begins_with(SK, :skPrefix)",
-    ExpressionAttributeValues:
+  try {
+    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?PK=${pk}&selling`), 
     {
-      ":pkVal": pk,
-      ":skPrefix": "ITEM#",
-      ":sellingValue": true
-    },
-    FilterExpression: "selling = :sellingValue"
-  });
-
-  const response = await client.send(command);
-  if (response.Items?.length == 0) {
-    return []
-  } else {
-    return response.Items
+      method: 'GET',
+    })
+    .then(async (response) => {
+        return response.json()
+    })
+  } catch (error) {
+    console.error(error);
   }
 }
