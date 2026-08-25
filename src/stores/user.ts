@@ -35,10 +35,7 @@ export const userStore = defineStore('user', {
             try {
                 // This is the PK value for any user
                 console.log("inputUser", inputUser)
-                console.log("PK", PK)
                 const retrievedUser = await GET_BY_PK_SK(inputUser.sub, SK)
-                console.log(retrievedUser)
-                /*
                 if (!retrievedUser) {
                     if (inputUser.value) {
                         const newUser = await PUT_DATA({
@@ -64,20 +61,19 @@ export const userStore = defineStore('user', {
                     }
                 } else {
                     this.user = retrievedUser
-                this.credits = retrievedUser.credits
-                await this.fetchFriends(PK)
-                await this.fetchNotifications()
-                console.log(retrievedUser)
-                return retrievedUser
-            }
-            */
+                    this.credits = retrievedUser.credits
+                    await this.fetchFriends(PK)
+                    await this.fetchNotifications()
+                    console.log(retrievedUser)
+                    return retrievedUser
+                }
             } catch (error: any) {
                 console.error("An error occurred in fetchUser: ", error)
             }
         },
 
         async fetchPets(PK: string) {
-            const pets = await GET_BY_PK_SK(PK, "PET#")
+            const pets = await GET_BY_PK_SK(PK, "PET")
             try {
                 if (PK == this.user.PK) {
                     this.pets = pets || []
@@ -90,7 +86,7 @@ export const userStore = defineStore('user', {
         },
 
         async fetchTrades() {
-            const trades = await GET_BY_PK_SK(this.getUser.PK, "TRADE#")
+            const trades = await GET_BY_PK_SK(this.getUser.PK, "TRADE")
             try {
                 this.trades = trades || []
                 return this.trades
