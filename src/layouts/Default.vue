@@ -7,7 +7,6 @@ import { userStore } from "@/stores/user";
 const user = userStore()
 const { loginWithRedirect, logout: auth0Logout } = useAuth0();
 const logout = () => {
-  document.cookie = "currentUser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; 
   auth0Logout({ logoutParams: { returnTo: window.location.origin } })
 }
 
