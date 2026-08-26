@@ -21,9 +21,7 @@ const logout = async () => {
 
 const loggedOutLinks = ref<Array<{ title: string; to?: string, link: boolean, onClick?: any}>>([
   { title: "Home", to: "/", link: true },
-  { title: "General Store", to: "/shop/1", link: true },
-  { title: "Inventory", to: "/inventory", link: true },
-  { title: "Pets", to: "/pets", link: true },
+  { title: "Games", to: "/games", link: true },
   { title: "About", to: "/about", link: true },
   { title: "Login", onClick: () => {loginWithRedirect()}, link: true },
 ]);
