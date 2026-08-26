@@ -15,11 +15,11 @@ if (user.value !== undefined) {
   console.log("Starting user store actions")
   await uStore.fetchUser(user.value.sub as string, "#METADATA", toRaw(user.value))
   .then(async () => {
-    // const updatedCreationData = await setCreationCredits(new Date().getTime(), uStore.getUser.updatedAt)
-    // await PUT_DATA(updatedCreationData)
-    // .then(() => {
-      // useRouter().push({name: 'home'})
-    // })
+    const updatedCreationData = await setCreationCredits(new Date().getTime(), uStore.getUser.updatedAt)
+    await PUT_DATA(updatedCreationData)
+    .then(() => {
+      useRouter().push({name: 'home'})
+    })
   })
 }
 
