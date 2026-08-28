@@ -2,8 +2,8 @@
 import { userStore } from "@/stores/user";
 import { onMounted, ref, toRaw } from "vue";
 import { UPDATE_TRADE } from "../tools/ddbActions";
-import router from "@/router";
 import { createNotification } from "../notifications/createNotification";
+import { useRouter } from "vue-router";
 const user = userStore();
 const tradeForm = ref()
 const selectedFriend = ref()
@@ -15,6 +15,7 @@ const selectedCredits = ref(0)
 const friends = ref<Array<any>>([]);
 const pets = ref<Array<any>>(user.getPets);
 const items = ref<Array<any>>(user.getInventory);
+const router = useRouter()
 
 const creditRules = ref([
     (v: number) => (-1 < v && v < 1001) || 'Min credits: 0; Max credits: 1000',
@@ -42,13 +43,13 @@ const petRules = ref([
 onMounted(async () => {
     const fetchedFriends = await user.fetchFriends(user.getUser.PK) || []
     if (fetchedFriends.length) {
-        friends.value = toRaw(fetchedFriends.filter((f) => f.status == 1))
+        friends.value = toRaw(fetchedFriends.filter((f: { status: number; }) => f.status == 1))
     }
     if (user.getPets.length == 0) {
         pets.value = await user.fetchPets(user.getUser.PK) || []
     }
     if (user.getInventory.length == 0) {
-        items.value = await user.fetchInventory() || []
+        items.value = await user.fetchInventory(user.getUser.PK) || []
     }
 })
 
