@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import Item from "./Item.vue";
-import { onMounted, ref } from "vue";
+import { onMounted, reactive, ref, toRaw } from "vue";
 import { userStore } from "@/stores/user";
 
 // These should be items where the owner is the logged in user
 const user = userStore();
-
 // create a reactive reference to Item[]
-const fetchedItems: any = ref<Array<any>>([]);
-var canCreate = true;
+var fetchedItems = ref<Array<any>>([]);
+var canCreate = false;
 
 async function setCreation() {
   if (user.getUser?.itemsRemaining! > 0) {
@@ -16,11 +15,24 @@ async function setCreation() {
   }
 }
 
+async function getInventory() {
+  const data = await user.fetchInventory(user.getUser.PK)
+  console.log("data", data)
+  if (data.length) {
+    return data
+  } else {
+    return [data]
+  }
+}
+
 onMounted(async () => {
-  await setCreation();
-  await user.fetchInventory()
-  fetchedItems.value = user.getInventory;
-  console.log(fetchedItems.value)
+  try {
+    await setCreation()
+    fetchedItems.value = await getInventory()
+    console.log(fetchedItems.value)
+  } catch (error: any) {
+    console.error(error)
+  }
 });
 </script>
 
