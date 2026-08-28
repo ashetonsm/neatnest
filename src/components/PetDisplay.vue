@@ -6,7 +6,7 @@ const user = userStore();
 
 const fetchedPets = ref<Array<any>>([]);
 const fetchedItems = ref<Array<any>>([]);
-var canCreate = true;
+var canCreate = false;
 
 async function setCreation() {
   if (user.getUser?.petsRemaining! > 0) {
@@ -14,13 +14,22 @@ async function setCreation() {
   }
 }
 
+async function getInventory() {
+  const data = await user.fetchInventory(user.getUser.PK)
+  console.log("data", data)
+  if (data.length) {
+    return data
+  } else {
+    return [data]
+  }
+}
+
 onMounted(async () => {
   try {
     await setCreation();
     await user.fetchPets(user.getUser.PK)
-    await user.fetchInventory()
+    fetchedItems.value = await user.fetchInventory(user.getUser.PK)
     fetchedPets.value = user.getPets;
-    fetchedItems.value = user.getInventory;
   } catch (error: any) {
     console.error(error)
   }
