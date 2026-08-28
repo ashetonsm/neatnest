@@ -345,7 +345,6 @@ export async function GET_BY_PK_SK(pk: string, sk: string) {
   // Then it's replaced again within the lambda function because that works somehow.
   sk == "#METADATA" ? sk = "%23METADATA" : sk = sk
   const encodedURI = encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?PK=${pk}&SK=${sk}`)
-  console.log("encodedURI", encodedURI)
   try {
     return fetch(encodedURI, 
     {
