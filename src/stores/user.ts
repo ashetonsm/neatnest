@@ -17,7 +17,7 @@ export const userStore = defineStore('user', {
         getUser: (state: { user: any | null }) => state.user,
         getShop: (state: { shop: any | null }) => state.shop,
         getPets: (state: { pets: any }) => state.pets,
-        getInventory: (state: { inventory: any }) => state.inventory,
+        getInventory: (state: { inventory: Array<any> }) => state.inventory,
         getNotifications: (state: { notifications: any }) => state.notifications,
         getCredits: (state: { credits: number }) => state.credits,
         getTrades: (state: { trades: any }) => state.trades,
@@ -95,14 +95,17 @@ export const userStore = defineStore('user', {
             }
         },
 
-        async fetchInventory() {
-            const inventory = await GET_BY_PK_SK(this.getUser.PK, "ITEM")
+        async fetchInventory(PK: string) {
+            const inventory = await GET_BY_PK_SK(PK, "ITEM")
             try {
-                this.inventory = inventory || []
-                return this.inventory
+                console.log("INVENTORY:", inventory)
+                if (PK == this.user.PK) {
+                    this.inventory = inventory
+                    return inventory
+                }
+                return inventory
             } catch (error: any) {
-                console.error("Error fetching the inventory: ", error)
-                return this.inventory
+                console.error(error)
             }
         },
 
