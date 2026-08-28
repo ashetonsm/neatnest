@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import router from "@/router";
 import { ref, toRaw } from "vue";
 import { userStore } from "@/stores/user";
 import { DELETE_OBJECT } from "./tools/s3Actions";
 import { BATCH_MODIFY_DATA, DELETE_DATA, PUT_DATA } from "./tools/ddbActions";
+import { useRouter } from "vue-router";
 
+const router = useRouter()
 const user = userStore()
 const props = defineProps<{
   pet: any;
