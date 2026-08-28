@@ -67,11 +67,15 @@ async function buyFlow(i: any) {
   }
 }
 
-async function getFileUrl(fileName: any) {
-    await GET_SIGNED_URL(fileName)
-  .then((res) => {
-    signedSrc.value = res.body
-  })
+async function getFileUrl() {
+  if (props.item.url !== undefined) {
+    console.log("props.item.url", props.item.url)
+    await GET_SIGNED_URL(props.item.url)
+    .then((res) => {
+      console.log(res)
+      signedSrc.value = res.body
+    })
+  }
   return
 }
 
@@ -93,9 +97,11 @@ async function handleDelete(i: any) {
 }
 
 onMounted(async () => {
-  await getFileUrl(props.item.url);
-  const creatorMetadata = await toRaw(GET_BY_PK_SK(props.item.creator, "#METADATA"))
-  itemCreator.value = creatorMetadata?.username
+  console.log("props.item.url", props.item.url)
+  console.log("props.item", props.item)
+  await getFileUrl()
+  // const creatorMetadata = await toRaw(GET_BY_PK_SK(props.item.creator, "#METADATA"))
+  // itemCreator.value = creatorMetadata?.username
 });
 </script>
 
