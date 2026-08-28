@@ -6,6 +6,7 @@ import { createNotification } from "./notifications/createNotification";
 import { onMounted, toRaw } from "vue";
 import { useRouter } from "vue-router";
 
+const router = useRouter()
 const uStore = userStore();
 const { user } = useAuth0();
 const auth0 = useAuth0();
@@ -14,13 +15,13 @@ console.log("User is authenticated: ", auth0.isAuthenticated.value)
 if (user.value !== undefined) {
   console.log("Starting user store actions")
   await uStore.fetchUser(user.value.sub as string, "#METADATA", toRaw(user.value))
-  .then(async () => {
-    const updatedCreationData = await setCreationCredits(new Date().getTime(), uStore.getUser.updatedAt)
-    await PUT_DATA(updatedCreationData)
-    .then(() => {
-      useRouter().push({name: 'home'})
+    .then(async () => {
+      const updatedCreationData = await setCreationCredits(new Date().getTime(), uStore.getUser.updatedAt)
+      await PUT_DATA(updatedCreationData)
+        .then(() => {
+          router.push({ name: 'home' })
+        })
     })
-  })
 }
 
 async function setCreationCredits(currentDate: number, lastCreditRefresh: number) {
@@ -30,7 +31,7 @@ async function setCreationCredits(currentDate: number, lastCreditRefresh: number
   const updatedUser = uStore.getUser
   if (dayDifference >= 15) {
     var update = false
-    
+
     if (updatedUser.itemsRemaining + 1 <= 3) {
       updatedUser.itemsRemaining++
       await createNotification(uStore.getUser, null, "addedItemCredit")
