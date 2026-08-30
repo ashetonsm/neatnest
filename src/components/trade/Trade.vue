@@ -84,8 +84,8 @@ onMounted(() => {
     <v-card-subtitle>{{
       `Trade between ${props.trade.username} and ${props.trade.tradeUsername}`
     }}</v-card-subtitle>
-    <h3>Pet(s): {{ toRaw(props.trade.tradeContents[0].pets).length }}</h3>
-    <v-card v-if="toRaw(props.trade.tradeContents[0].pets).length !== 0" class="mx-auto" max-width="200px"
+    <h3>Pet(s): {{ props.trade.tradeContents[0].pets.length }}</h3>
+    <v-card v-if="props.trade.tradeContents[0].pets.length !== 0" class="mx-auto" max-width="200px"
       v-for="(pet, i) in props.trade.tradeContents[0].pets" :key="pet.name ?? i">
       <v-card-title>{{ pet.name }}</v-card-title>
     </v-card>
@@ -93,7 +93,7 @@ onMounted(() => {
       <v-card-title>No pets</v-card-title>
     </v-card>
     <h3>Item(s):</h3>
-    <v-card v-if="toRaw(props.trade.tradeContents[1].items).length > 0" class="mx-auto" max-width="200px"
+    <v-card v-if="props.trade.tradeContents[1].items.length > 0" class="mx-auto" max-width="200px"
       v-for="(item, i) in props.trade.tradeContents[1].items" :key="item.name ?? i">
       <v-card-title>{{ item.name }}</v-card-title>
     </v-card>
@@ -102,7 +102,7 @@ onMounted(() => {
     </v-card>
     <h3>Credits:</h3>
     <v-card class="mx-auto" max-width="200px">
-      <v-card-title>{{ toRaw(props.trade.tradeContents[2].credits) }}</v-card-title>
+      <v-card-title>{{ props.trade.tradeContents[2].credits }}</v-card-title>
     </v-card>
     <h3>Trade Status: {{ textStatus }}</h3>
     <v-card-actions>
