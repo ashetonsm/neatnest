@@ -319,19 +319,22 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
 
 /**
  * Deletes an entry in the database
- * @param newData The new or updated data object
+ * @param deletedData The data to be deleted.
  * @returns 
  */
-export async function DELETE_DATA(newData: any) {
-  const command = {
-    TableName: tableName,
-    Key: {
-      PK: { S: newData.PK as string },
-      SK: { S: newData.SK as string }
-    },
-  };
-  const response = await client.send(new DeleteItemCommand(command));
-  return response
+export async function DELETE_DATA(deletedData: Object) {
+  try {
+    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`), 
+    {
+      method: 'DELETE',
+      body: JSON.stringify(deletedData)
+    })
+    .then(async (response) => {
+        return response.json()
+    })
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 /**
