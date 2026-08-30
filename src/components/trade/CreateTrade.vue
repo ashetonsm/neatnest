@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { userStore } from "@/stores/user";
-import { onMounted, ref, toRaw } from "vue";
+import { onMounted, ref } from "vue";
 import { UPDATE_TRADE } from "../tools/ddbActions";
 import { createNotification } from "../notifications/createNotification";
 import { useRouter } from "vue-router";
-const user = userStore();
+const store = userStore();
 const tradeForm = ref()
 const selectedFriend = ref()
 const selectedPets = ref([])
@@ -13,13 +13,13 @@ const selectedCredits = ref(0)
 
 
 const friends = ref<Array<any>>([]);
-const pets = ref<Array<any>>(user.getPets);
-const items = ref<Array<any>>(user.getInventory);
+const pets = ref<Array<any>>(store.getPets);
+const items = ref<Array<any>>(store.getInventory);
 const router = useRouter()
 
 const creditRules = ref([
     (v: number) => (-1 < v && v < 1001) || 'Min credits: 0; Max credits: 1000',
-    (v: number) => (user.getCredits >= v) || "You don't have enough credits to offer!",
+    (v: number) => (store.getCredits >= v) || "You don't have enough credits to offer!",
 ])
 
 const itemRules = ref([
@@ -40,16 +40,45 @@ const petRules = ref([
         "You can't trade nothing!",
 ])
 
+async function getFriends() {
+  const data = await store.fetchFriends(store.getUser.PK)
+  console.log("data", data)
+  if (data.length) {
+    return data
+  } else {
+    return [data]
+  }
+}
+
+async function getInventory() {
+  const data = await store.fetchInventory(store.getUser.PK)
+  console.log("data", data)
+  if (data.length) {
+    return data
+  } else {
+    return [data]
+  }
+}
+async function getPets() {
+  const data = await store.fetchPets(store.getUser.PK)
+  console.log("data", data)
+  if (data.length) {
+    return data
+  } else {
+    return [data]
+  }
+}
+
 onMounted(async () => {
-    const fetchedFriends = await user.fetchFriends(user.getUser.PK) || []
+    const fetchedFriends = await getFriends()
     if (fetchedFriends.length) {
-        friends.value = toRaw(fetchedFriends.filter((f: { status: number; }) => f.status == 1))
+        friends.value = fetchedFriends.filter((f: { status: number; }) => f.status == 1)
     }
-    if (user.getPets.length == 0) {
-        pets.value = await user.fetchPets(user.getUser.PK) || []
+    if (store.getPets.length == 0) {
+        pets.value = await getPets()
     }
-    if (user.getInventory.length == 0) {
-        items.value = await user.fetchInventory(user.getUser.PK) || []
+    if (store.getInventory.length == 0) {
+        items.value = await getInventory()
     }
 })
 
@@ -57,8 +86,8 @@ async function createTrade() {
     try {
         // The actual content of the trade
         const contents = [
-            { pets: toRaw(selectedPets.value) },
-            { items: toRaw(selectedItems.value) },
+            { pets: selectedPets.value },
+            { items: selectedItems.value },
             { credits: selectedCredits.value}
         ]
         var friendObj = { PK: '', tradeUsername: '' }
@@ -66,9 +95,9 @@ async function createTrade() {
         friendObj.tradeUsername = selectedFriend.value.relationshipUsername
         // The recipient, the sender, the contents, the action
         if (friendObj.PK !== undefined && friendObj.tradeUsername !== undefined) {
-            await UPDATE_TRADE(friendObj, user.getUser, contents, 'create')
+            await UPDATE_TRADE(friendObj, store.getUser, contents, 'create')
               .then(async () => {
-                    await createNotification(user.getUser, friendObj, "tradeNew")
+                    await createNotification(store.getUser, friendObj, "tradeNew")
             })
                 .then(() => {
                     router.push({ name: 'trades' })
