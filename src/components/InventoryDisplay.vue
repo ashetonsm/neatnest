@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Item from "./Item.vue";
-import { onMounted, reactive, ref, toRaw } from "vue";
+import { onMounted, ref } from "vue";
 import { userStore } from "@/stores/user";
 
 // These should be items where the owner is the logged in user
