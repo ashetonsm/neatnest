@@ -1,23 +1,6 @@
-import { DeleteItemCommand, DynamoDB } from "@aws-sdk/client-dynamodb";
 import { BatchWriteCommand, DynamoDBDocument, PutCommand } from "@aws-sdk/lib-dynamodb";
 
-export const config = {
-  credentials: {
-    accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID,
-    secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY
-  },
-  region: import.meta.env.VITE_AWS_DEFAULT_REGION
-}
-
 const tableName = import.meta.env.VITE_DYNAMODB_TABLE
-
-export const client = DynamoDBDocument.from(new DynamoDB(config), {
-  marshallOptions: {
-    convertEmptyValues: true,
-    removeUndefinedValues: true,
-    convertClassInstanceToMap: true
-  }
-})
 
 /**
  * Creates or updates an entry in the database
@@ -50,15 +33,18 @@ export async function PUT_DATA(newData: Object) {
  * @returns 
  */
 export async function BATCH_MODIFY_DATA(newData: Array<any>) {
-  try {
-    const command = new BatchWriteCommand({
-      RequestItems: { [tableName]: newData },
-      ReturnConsumedCapacity: "TOTAL"
-    });
-    const response = await client.send(command);
-    return response
-  } catch (error: any) {
-    console.error("Something went wrong with the BATCH_MODIFY_DATA request:", error)
+
+    try {
+    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`), 
+    {
+      method: 'POST',
+      body: JSON.stringify(newData)
+    })
+    .then(async (response) => {
+        return response.json()
+    })
+  } catch (error) {
+    console.error(error);
   }
 }
 
