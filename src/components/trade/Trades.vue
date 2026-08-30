@@ -4,11 +4,25 @@ import { userStore } from "@/stores/user";
 import CreateTrade from "@/components/trade/CreateTrade.vue"
 import Trade from "@/components/trade/Trade.vue"
 const user = userStore();
-
 const trades = ref<Array<any>>([]);
 
+
+async function getTrades() {
+  const data = await user.fetchTrades()
+  console.log("data", data)
+  if (data) {
+    if (data.length) {
+      return data
+    } else {
+      return [data]
+    }
+  } else {
+    return []
+  }
+}
+
 onMounted(async () => {
-    trades.value = await user.fetchTrades() || []
+    trades.value = await getTrades()
 })
 
 </script>
