@@ -69,7 +69,7 @@ onMounted(async () => {
       if (mutation.storeId == "user" && user.getUser?.username !== undefined) {
         loggedInLinks.value[3].to = `/profile/${user.getUser?.username}`;
         if (!activePet) {
-          var allPets = structuredClone(toRaw(user.getPets))
+          var allPets = [user.getPets]
           allPets.filter((pet: any) => {
             if (pet.status == 1) {
               activePet = pet
