@@ -2,12 +2,12 @@
 import { onMounted, ref, toRaw } from "vue";
 import PetItemModal from "./PetItemModal.vue";
 import { userStore } from "@/stores/user";
-import router from "@/router";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { DELETE_OBJECT, GET_SIGNED_URL } from "./tools/s3Actions";
 import { DELETE_DATA, GET_BY_PK_SK } from "./tools/ddbActions";
 
 const route = useRoute();
+const router = useRouter();
 const signedSrc = ref();
 const petModalRef = ref();
 const petCreator = ref("Loading...");
