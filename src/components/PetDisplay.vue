@@ -38,12 +38,6 @@ async function getPets() {
 
 onMounted(async () => {
   try {
-    console.log("user.value?.sub", user.value?.sub)
-    if (user.value?.sub) {
-      store.setUserPK(user.value?.sub)
-    } else {
-      router.push({name: 'home'})
-    }
     await setCreation();
     fetchedItems.value = await getInventory()
     fetchedPets.value = await getPets()
