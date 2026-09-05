@@ -8,6 +8,8 @@ import {
 import { createNotification } from "../notifications/createNotification";
 import { useRouter } from "vue-router";
 
+const router = useRouter()
+
 const props = defineProps<{
   trade: any;
 }>();
@@ -34,14 +36,16 @@ async function handleTrade(action: string) {
       case "reject":
         await createNotification(user.getUser, traderObj, "tradeReject")
         break;
+      case "remove":
+        break;
       default:
         console.error("Invalid notificaton action for trade switch sequence.")
         break;
     }
   })
   .then(() => {
-      useRouter().push({name: 'trades'})
-      useRouter().go(0);
+      router.push({name: 'trades'})
+      router.go(0);
   })
 }
 
