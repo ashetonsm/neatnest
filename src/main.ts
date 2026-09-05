@@ -7,7 +7,7 @@ import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import { createAuth0 } from '@auth0/auth0-vue'
-import createRouter from './router'
+import router from './router'
 
 const pinia = createPinia()
 const app = createApp(App)
@@ -26,7 +26,7 @@ const auth0 = createAuth0({
 
 app
     .use(auth0)
-    .use(createRouter(app))
+    .use(router)
     .use(pinia)
     .use(vuetify)
 
