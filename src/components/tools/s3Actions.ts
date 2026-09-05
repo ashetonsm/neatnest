@@ -70,7 +70,7 @@ export const DELETE_OBJECT = async (itemKey: any) => {
         }
     }
 
-    console.log(JSON.stringify(body))
+    // console.log(JSON.stringify(body))
     return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/s3`, 
     {
       method: 'POST',

@@ -9,7 +9,6 @@ const trades = ref<Array<any>>([]);
 
 async function getTrades() {
   const data = await user.fetchTrades()
-  console.log("Trades data", data)
   if (data) {
     if (data.length) {
       return data

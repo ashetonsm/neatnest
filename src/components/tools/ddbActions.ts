@@ -247,8 +247,6 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
 
           fullTargetTrader!.credits = fullTargetTrader!.credits - tradeContents[2].credits
           updatedInitiatingTrader.credits = updatedInitiatingTrader.credits + tradeContents[2].credits
-          console.log("updatedInitiatingTrader", updatedInitiatingTrader)
-          console.log("fullTargetTrader", fullTargetTrader)
           creditPutList.push({ PutRequest: { Item: updatedInitiatingTrader } })
           creditPutList.push({ PutRequest: { Item: fullTargetTrader } })
           await BATCH_MODIFY_DATA(creditPutList)

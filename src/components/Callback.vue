@@ -11,18 +11,19 @@ const uStore = userStore();
 const { user } = useAuth0();
 const auth0 = useAuth0();
 
-console.log("User is authenticated: ", auth0.isAuthenticated.value)
-if (user.value !== undefined) {
-  console.log("Starting user store actions")
-  await uStore.fetchUser(user.value.sub as string, "#METADATA", toRaw(user.value))
-    .then(async () => {
-      const updatedCreationData = await setCreationCredits(new Date().getTime(), uStore.getUser.updatedAt)
-      await PUT_DATA(updatedCreationData)
-        .then(() => {
-          router.push({ name: 'home' })
-        })
-    })
-}
+onMounted(async () => {
+  if (user.value !== undefined) {
+    await uStore.fetchUser(user.value.sub as string, "#METADATA", toRaw(user.value))
+      .then(async () => {
+        const updatedCreationData = await setCreationCredits(new Date().getTime(), uStore.getUser.updatedAt)
+        await PUT_DATA(updatedCreationData)
+          .then(() => {
+            router.push({ name: 'home' })
+          })
+      })
+  }
+
+})
 
 async function setCreationCredits(currentDate: number, lastCreditRefresh: number) {
   // 1 day is 86400000 ms

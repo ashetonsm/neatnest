@@ -34,7 +34,6 @@ export const userStore = defineStore('user', {
         async fetchUser(PK: string, SK: string, inputUser?: any) {
             try {
                 // This is the PK value for any user
-                console.log("inputUser", inputUser)
                 const retrievedUser = await GET_BY_PK_SK(inputUser.sub, SK)
                 if (!retrievedUser) {
                     if (inputUser.value) {
@@ -64,7 +63,6 @@ export const userStore = defineStore('user', {
                     this.credits = retrievedUser.credits
                     await this.fetchFriends(PK)
                     await this.fetchNotifications()
-                    console.log(retrievedUser)
                     return retrievedUser
                 }
             } catch (error: any) {
@@ -98,7 +96,7 @@ export const userStore = defineStore('user', {
         async fetchInventory(PK: string) {
             const inventory = await GET_BY_PK_SK(PK, "ITEM")
             try {
-                console.log("INVENTORY:", inventory)
+                // console.log("INVENTORY:", inventory)
                 if (PK == this.user.PK) {
                     this.inventory = inventory
                     return inventory

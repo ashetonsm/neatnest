@@ -18,7 +18,6 @@ const getNewsPosts: any = () => {
   .then(async (response) => {
     const res =  await response.json()
       .then((res) => {
-        // console.log(res.response.posts)
         posts.value = res.response.posts
       })
   })

@@ -17,7 +17,6 @@ async function setCreation() {
 
 async function getInventory() {
   const data = await user.fetchInventory(user.getUser.PK)
-  console.log("data", data)
   if (data.length) {
     return data
   } else {
@@ -29,7 +28,6 @@ onMounted(async () => {
   try {
     await setCreation()
     fetchedItems.value = await getInventory()
-    console.log(fetchedItems.value)
   } catch (error: any) {
     console.error(error)
   }

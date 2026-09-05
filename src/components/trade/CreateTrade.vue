@@ -42,7 +42,6 @@ const petRules = ref([
 
 async function getFriends() {
   const data = await store.fetchFriends(store.getUser.PK)
-  console.log("data", data)
   if (data.length) {
     return data
   } else {
@@ -52,7 +51,6 @@ async function getFriends() {
 
 async function getInventory() {
   const data = await store.fetchInventory(store.getUser.PK)
-  console.log("data", data)
   if (data.length) {
     return data
   } else {
@@ -61,7 +59,6 @@ async function getInventory() {
 }
 async function getPets() {
   const data = await store.fetchPets(store.getUser.PK)
-  console.log("data", data)
   if (data.length) {
     return data
   } else {
