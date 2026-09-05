@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import router from "@/router";
 import { onMounted, ref, toRaw } from "vue";
 import { userStore } from "@/stores/user";
 import ItemModal from "./ItemModal.vue";
@@ -9,6 +8,7 @@ import { useRouter } from "vue-router";
 const user = userStore();
 const itemModalRef = ref();
 
+const router = useRouter()
 const signedSrc = ref("null");
 const itemCreator = ref("Loading...");
 
@@ -52,10 +52,10 @@ async function buyFlow(i: any) {
             // Delete the old item
             await DELETE_DATA(toRaw(i))
             .then(() => {
-              useRouter().go(0);
+              router.go(0);
             })
           } else {
-            useRouter().go(0);
+            router.go(0);
           }
         })
 
@@ -88,7 +88,7 @@ async function handleDelete(i: any) {
       await DELETE_DATA(i)
         .then(() => {
           // Refresh
-          useRouter().go(0);
+          router.go(0);
         })
     }
   } catch (error: any) {
