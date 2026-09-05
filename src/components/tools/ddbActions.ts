@@ -5,14 +5,14 @@
  */
 export async function PUT_DATA(newData: Object) {
   try {
-    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`), 
-    {
-      method: 'PUT',
-      body: JSON.stringify(newData)
-    })
-    .then(async (response) => {
+    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`),
+      {
+        method: 'PUT',
+        body: JSON.stringify(newData)
+      })
+      .then(async (response) => {
         return response.json()
-    })
+      })
   } catch (error) {
     console.error(error);
   }
@@ -30,15 +30,15 @@ export async function PUT_DATA(newData: Object) {
  */
 export async function BATCH_MODIFY_DATA(newData: Array<any>) {
 
-    try {
-    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`), 
-    {
-      method: 'POST',
-      body: JSON.stringify(newData)
-    })
-    .then(async (response) => {
+  try {
+    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`),
+      {
+        method: 'POST',
+        body: JSON.stringify(newData)
+      })
+      .then(async (response) => {
         return response.json()
-    })
+      })
   } catch (error) {
     console.error(error);
   }
@@ -78,41 +78,43 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
     updatedAt: new Date().getTime(),
   }
 
+
   try {
     switch (updateType) {
       case "add":
         initiatingRel.status = 9
         targetRel.status = 0
+        var putList: { PutRequest: { Item: any; }; }[] = []
+        putList.push({ PutRequest: { Item: initiatingRel } })
+        putList.push({ PutRequest: { Item: targetRel } })
+        await BATCH_MODIFY_DATA(putList)
         break
       case "accept":
         initiatingRel.status = 1
         targetRel.status = 1
+        var putList: { PutRequest: { Item: any; }; }[] = []
+        putList.push({ PutRequest: { Item: initiatingRel } })
+        putList.push({ PutRequest: { Item: targetRel } })
+        await BATCH_MODIFY_DATA(putList)
         break
       case "remove":
-        const initiatingRelDelete = {
-          PK: initiatingRelationship.PK,
-          SK: `RELATIONSHIP#${targetRelationship.PK}`
-        }
-        const targetRelDelete = {
-          PK: targetRelationship.PK,
-          SK: `RELATIONSHIP#${initiatingRelationship.PK}`
-        }
-        await DELETE_DATA(initiatingRelDelete)
-        await DELETE_DATA(targetRelDelete)
+        var deleteList: { DeleteRequest: { Key: any; }; }[] = []
+        deleteList.push({ DeleteRequest: { Key: { PK: initiatingRelationship.PK, SK: `RELATIONSHIP#${targetRelationship.PK}` } } })
+        deleteList.push({ DeleteRequest: { Key: { PK: targetRelationship.PK, SK: `RELATIONSHIP#${initiatingRelationship.PK}` } } })
+        await BATCH_MODIFY_DATA(deleteList)
         return
       case "block":
         initiatingRel.status = 2
         targetRel.status = 8
-        break
+        var putList: { PutRequest: { Item: any; }; }[] = []
+        putList.push({ PutRequest: { Item: initiatingRel } })
+        putList.push({ PutRequest: { Item: targetRel } })
+        await BATCH_MODIFY_DATA(putList)
+        return
       default:
         console.error("Invalid updateType")
         return
     }
-
-    var putList: { PutRequest: { Item: any; }; }[] = []
-    putList.push({ PutRequest: { Item: initiatingRel } })
-    putList.push({ PutRequest: { Item: targetRel } })
-    await BATCH_MODIFY_DATA(putList)
   } catch (error: any) {
     console.error("Error: ", error)
   }
@@ -166,6 +168,10 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
       case "create":
         initiatingTrade.status = 9
         targetTrade.status = 0
+        var putList: { PutRequest: { Item: any; }; }[] = []
+        putList.push({ PutRequest: { Item: initiatingTrade } })
+        putList.push({ PutRequest: { Item: targetTrade } })
+        await BATCH_MODIFY_DATA(putList)
         break
       case "accept":
         initiatingTrade.status = 1
@@ -234,7 +240,7 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
         if (tradeContents[2].credits > 0) {
           // In this case, the TARGET is the one who STARTED the trade. They're LOSING credits.
           var fullTargetTrader = await GET_BY_USERNAME(targetTrader.tradeUsername, "%23METADATA")
-		  
+
           // In this case, the INITIATOR is the one who's APPROVING the trade. They're GAINING credits.
           // I know, this is all very backwards and I'm confused but it works now.
           var updatedInitiatingTrader = initiatingTrader
@@ -251,32 +257,29 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
       case "reject":
         initiatingTrade.status = 2
         targetTrade.status = 2
+        var putList: { PutRequest: { Item: any; }; }[] = []
+        putList.push({ PutRequest: { Item: initiatingTrade } })
+        putList.push({ PutRequest: { Item: targetTrade } })
+        await BATCH_MODIFY_DATA(putList)
         break
       case "close":
         initiatingTrade.status = 8
         targetTrade.status = 8
+        var putList: { PutRequest: { Item: any; }; }[] = []
+        putList.push({ PutRequest: { Item: initiatingTrade } })
+        putList.push({ PutRequest: { Item: targetTrade } })
+        await BATCH_MODIFY_DATA(putList)
         break
       case "remove":
-        const initiatingTradeDelete = {
-          PK: initiatingTrader.PK,
-          SK: `TRADE#${targetTrader.PK}`
-        }
-        const targetTradeDelete = {
-          PK: targetTrader.PK,
-          SK: `TRADE#${initiatingTrader.PK}`
-        }
-        await DELETE_DATA(initiatingTradeDelete)
-        await DELETE_DATA(targetTradeDelete)
+        var deleteList: { DeleteRequest: { Key: any; }; }[] = []
+        deleteList.push({ DeleteRequest: { Key: { PK: initiatingTrader.PK, SK: `TRADE#${targetTrader.PK}` } } })
+        deleteList.push({ DeleteRequest: { Key: { PK: targetTrader.PK, SK: `TRADE#${initiatingTrader.PK}` } } })
+        await BATCH_MODIFY_DATA(deleteList)
         return
       default:
         console.error("Invalid updateType")
         return
     }
-
-    var putList: { PutRequest: { Item: any; }; }[] = []
-    putList.push({ PutRequest: { Item: initiatingTrade } })
-    putList.push({ PutRequest: { Item: targetTrade } })
-    await BATCH_MODIFY_DATA(putList)
   } catch (error: any) {
     console.error("Error: ", error)
   }
@@ -291,14 +294,14 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
  */
 export async function DELETE_DATA(deletedData: Object) {
   try {
-    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`), 
-    {
-      method: 'DELETE',
-      body: JSON.stringify(deletedData)
-    })
-    .then(async (response) => {
+    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`),
+      {
+        method: 'DELETE',
+        body: JSON.stringify(deletedData)
+      })
+      .then(async (response) => {
         return response.json()
-    })
+      })
   } catch (error) {
     console.error(error);
   }
@@ -316,13 +319,13 @@ export async function GET_BY_PK_SK(pk: string, sk: string) {
   sk == "#METADATA" ? sk = "%23METADATA" : sk = sk
   const encodedURI = encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?PK=${pk}&SK=${sk}`)
   try {
-    return fetch(encodedURI, 
-    {
-      method: 'GET',
-    })
-    .then(async (response) => {
+    return fetch(encodedURI,
+      {
+        method: 'GET',
+      })
+      .then(async (response) => {
         return response.json()
-    })
+      })
   } catch (error) {
     console.error(error);
   }
@@ -335,13 +338,13 @@ export async function GET_BY_PK_SK(pk: string, sk: string) {
  */
 export async function GET_BY_USERNAME(un: string, sk?: string) {
   try {
-    return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?username=${un}&SK=${sk}`, 
-    {
-      method: 'GET',
-    })
-    .then(async (response) => {
+    return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?username=${un}&SK=${sk}`,
+      {
+        method: 'GET',
+      })
+      .then(async (response) => {
         return response.json()
-    })
+      })
   } catch (error) {
     console.error(error);
   }
@@ -355,13 +358,13 @@ export async function GET_BY_USERNAME(un: string, sk?: string) {
  */
 export async function LIST_SELLING_BY_PK(pk: string) {
   try {
-    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?PK=${pk}&selling`), 
-    {
-      method: 'GET',
-    })
-    .then(async (response) => {
+    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?PK=${pk}&selling`),
+      {
+        method: 'GET',
+      })
+      .then(async (response) => {
         return response.json()
-    })
+      })
   } catch (error) {
     console.error(error);
   }
