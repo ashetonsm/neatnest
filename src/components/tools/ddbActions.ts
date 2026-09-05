@@ -1,7 +1,3 @@
-import { BatchWriteCommand, DynamoDBDocument, PutCommand } from "@aws-sdk/lib-dynamodb";
-
-const tableName = import.meta.env.VITE_DYNAMODB_TABLE
-
 /**
  * Creates or updates an entry in the database
  * @param newData The new or updated data object
@@ -113,19 +109,10 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
         return
     }
 
-    const command1 = new PutCommand({
-      TableName: tableName,
-      Item: initiatingRel,
-    });
-    const command2 = new PutCommand({
-      TableName: tableName,
-      Item: targetRel,
-    });
-
-    if (command1.input.TableName !== undefined && command2.input.TableName !== undefined) {
-      await client.send(command1)
-      await client.send(command2)
-    }
+    var putList: { PutRequest: { Item: any; }; }[] = []
+    putList.push({ PutRequest: { Item: initiatingRel } })
+    putList.push({ PutRequest: { Item: targetRel } })
+    await BATCH_MODIFY_DATA(putList)
   } catch (error: any) {
     console.error("Error: ", error)
   }
@@ -286,16 +273,10 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
         return
     }
 
-    const command1 = new PutCommand({
-      TableName: tableName,
-      Item: initiatingTrade,
-    });
-    const command2 = new PutCommand({
-      TableName: tableName,
-      Item: targetTrade,
-    });
-    await client.send(command1)
-    await client.send(command2)
+    var putList: { PutRequest: { Item: any; }; }[] = []
+    putList.push({ PutRequest: { Item: initiatingTrade } })
+    putList.push({ PutRequest: { Item: targetTrade } })
+    await BATCH_MODIFY_DATA(putList)
   } catch (error: any) {
     console.error("Error: ", error)
   }
