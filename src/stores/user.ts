@@ -54,15 +54,15 @@ export const userStore = defineStore('user', {
                         })
                         this.user = newUser
                         this.credits = 0
-                        await this.fetchFriends(PK)
-                        await this.fetchNotifications()
+                        // await this.fetchFriends(PK)
+                        // await this.fetchNotifications()
                         return newUser
                     }
                 } else {
                     this.user = retrievedUser
                     this.credits = retrievedUser.credits
-                    await this.fetchFriends(PK)
-                    await this.fetchNotifications()
+                    // await this.fetchFriends(PK)
+                    // await this.fetchNotifications()
                     return retrievedUser
                 }
             } catch (error: any) {
