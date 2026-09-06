@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { userStore } from "@/stores/user";
-import { onMounted, ref, toRaw, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 import Notification from "./notifications/Notification.vue";
 import { useAuth0 } from "@auth0/auth0-vue";
 
+const auth0 = useAuth0()
 const user = userStore();
 const collapse = ref(true);
 var activePet: any = null
@@ -135,7 +136,7 @@ onMounted(async () => {
         :location="$vuetify.display.mobile ? 'bottom' : undefined"
         temporary
       >
-        <template v-if="user.getUser?.username !== undefined">
+        <template v-if="auth0.isAuthenticated.value">
           <v-list
             :items="loggedInLinks"
             :item-props="true"
