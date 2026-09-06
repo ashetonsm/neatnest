@@ -43,6 +43,10 @@ async function updateFriend(action: string) {
         if (action == "accept") {
           await createNotification(user.getUser, relationshipObj, "friendAccept")
         }
+        if (action == "remove") {
+        }
+        if (action == "block") {
+        }
       })
       .then(() => {
         router.go(0);
@@ -50,6 +54,8 @@ async function updateFriend(action: string) {
 }
 
 onMounted(() => {
+
+  console.log(props.friend)
     /*
     * 0 = Your incoming friend request is pending.
     * 1 = accepted
