@@ -41,11 +41,11 @@ const thesePets = ref<Array<any>>([])
 
 async function fetchUser() {
   try {
-    await GET_BY_USERNAME(profile.toString(), "#METADATA")
+    await GET_BY_USERNAME(profile.toString(), "%23METADATA")
       .then(async (res) => {
         thisUser.value = res
         thisProfileDesc.value = thisUser.value.bio as string;
-        friends.value = await user.fetchFriends(res!.PK) || []
+        friends.value = await getFriends(res!.PK)
       })
   } catch (error: any) {
     console.error(error); // The user probably doesn't exist in the db.
@@ -55,12 +55,13 @@ async function fetchUser() {
   // Set the target friend.
   try {
     var filteredFriend = structuredClone(toRaw(friends.value))
-    filteredFriend = filteredFriend.filter((f: { status?: number }) => {
-      if (f.status == 1) {
+    filteredFriend = filteredFriend.filter((f: { status?: number, relationshipUsername?: string }) => {
+      if (f.status == 1 && f.relationshipUsername == user.getUser.username) {
         targetFriend.value = f
       }
     })
-    if (toRaw(targetFriend.value) !== undefined) {
+    if (targetFriend.value !== undefined) {
+      console.log("Friend status:", targetFriend.value.status)
 
       /*
       * 0 = Your incoming friend request is pending.
@@ -69,7 +70,7 @@ async function fetchUser() {
       * 8 = blocked for the initiator
       * 9 = Your outgoing friend request is pending.
       */
-      switch (toRaw(targetFriend.value).status) {
+      switch (targetFriend.value.status) {
         case 0:
           // console.log("You are waiting for a response from this user.")
           buttonValues.value.cancel = true
@@ -126,17 +127,38 @@ async function updateFriend(action: string) {
     })
 }
 
+async function getPets(PK: string) {
+  const data = await user.fetchPets(PK)
+  if (data.length) {
+    return data
+  } else {
+    return [data]
+  }
+}
+
+async function getFriends(PK: string) {
+  const data = await user.fetchFriends(PK)
+  console.log(data)
+  if (data.length) {
+    return data
+  } else {
+    return [data]
+  }
+}
+
 onMounted(async () => {
   // Not viewing logged in user's profile
   if (user.getUser!.username !== profile) {
     await fetchUser();
-    thesePets.value = await user.fetchPets(thisUser.value.PK) || []
+    thesePets.value = await getPets(thisUser.value.PK)
   } else {
     // Viewing logged in user's profile
     thisUser.value = user.getUser!;
     thisProfileDesc.value = thisUser.value.bio as string;
-    thesePets.value = user.getPets;
-    friends.value = await user.fetchFriends(user.getUser.PK) || []
+    thesePets.value = await getPets(user.getUser.PK)
+    friends.value = await getFriends(user.getUser.PK)
+    console.log("FRIENDS.VALUE", friends.value)
+
   }
 });
 </script>
