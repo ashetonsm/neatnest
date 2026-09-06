@@ -10,7 +10,7 @@ const trades = ref<Array<any>>([]);
 async function getTrades() {
   const data = await user.fetchTrades()
   if (data) {
-    if (data.length) {
+    if (data.length == 1) {
       return data
     } else {
       return [data]
@@ -45,7 +45,7 @@ onMounted(async () => {
           class="ma-4"
         ></v-alert>
         <v-alert
-          v-else-if="!trades.values.length"
+          v-else-if="!trades.length"
           title="No trade history found!"
           type="info"
           class="ma-4"
@@ -53,7 +53,7 @@ onMounted(async () => {
 
         <v-row class="ga-4">
           <Trade
-            v-if="trades.values.length > 0"
+            v-if="trades.length > 0"
             v-for="(trade, i) in trades"
             :key="trade?.PK ?? i"
             :trade="trade"
