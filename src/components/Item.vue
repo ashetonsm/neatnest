@@ -96,8 +96,8 @@ async function handleDelete(i: any) {
 
 onMounted(async () => {
   await getFileUrl()
-  // const creatorMetadata = await toRaw(GET_BY_PK_SK(props.item.creator, "#METADATA"))
-  // itemCreator.value = creatorMetadata?.username
+  const creatorMetadata = await GET_BY_PK_SK(props.item.creator, "#METADATA")
+  itemCreator.value = creatorMetadata?.username
 });
 </script>
 
