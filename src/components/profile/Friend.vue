@@ -55,7 +55,7 @@ async function updateFriend(action: string) {
 
 onMounted(() => {
 
-  console.log(props.friend)
+  // console.log(props.friend)
     /*
     * 0 = Your incoming friend request is pending.
     * 1 = accepted

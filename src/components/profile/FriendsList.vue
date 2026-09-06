@@ -1,16 +1,10 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
 import Friend from './Friend.vue';
-
 
 const props = defineProps<{
     username: string;
-    friends: Record<string, any>[];
+    friends: Record<string, any>[] | [];
 }>();
-
-onMounted(() => {
-    console.log("props.friends", props.friends)
-})
 
 </script>
 
