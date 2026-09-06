@@ -5,13 +5,12 @@ import { onMounted, ref } from 'vue';
 import { useAuth0 } from '@auth0/auth0-vue';
 
 const store = userStore()
-const friends = ref<Array<Record<string, any>>>([])
+const friends = ref()
 
 async function getFriends() {
-    console.log(store.getUser)
     const data = await store.fetchFriends(store.getUser.PK)
-    if (data) {
-        return data
+    if (data.length) {
+        return [data]
     } else {
         return []
     }
@@ -28,5 +27,5 @@ onMounted(async () => {
 
 
 <template>
-    <FriendsList :friends="friends" :username="store.getUser.username" />
+    <FriendsList :friends="friends || []" :username="store.getUser.username" />
 </template>
