@@ -61,7 +61,7 @@ async function fetchUser() {
       }
     })
     if (targetFriend.value !== undefined) {
-      console.log("Friend status:", targetFriend.value.status)
+      // console.log("Friend status:", targetFriend.value.status)
 
       /*
       * 0 = Your incoming friend request is pending.

@@ -117,7 +117,7 @@ router.beforeResolve(async to => {
     return false
   } else {
     if (user.value && !store.getUser) {
-      console.log("Filling logged in user's store value")
+      // console.log("Filling logged in user's store value")
       await store.fetchUser(user.value.sub as string, "#METADATA", toRaw(user.value))
       .then(async () => {
         return true
