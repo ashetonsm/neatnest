@@ -176,12 +176,13 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
       case "accept":
         initiatingTrade.status = 1
         targetTrade.status = 1
+        var putList: { PutRequest: { Item: any; }; }[] = []
+        var deleteList: { DeleteRequest: { Key: any; }; }[] = []
 
-        var petPutList: { PutRequest: { Item: any; }; }[] = []
-        var petDeleteList: { DeleteRequest: { Key: any; }; }[] = []
-        var itemPutList: { PutRequest: { Item: any; }; }[] = []
-        var itemDeleteList: { DeleteRequest: { Key: any; }; }[] = []
-        var creditPutList: { PutRequest: { Item: any; }; }[] = []
+        // Add the original trades to the put lists with updated statuses first
+        putList.push({ PutRequest: { Item: initiatingTrade } })
+        putList.push({ PutRequest: { Item: targetTrade } })
+
         if (tradeContents[0].pets.length > 0) {
           // Format a PutRequest for the batch command
           // Set the PK and owner data correctly
@@ -190,7 +191,7 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
             // We must use the targetTrader's (AKA the trade creator to the accepting user) 
             // PK as the original PK because this is inside of a for loop
             // where the PK will get overwritten at the end of this push.
-            petDeleteList.push(
+            deleteList.push(
               {
                 DeleteRequest: {
                   Key: {
@@ -203,12 +204,8 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
             // Then, edit the item and add it to the batch put list.
             item.PK = initiatingTrader.PK
             item.owner = initiatingTrader.PK
-            petPutList.push({ PutRequest: { Item: item } })
+            putList.push({ PutRequest: { Item: item } })
           });
-          // Create new data
-          await BATCH_MODIFY_DATA(petPutList)
-          // Delete old data
-          await BATCH_MODIFY_DATA(petDeleteList)
         }
 
         if (tradeContents[1].items.length > 0) {
@@ -216,7 +213,7 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
           // Set the PK and owner data correctly
           tradeContents[1].items.forEach((item: any) => {
             // First, add the original item to the batch delete list.
-            itemDeleteList.push(
+            deleteList.push(
               {
                 DeleteRequest: {
                   Key: {
@@ -229,12 +226,8 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
             // Then, edit the item and add it to the batch put list.
             item.PK = initiatingTrader.PK
             item.owner = initiatingTrader.PK
-            itemPutList.push({ PutRequest: { Item: item } })
+            putList.push({ PutRequest: { Item: item } })
           });
-          // Create new data
-          await BATCH_MODIFY_DATA(itemPutList)
-          // Delete old data
-          await BATCH_MODIFY_DATA(itemDeleteList)
         }
 
         if (tradeContents[2].credits > 0) {
@@ -247,9 +240,12 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
 
           fullTargetTrader!.credits = fullTargetTrader!.credits - tradeContents[2].credits
           updatedInitiatingTrader.credits = updatedInitiatingTrader.credits + tradeContents[2].credits
-          creditPutList.push({ PutRequest: { Item: updatedInitiatingTrader } })
-          creditPutList.push({ PutRequest: { Item: fullTargetTrader } })
-          await BATCH_MODIFY_DATA(creditPutList)
+          putList.push({ PutRequest: { Item: updatedInitiatingTrader } })
+          putList.push({ PutRequest: { Item: fullTargetTrader } })
+
+          // Update everything that was added to both lists.
+          await BATCH_MODIFY_DATA(putList)
+          await BATCH_MODIFY_DATA(deleteList)
         }
         break
       case "reject":
