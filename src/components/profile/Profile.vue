@@ -45,22 +45,22 @@ async function fetchUser() {
       .then(async (res) => {
         thisUser.value = res
         thisProfileDesc.value = thisUser.value.bio as string;
-        friends.value = await getFriends(res!.PK)
       })
   } catch (error: any) {
     console.error(error); // The user probably doesn't exist in the db.
   }
+}
 
-
+async function setFriends() {
   // Set the target friend.
   try {
     var filteredFriend = structuredClone(toRaw(friends.value))
-    filteredFriend = filteredFriend.filter((f: { status?: number, relationshipUsername?: string }) => {
-      if (f.status == 1 && f.relationshipUsername == user.getUser.username) {
+    filteredFriend.filter((f: any) => {
+      if (f.relationshipUsername == user.getUser.username) {
         targetFriend.value = f
       }
     })
-    if (targetFriend.value !== undefined) {
+    if (targetFriend.value) {
       // console.log("Friend status:", targetFriend.value.status)
 
       /*
@@ -139,10 +139,10 @@ async function getPets(PK: string) {
 async function getFriends(PK: string) {
   const data = await user.fetchFriends(PK)
   console.log(data)
-  if (data.length) {
-    return data
-  } else {
+  if (data.length >= 1) {
     return [data]
+  } else {
+    return []
   }
 }
 
@@ -150,6 +150,8 @@ onMounted(async () => {
   // Not viewing logged in user's profile
   if (user.getUser!.username !== profile) {
     await fetchUser();
+    await getFriends(thisUser.value.PK)
+    await setFriends()
     thesePets.value = await getPets(thisUser.value.PK)
   } else {
     // Viewing logged in user's profile
@@ -157,6 +159,7 @@ onMounted(async () => {
     thisProfileDesc.value = thisUser.value.bio as string;
     thesePets.value = await getPets(user.getUser.PK)
     friends.value = await getFriends(user.getUser.PK)
+    await setFriends()
     console.log("FRIENDS.VALUE", friends.value)
 
   }
