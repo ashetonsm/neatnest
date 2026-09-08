@@ -50,13 +50,13 @@ const router = createRouter({
       beforeEnter: authGuard,
       meta: { requiresAuth: true }
     },
-    {
-      path: '/friends',
-      name: 'friends',
-      component: () => import('@/views/FriendsView.vue'),
-      beforeEnter: authGuard,
-      meta: { requiresAuth: true }
-    },
+    // {
+    //   path: '/friends',
+    //   name: 'friends',
+    //   component: () => import('@/views/FriendsView.vue'),
+    //   beforeEnter: authGuard,
+    //   meta: { requiresAuth: true }
+    // },
     {
       path: '/inventory',
       name: 'inventory',

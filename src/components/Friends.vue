@@ -9,7 +9,7 @@ const friends = ref()
 
 async function getFriends() {
     const data = await store.fetchFriends(store.getUser.PK)
-    if (data.length) {
+    if (data) {
         return [data]
     } else {
         return []
