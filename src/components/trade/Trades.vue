@@ -9,55 +9,32 @@ const trades = ref<Array<any>>([]);
 
 async function getTrades() {
   const data = await user.fetchTrades()
-  if (data) {
-    if (data.length == 1) {
+  if (data?.length) {
       return data
     } else {
-      return [data]
+      return []
     }
-  } else {
-    return []
-  }
 }
 
 onMounted(async () => {
-    trades.value = await getTrades()
+  trades.value = await getTrades()
+  console.log(trades.value)
 })
 
 </script>
 
 <template>
-  <v-sheet
-    class="d-flex align-center justify-center text-center mx-auto pa-8"
-    elevation="4"
-    width="100%"
-    rounded
-  >
-  <v-row>
+  <v-sheet class="d-flex align-center justify-center text-center mx-auto pa-8" elevation="4" width="100%" rounded>
+    <v-row>
       <CreateTrade />
       <v-col md="12" class="text-center">
         <h2 class="text-h4 font-weight-black ma-4">Your Trades</h2>
 
-        <v-alert
-          v-if="!trades"
-          title="Loading..."
-          type="info"
-          class="ma-4"
-        ></v-alert>
-        <v-alert
-          v-else-if="!trades.length"
-          title="No trade history found!"
-          type="info"
-          class="ma-4"
-        ></v-alert>
+        <v-alert v-if="!trades" title="Loading..." type="info" class="ma-4"></v-alert>
+        <v-alert v-else-if="!trades.length" title="No trade history found!" type="info" class="ma-4"></v-alert>
 
         <v-row class="ga-4">
-          <Trade
-            v-if="trades.length > 0"
-            v-for="(trade, i) in trades"
-            :key="trade?.PK ?? i"
-            :trade="trade"
-          />
+          <Trade v-if="trades.length > 0" v-for="(trade, i) in trades" :key="trade?.PK ?? i" :trade="trade" />
         </v-row>
       </v-col>
     </v-row>
