@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, toRaw } from "vue";
-import { userStore } from "@/stores/user";
 import {DELETE_DATA} from "@/components/tools/ddbActions";
-const user = userStore();
 
 async function deleteNotification(notification: any) {
     try {
