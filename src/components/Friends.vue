@@ -8,9 +8,11 @@ const store = userStore()
 const friends = ref()
 
 async function getFriends() {
-    const data = await store.fetchRelationships(store.getUser.PK)
+    const data = await store.fetchRelationships(store.getUser.username, "", "")
+    console.log("Friends.vue data", data)
+    // Do not return the data inside of an array, it's unnecessary.
     if (data) {
-        return [data]
+        return data
     } else {
         return []
     }
