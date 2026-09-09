@@ -50,13 +50,13 @@ const router = createRouter({
       beforeEnter: authGuard,
       meta: { requiresAuth: true }
     },
-    // {
-    //   path: '/friends',
-    //   name: 'friends',
-    //   component: () => import('@/views/FriendsView.vue'),
-    //   beforeEnter: authGuard,
-    //   meta: { requiresAuth: true }
-    // },
+    {
+      path: '/friends',
+      name: 'friends',
+      component: () => import('@/views/FriendsView.vue'),
+      beforeEnter: authGuard,
+      meta: { requiresAuth: true }
+    },
     {
       path: '/inventory',
       name: 'inventory',
@@ -116,7 +116,7 @@ router.beforeResolve(async to => {
 
   // authGuard is already doing the check for us, so there's no need to redirect if unauthenticated.
   if (to.meta.requiresAuth && auth0.isAuthenticated.value) {
-      if (user.value && !store.getUser) {
+      if (user.value && store.getUser != true) {
         console.log("Filling logged in user's store value")
         await store.fetchUser(user.value.sub as string, "#METADATA", toRaw(user.value))
           .then(async () => {
