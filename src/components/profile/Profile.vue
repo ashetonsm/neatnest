@@ -1,23 +1,16 @@
 <script setup lang="ts">
-import router from "@/router";
 import { userStore } from "@/stores/user";
-import { onMounted, ref, toRaw } from "vue";
+import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import Pet from "@/components/Pet.vue"
 import {
-  GET_BY_USERNAME,
-  UPDATE_RELATIONSHIP
-} from "@/components/tools/ddbActions";
-import FriendsList from "./FriendsList.vue";
+  GET_BY_USERNAME} from "@/components/tools/ddbActions";
 import ChangeProfile from "./ChangeProfile.vue";
-import FriendButtons from "./FriendButtons.vue";
-import { createNotification } from "@/components/notifications/createNotification"
 
 const route = useRoute();
 const user = userStore();
 var profile = route.params.username;
-const thisProfileDesc = ref<String>("Lorum ipsum this is a description");
-// const friends = ref<Array<Record<string, any>>>([])
+const profileUserBio = ref<String>("Lorum ipsum this is a description");
 // const buttonValues = ref<{
 //   add: boolean,
 //   cancel: boolean,
@@ -35,16 +28,15 @@ const thisProfileDesc = ref<String>("Lorum ipsum this is a description");
 //   block: false,
 //   unblock: false
 // })
-const thisUser = ref<any>()
-// const targetFriend = ref<any>()
-const thesePets = ref<Array<any>>([])
+const profileUser = ref<any>()
+const profilePets = ref<Array<any>>([])
 
 async function fetchUser() {
   try {
     await GET_BY_USERNAME(profile.toString(), "%23METADATA")
       .then(async (res) => {
-        thisUser.value = res
-        thisProfileDesc.value = thisUser.value.bio as string;
+        profileUser.value = res
+        profileUserBio.value = profileUser.value.bio as string;
       })
   } catch (error: any) {
     console.error(error); // The user probably doesn't exist in the db.
@@ -111,15 +103,15 @@ async function fetchUser() {
 /** Used to block and accept friends */
 // async function updateFriend(action: string) {
 //   var relationshipObj = { PK: '', relationshipUsername: '' }
-//   relationshipObj.PK = thisUser.value.PK
-//   relationshipObj.relationshipUsername = thisUser.value.username
+//   relationshipObj.PK = profileUser.value.PK
+//   relationshipObj.relationshipUsername = profileUser.value.username
 //   await UPDATE_RELATIONSHIP(relationshipObj, user.getUser, action)
 //     .then(async () => {
 //       if (action == "add") {
-//         await createNotification(user.getUser, thisUser.value, "friendNew")
+//         await createNotification(user.getUser, profileUser.value, "friendNew")
 //       }
 //       if (action == "accept") {
-//         await createNotification(user.getUser, thisUser.value, "friendAccept")
+//         await createNotification(user.getUser, profileUser.value, "friendAccept")
 //       }
 //     })
 //     .then(() => {
@@ -138,7 +130,7 @@ async function getPets(PK: string) {
 }
 
 // async function getFriends(PK: string) {
-//   const data = await user.fetchFriends(PK)
+//   const data = await user.fetchRelationships(PK)
 //   console.log(data)
 //   if (data) {
 //     return data
@@ -149,16 +141,16 @@ async function getPets(PK: string) {
 
 onMounted(async () => {
   // Not viewing logged in user's profile
-  if (user.getUser!.username !== profile) {
+  if (user.getUser.username !== profile) {
     await fetchUser();
-    // friends.value = await getFriends(thisUser.value.PK)
+    // friends.value = await getFriends(profileUser.value.PK)
     // await setFriends()
-    thesePets.value = await getPets(thisUser.value.PK)
+    profilePets.value = await getPets(profileUser.value.PK)
   } else {
     // Viewing logged in user's profile
-    thisUser.value = user.getUser!;
-    thisProfileDesc.value = thisUser.value.bio as string;
-    thesePets.value = await getPets(user.getUser.PK)
+    profileUser.value = user.getUser;
+    profileUserBio.value = user.getUser.bio as string;
+    profilePets.value = await getPets(user.getUser.PK)
     // friends.value = await getFriends(user.getUser.PK)
 
   }
@@ -198,7 +190,7 @@ onMounted(async () => {
         <v-sheet border="md" class="pa-4 text-white mx-auto rounded" color="primary">
           <h4 class="text-h5 font-weight-bold mb-4">Description:</h4>
           <p>
-            {{ thisProfileDesc }}
+            {{ profileUserBio }}
           </p>
         </v-sheet>
 
@@ -207,8 +199,8 @@ onMounted(async () => {
           <v-row>
             <v-col md="12" class="text-center">
               <h2 class="text-h4 font-weight-black ma-4">{{ profile }}'s Pets:</h2>
-              <v-row class="ga-4" v-if="thesePets.length !== 0">
-                <Pet v-for="(pet, i) in thesePets" :key="pet.name ?? i" :pet="pet" :items="[]" />
+              <v-row class="ga-4" v-if="profilePets.length !== 0">
+                <Pet v-for="(pet, i) in profilePets" :key="pet.name ?? i" :pet="pet" :items="[]" />
               </v-row>
               <div v-else>Aww, {{ profile }} has no pets!</div>
             </v-col>
