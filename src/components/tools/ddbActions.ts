@@ -310,9 +310,11 @@ export async function DELETE_DATA(deletedData: Object) {
 export async function GET_BY_PK_SK(pk: string, sk: string) {
   // The pound symbol needs to be encoded in order to get through the API Gateway...
   // Then it's replaced again within the lambda function because that works somehow.
+  
   sk == "#METADATA" ? sk = "%23METADATA" : sk = sk
   const encodedURI = encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?PK=${pk}&SK=${sk}`)
   try {
+    if (pk == undefined) { throw new Error("PK undefined")}
     return fetch(encodedURI,
       {
         method: 'GET',
@@ -332,6 +334,7 @@ export async function GET_BY_PK_SK(pk: string, sk: string) {
  */
 export async function GET_BY_USERNAME(un: string, sk?: string) {
   try {
+    if (un == undefined) { throw new Error("Username undefined")}
     return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?username=${un}&SK=${sk}`,
       {
         method: 'GET',
@@ -358,8 +361,9 @@ export async function GET_BY_USERNAME(un: string, sk?: string) {
  */
 export async function GET_RELATIONSHIP(username: string, status?: number | string, filter?: string) {
   try {
-    if (status == undefined) {status = ""}
-    if (filter == undefined) {filter = ""}
+    if (username == undefined) { throw new Error("Username undefined");
+    }
+    console.log("username, status, filter", username, status, filter)
     return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?username=${username}&status=${status}&filter=${filter}`,
       {
         method: 'GET',
