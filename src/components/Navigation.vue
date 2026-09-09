@@ -38,7 +38,7 @@ const loggedInLinks = ref<Array<{ title: string; to?: string, link: boolean, onC
   },
   { title: "Pets", to: "/pets", link: true },
   { title: "Games", to: "/games", link: true },
-  // { title: "Friends", to: "/friends", link: true },
+  { title: "Friends", to: "/friends", link: true },
   { title: "Trades", to: "/trades", link: true },
   { title: "About", to: "/about", link: true },
   { title: "Logout", onClick: logout, link: true },
@@ -66,14 +66,13 @@ onMounted(async () => {
     const { user } = useAuth0();
     if (user.value && !store.getUser) {
       // console.log("Filling logged in user's store value")
-      await store.fetchUser(user.value.sub as string, "#METADATA", toRaw(user.value))
+      await store.fetchUser(user.value.sub as string, "%23METADATA", toRaw(user.value))
         .then(async () => {
           return true
         })
     }
-    await store.fetchNotifications()
     window.addEventListener("resize", resize);
-    store.$subscribe((mutation) => {
+    store.$subscribe(async (mutation) => {
       // Perform actions here when the state changes
 
       if (mutation.storeId == "user" && store.getUser?.username !== undefined) {
@@ -86,6 +85,8 @@ onMounted(async () => {
             }
           })
         }
+        // await store.fetchNotifications()
+
       }
     });
 
