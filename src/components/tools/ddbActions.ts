@@ -356,8 +356,10 @@ export async function GET_BY_USERNAME(un: string, sk?: string) {
  * This would be the relationship between User3 and User1.
  * @returns 
  */
-export async function GET_RELATIONSHIP(username: string, status: string, filter: string) {
+export async function GET_RELATIONSHIP(username: string, status?: number | string, filter?: string) {
   try {
+    if (status == undefined) {status = ""}
+    if (filter == undefined) {filter = ""}
     return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?username=${username}&status=${status}&filter=${filter}`,
       {
         method: 'GET',

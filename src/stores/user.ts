@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import { GET_BY_PK_SK, GET_BY_USERNAME, LIST_SELLING_BY_PK, PUT_DATA } from '@/components/tools/ddbActions';
+import { GET_BY_PK_SK, GET_BY_USERNAME, GET_RELATIONSHIP, LIST_SELLING_BY_PK, PUT_DATA } from '@/components/tools/ddbActions';
 
 export const userStore = defineStore('user', {
     state: () => ({
@@ -54,14 +54,14 @@ export const userStore = defineStore('user', {
                         })
                         this.user = newUser
                         this.credits = 0
-                        // await this.fetchFriends(PK)
+                        // await this.fetchRelationships(PK)
                         // await this.fetchNotifications()
                         return newUser
                     }
                 } else {
                     this.user = retrievedUser
                     this.credits = retrievedUser.credits
-                    // await this.fetchFriends(PK)
+                    // await this.fetchRelationships(PK)
                     // await this.fetchNotifications()
                     return retrievedUser
                 }
@@ -130,10 +130,10 @@ export const userStore = defineStore('user', {
             }
         },
 
-        async fetchFriends(PK: string) {
-            const friends = await GET_BY_PK_SK(PK, "RELATIONSHIP")
+        async fetchRelationships(username: string, status?: number | string, filter?: string) {
+            const friends = await GET_RELATIONSHIP(username, status, filter)
             try {
-                if (PK == this.user.PK) {
+                if (username == this.user.username) {
                     this.friends = friends || []
                     return this.friends
                 }
