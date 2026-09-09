@@ -33,8 +33,9 @@ const buttonValues = ref<{
 /** Used to block and accept friends */
 async function updateFriend(action: string) {
   var relationshipObj = { PK: '', relationshipUsername: '' }
-  relationshipObj.PK = (props.friend.SK).match(/(?<=#)\S+/)[0]
-  relationshipObj.relationshipUsername = props.friend.relationshipUsername
+  // relationshipObj.PK = (props.friend.SK).match(/(?<=#)\S+/)[0]
+  relationshipObj.PK = props.friend.PK
+  relationshipObj.relationshipUsername = props.friend.username
     await UPDATE_RELATIONSHIP(relationshipObj, user.getUser, action)
       .then(async () => {
         if (action == "add") {
@@ -55,7 +56,7 @@ async function updateFriend(action: string) {
 
 onMounted(() => {
 
-  // console.log(props.friend)
+  console.log(props.friend)
     /*
     * 0 = Your incoming friend request is pending.
     * 1 = accepted
@@ -105,17 +106,17 @@ onMounted(() => {
         :content="textStatus"
     >
         <v-list-item 
-            :key="'relation: ' + props.friend.relationshipUsername" 
-            :title="props.friend.relationshipUsername.toString()"
-            :to="'/profile/' + props.friend.relationshipUsername"
+            :key="'relation: ' + props.friend.username" 
+            :title="props.friend.username"
+            :to="'/profile/' + props.friend.username"
         >
         </v-list-item>
     </v-badge>
 
         <v-list-item v-else
-            :key="'relation: ' + props.friend.relationshipUsername" 
-            :title="props.friend.relationshipUsername.toString()"
-            :to="'/profile/' + props.friend.relationshipUsername"
+            :key="'relation: ' + props.friend.username" 
+            :title="props.friend.username.toString()"
+            :to="'/profile/' + props.friend.username"
         >
         </v-list-item>
     <FriendButtons 
