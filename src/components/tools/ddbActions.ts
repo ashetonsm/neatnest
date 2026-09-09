@@ -346,6 +346,32 @@ export async function GET_BY_USERNAME(un: string, sk?: string) {
 
 /**
  * Remember that the KeyConditionExpression is CASE SENSITIVE. Lowercase "PK"/"SK" will not work.
+ * @param username The relationshipUsername value for any relationship entry. 
+ * If User1 and User2 each have a relationship with User3, there will be 
+ * TWO results for a query with username=User3
+ * @param status The status for any relationship entry
+ * @param filter The username value for any relationship entry.
+ * If User1 and User2 each have a relationship with User3, there will be 
+ * ONE result for a query with username=User3&filter=User1. 
+ * This would be the relationship between User3 and User1.
+ * @returns 
+ */
+export async function GET_RELATIONSHIP(username: string, status: string, filter: string) {
+  try {
+    return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?username=${username}&status=${status}&filter=${filter}`,
+      {
+        method: 'GET',
+      })
+      .then(async (response) => {
+        return response.json()
+      })
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+/**
+ * Remember that the KeyConditionExpression is CASE SENSITIVE. Lowercase "PK"/"SK" will not work.
  * @param pk Primary Key (the userID)
  * @param sk Sort Key (the item type)
  * @returns 
