@@ -8,7 +8,7 @@ const store = userStore()
 const friends = ref()
 
 async function getFriends() {
-    const data = await store.fetchFriends(store.getUser.PK)
+    const data = await store.fetchRelationships(store.getUser.PK)
     if (data) {
         return [data]
     } else {

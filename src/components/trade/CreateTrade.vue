@@ -41,7 +41,7 @@ const petRules = ref([
 ])
 
 async function getFriends() {
-  const data = await store.fetchFriends(store.getUser.PK)
+  const data = await store.fetchRelationships(store.getUser.PK, 1)
   if (data.length) {
     return data
   } else {
