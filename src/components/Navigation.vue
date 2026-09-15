@@ -63,18 +63,11 @@ watch(notifGroup, () => {
 
 onMounted(async () => {
   try {
-    const { user } = useAuth0();
-    if (user.value && !store.getUser) {
-      // console.log("Filling logged in user's store value")
-      await store.fetchUser(user.value.sub as string, "%23METADATA", toRaw(user.value))
-        .then(async () => {
-          return true
-        })
-    }
     window.addEventListener("resize", resize);
     store.$subscribe(async (mutation) => {
       // Perform actions here when the state changes
 
+      console.log(mutation.storeId)
       if (mutation.storeId == "user" && store.getUser?.username !== undefined) {
         loggedInLinks.value[3].to = `/profile/${store.getUser?.username}`;
         if (!activePet) {
