@@ -11,7 +11,7 @@ import router from "@/router";
 import { createNotification } from "../notifications/createNotification";
 
 const route = useRoute();
-const user = userStore();
+const store = userStore();
 var profile = route.params.username;
 const profileUserBio = ref<String>("Lorum ipsum this is a description");
 const profileUser = ref<any>()
@@ -26,6 +26,9 @@ async function fetchUser() {
         profileUser.value = res
         profileUserBio.value = profileUser.value.bio as string;
       })
+      .then(async (res) => {
+        
+      })
   } catch (error: any) {
     console.error(error); // The user probably doesn't exist in the db.
   }
@@ -36,7 +39,7 @@ async function setFriends() {
   try {
     var filteredFriend = [structuredClone(toRaw(friends.value))]
     filteredFriend.filter((f: any) => {
-      if (f.relationshipUsername == user.getUser.username) {
+      if (f.relationshipUsername == store.getUser.username) {
         console.log("f", f)
         targetFriend.value = f
       }
@@ -53,13 +56,13 @@ async function updateFriend(action: string) {
   var relationshipObj = { PK: '', relationshipUsername: '' }
   relationshipObj.PK = profileUser.value.PK
   relationshipObj.relationshipUsername = profileUser.value.username
-  await UPDATE_RELATIONSHIP(relationshipObj, user.getUser, action)
+  await UPDATE_RELATIONSHIP(relationshipObj, store.getUser, action)
     .then(async () => {
       if (action == "add") {
-        await createNotification(user.getUser, profileUser.value, "friendNew")
+        await createNotification(store.getUser, profileUser.value, "friendNew")
       }
       if (action == "accept") {
-        await createNotification(user.getUser, profileUser.value, "friendAccept")
+        await createNotification(store.getUser, profileUser.value, "friendAccept")
       }
     })
     .then(() => {
@@ -69,7 +72,7 @@ async function updateFriend(action: string) {
 }
 
 async function getPets(PK: string) {
-  const data = await user.fetchPets(PK)
+  const data = await store.fetchPets(PK)
   if (data.length) {
     return data
   } else {
@@ -77,29 +80,29 @@ async function getPets(PK: string) {
   }
 }
 
-async function getFriends(PK: string) {
-  const data = await user.fetchRelationships(PK)
-  console.log(data)
-  if (data) {
-    return data
-  } else {
-    return []
-  }
+async function getFriends() {
+    const data = await store.fetchRelationships(store.getUser.username, "", "")
+    // Do not return the data inside of an array, it's unnecessary.
+    if (data) {
+        return data
+    } else {
+        return []
+    }
 }
 
 onMounted(async () => {
   // Not viewing logged in user's profile
-  if (user.getUser.username !== profile) {
+  if (store.getUser.username !== profile) {
     await fetchUser();
-    friends.value = await getFriends(profileUser.value.PK)
+    // friends.value = await getFriends(profileUser.value.PK)
     await setFriends()
     profilePets.value = await getPets(profileUser.value.PK)
   } else {
     // Viewing logged in user's profile
-    profileUser.value = user.getUser;
-    profileUserBio.value = user.getUser.bio as string;
-    profilePets.value = await getPets(user.getUser.PK)
-    friends.value = await getFriends(user.getUser.PK)
+    profileUser.value = store.getUser;
+    profileUserBio.value = store.getUser.bio as string;
+    profilePets.value = await getPets(store.getUser.PK)
+    // friends.value = await getFriends(store.getUser.PK)
 
   }
 });
@@ -114,22 +117,22 @@ onMounted(async () => {
         <v-alert v-if="profile == 'null'" title="Profile not found!" type="error" class="ma-4"></v-alert>
 
         <v-btn color="secondary" :to="'/shop/' + profile" class="mb-4">
-          {{ profile == user.getUser?.username ? "Your Shop" : profile + "'s Shop" }}
+          {{ profile == store.getUser?.username ? "Your Shop" : profile + "'s Shop" }}
         </v-btn>
 
         <FriendButtons :buttonStatus="targetFriend.value.status" :updateFriend="updateFriend" />
 
 
         <!-- Stuff to display for the logged in user -->
-        <template v-if="profile == user.getUser?.username">
+        <template v-if="profile == store.getUser?.username">
           <v-btn text="Trade Requests" to="/trades"></v-btn>
           <h2 class="text-h4 font-weight-black ma-4">
-            Credits: {{ user.getCredits > 0 ? user.getCredits : 0 }}
+            Credits: {{ store.getCredits > 0 ? store.getCredits : 0 }}
           </h2>
         </template>
       </v-col>
 
-      <v-col class="mx-auto" v-if="user.getUser!.username == profile">
+      <v-col class="mx-auto" v-if="store.getUser!.username == profile">
         <ChangeProfile />
       </v-col>
 
