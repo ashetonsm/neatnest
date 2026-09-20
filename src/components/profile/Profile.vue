@@ -9,6 +9,8 @@ import {
 import ChangeProfile from "./ChangeProfile.vue";
 import router from "@/router";
 import { createNotification } from "../notifications/createNotification";
+import FriendButtons from "./FriendButtons.vue";
+import FriendsList from "./FriendsList.vue";
 
 const route = useRoute();
 const store = userStore();
@@ -17,7 +19,7 @@ const profileUserBio = ref<String>("Lorum ipsum this is a description");
 const profileUser = ref<any>()
 const profilePets = ref<Array<any>>([])
 const friends = ref<Array<any>>([])
-const targetFriend = ref()
+const targetFriend = ref<any>([])
 
 async function fetchUser() {
   try {
@@ -26,28 +28,8 @@ async function fetchUser() {
         profileUser.value = res
         profileUserBio.value = profileUser.value.bio as string;
       })
-      .then(async (res) => {
-        
-      })
   } catch (error: any) {
     console.error(error); // The user probably doesn't exist in the db.
-  }
-}
-
-async function setFriends() {
-  // Set the target friend.
-  try {
-    var filteredFriend = [structuredClone(toRaw(friends.value))]
-    filteredFriend.filter((f: any) => {
-      if (f.relationshipUsername == store.getUser.username) {
-        console.log("f", f)
-        targetFriend.value = f
-      }
-    })
-    if (targetFriend.value) {
-    }
-  } catch (error: any) {
-    console.error("Something went wrong setting the targetFriend value.", error)
   }
 }
 
@@ -80,8 +62,8 @@ async function getPets(PK: string) {
   }
 }
 
-async function getFriends() {
-    const data = await store.fetchRelationships(store.getUser.username, "", "")
+async function getFriends(username: string) {
+    const data = await store.fetchRelationships(username, "", "")
     // Do not return the data inside of an array, it's unnecessary.
     if (data) {
         return data
@@ -90,19 +72,34 @@ async function getFriends() {
     }
 }
 
+async function checkFriendStatus(profileUser: string, currentUser: string) {
+    const data = await store.fetchRelationships(profileUser, "", currentUser)
+    // Do not return the data inside of an array, it's unnecessary.
+    if (data) {
+      return data
+    } else {
+      return []
+    }
+}
+
 onMounted(async () => {
   // Not viewing logged in user's profile
   if (store.getUser.username !== profile) {
+    console.log("Profile:", profile)
     await fetchUser();
-    // friends.value = await getFriends(profileUser.value.PK)
-    await setFriends()
+    friends.value = await getFriends(profileUser.value.username)
+    await checkFriendStatus(profileUser.value.username, store.getUser.username)
+      .then((res) => {
+        console.log(res)
+        targetFriend.value = res
+      })
     profilePets.value = await getPets(profileUser.value.PK)
   } else {
     // Viewing logged in user's profile
     profileUser.value = store.getUser;
     profileUserBio.value = store.getUser.bio as string;
     profilePets.value = await getPets(store.getUser.PK)
-    // friends.value = await getFriends(store.getUser.PK)
+    friends.value = await getFriends(store.getUser.username)
 
   }
 });
@@ -114,14 +111,13 @@ onMounted(async () => {
     <v-row>
       <v-col md="12" class="text-center">
         <h2 class="text-h4 font-weight-black ma-4">{{ profile }}'s Profile</h2>
-        <v-alert v-if="profile == 'null'" title="Profile not found!" type="error" class="ma-4"></v-alert>
-
         <v-btn color="secondary" :to="'/shop/' + profile" class="mb-4">
           {{ profile == store.getUser?.username ? "Your Shop" : profile + "'s Shop" }}
         </v-btn>
 
-        <FriendButtons :buttonStatus="targetFriend.value.status" :updateFriend="updateFriend" />
-
+        <template v-if="profile != store.getUser?.username">
+          <FriendButtons :updateFriend="updateFriend" :buttonStatus="targetFriend.value?.status"/>
+        </template>
 
         <!-- Stuff to display for the logged in user -->
         <template v-if="profile == store.getUser?.username">
@@ -129,12 +125,12 @@ onMounted(async () => {
           <h2 class="text-h4 font-weight-black ma-4">
             Credits: {{ store.getCredits > 0 ? store.getCredits : 0 }}
           </h2>
+          <v-col class="mx-auto">
+            <ChangeProfile />
+          </v-col>
         </template>
       </v-col>
 
-      <v-col class="mx-auto" v-if="store.getUser!.username == profile">
-        <ChangeProfile />
-      </v-col>
 
       <v-col cols="12" class="mx-auto">
         <!-- Description -->
@@ -157,8 +153,8 @@ onMounted(async () => {
             </v-col>
           </v-row>
         </v-sheet>
+        <FriendsList :friends="friends || []" :username="profile as string" />
 
-        <!-- <FriendsList :friends="friends" :username="profile as string" /> -->
       </v-col>
     </v-row>
   </v-sheet>
