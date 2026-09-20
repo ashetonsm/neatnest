@@ -53,5 +53,5 @@ async function updateFriend(action: string) {
   <v-list-item v-else :key="'relation: ' + props.friend.username" :title="props.friend.username"
     :to="'/profile/' + props.friend.username">
   </v-list-item>
-  <FriendButtons :updateFriend="updateFriend" :buttonStatus="props.status" />
+  <FriendButtons v-if="$route.name == 'friends'" :updateFriend="updateFriend" :buttonStatus="props.status" />
 </template>
