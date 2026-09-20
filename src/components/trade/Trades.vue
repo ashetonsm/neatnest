@@ -18,7 +18,7 @@ async function getTrades() {
 
 onMounted(async () => {
   trades.value = await getTrades()
-  console.log(trades.value)
+  // console.log(trades.value)
 })
 
 </script>

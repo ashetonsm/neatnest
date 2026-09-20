@@ -46,6 +46,10 @@ async function updateFriend(action: string) {
       if (action == "accept") {
         await createNotification(store.getUser, profileUser.value, "friendAccept")
       }
+      if (action == "remove") {
+      }
+      if (action == "block") {
+      }
     })
     .then(() => {
       router.push(`/profile/${profile}`);
@@ -85,12 +89,10 @@ async function checkFriendStatus(profileUser: string, currentUser: string) {
 onMounted(async () => {
   // Not viewing logged in user's profile
   if (store.getUser.username !== profile) {
-    console.log("Profile:", profile)
     await fetchUser();
     friends.value = await getFriends(profileUser.value.username)
     await checkFriendStatus(profileUser.value.username, store.getUser.username)
       .then((res) => {
-        console.log(res)
         targetFriend.value = res
       })
     profilePets.value = await getPets(profileUser.value.PK)
