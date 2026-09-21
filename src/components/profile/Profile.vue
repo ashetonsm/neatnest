@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { userStore } from "@/stores/user";
-import { onMounted, ref, toRaw } from "vue";
+import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import Pet from "@/components/Pet.vue"
 import {
   GET_BY_USERNAME,
   UPDATE_RELATIONSHIP} from "@/components/tools/ddbActions";
-import ChangeProfile from "./ChangeProfile.vue";
 import router from "@/router";
 import { createNotification } from "../notifications/createNotification";
 import FriendButtons from "./FriendButtons.vue";
@@ -15,7 +14,6 @@ import FriendsList from "./FriendsList.vue";
 const route = useRoute();
 const store = userStore();
 var profile = route.params.username;
-const profileUserBio = ref<String>("Lorum ipsum this is a description");
 const profileUser = ref<any>()
 const profilePets = ref<Array<any>>([])
 const friends = ref<Array<any>>([])
@@ -26,7 +24,6 @@ async function fetchUser() {
     await GET_BY_USERNAME(profile.toString(), "%23METADATA")
       .then(async (res) => {
         profileUser.value = res
-        profileUserBio.value = profileUser.value.bio as string;
       })
   } catch (error: any) {
     console.error(error); // The user probably doesn't exist in the db.
@@ -99,7 +96,6 @@ onMounted(async () => {
   } else {
     // Viewing logged in user's profile
     profileUser.value = store.getUser;
-    profileUserBio.value = store.getUser.bio as string;
     profilePets.value = await getPets(store.getUser.PK)
     friends.value = await getFriends(store.getUser.username)
 
@@ -127,22 +123,11 @@ onMounted(async () => {
           <h2 class="text-h4 font-weight-black ma-4">
             Credits: {{ store.getCredits > 0 ? store.getCredits : 0 }}
           </h2>
-          <v-col class="mx-auto">
-            <ChangeProfile />
-          </v-col>
         </template>
       </v-col>
 
 
       <v-col cols="12" class="mx-auto">
-        <!-- Description -->
-        <v-sheet border="md" class="pa-4 text-white mx-auto rounded" color="primary">
-          <h4 class="text-h5 font-weight-bold mb-4">Description:</h4>
-          <p>
-            {{ profileUserBio }}
-          </p>
-        </v-sheet>
-
         <!-- Pets -->
         <v-sheet border="md" class="pa-4 text-white mx-auto rounded" color="secondary">
           <v-row>
