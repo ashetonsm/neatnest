@@ -40,10 +40,7 @@ export const userStore = defineStore('user', {
                         const newUser = await PUT_DATA({
                             PK: PK,
                             SK: '%23METADATA',
-                            email: inputUser.value.email,
                             username: inputUser.value.nickname.toLowerCase().replace(/\s/g, "_").replace(/\W+/g, ""),
-                            url: inputUser.value.picture,
-                            bio: "Hi, I'm new! Nice to meet you!",
                             createdAt: new Date().getTime(),
                             credits: 0,
                             itemsRemaining: 3,
