@@ -1,36 +1,21 @@
-import { DeleteItemCommand, DynamoDB } from "@aws-sdk/client-dynamodb";
-import { BatchWriteCommand, DynamoDBDocument, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
-
-export const config = {
-  credentials: {
-    accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID,
-    secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY
-  },
-  region: import.meta.env.VITE_AWS_DEFAULT_REGION
-}
-
-const tableName = import.meta.env.VITE_DYNAMODB_TABLE
-
-export const client = DynamoDBDocument.from(new DynamoDB(config), {
-  marshallOptions: {
-    convertEmptyValues: true,
-    removeUndefinedValues: true,
-    convertClassInstanceToMap: true
-  }
-})
-
 /**
  * Creates or updates an entry in the database
  * @param newData The new or updated data object
  * @returns 
  */
 export async function PUT_DATA(newData: Object) {
-  const command = new PutCommand({
-    TableName: tableName,
-    Item: newData,
-  });
-  const response = await client.send(command);
-  return response
+  try {
+    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`),
+      {
+        method: 'PUT',
+        body: JSON.stringify(newData)
+      })
+      .then(async (response) => {
+        return response.json()
+      })
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 /**
@@ -44,15 +29,18 @@ export async function PUT_DATA(newData: Object) {
  * @returns 
  */
 export async function BATCH_MODIFY_DATA(newData: Array<any>) {
+
   try {
-    const command = new BatchWriteCommand({
-      RequestItems: { [tableName]: newData },
-      ReturnConsumedCapacity: "TOTAL"
-    });
-    const response = await client.send(command);
-    return response
-  } catch (error: any) {
-    console.error("Something went wrong with the BATCH_MODIFY_DATA request:", error)
+    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`),
+      {
+        method: 'POST',
+        body: JSON.stringify(newData)
+      })
+      .then(async (response) => {
+        return response.json()
+      })
+  } catch (error) {
+    console.error(error);
   }
 }
 
@@ -90,49 +78,42 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
     updatedAt: new Date().getTime(),
   }
 
+
   try {
     switch (updateType) {
       case "add":
         initiatingRel.status = 9
         targetRel.status = 0
+        var putList: { PutRequest: { Item: any; }; }[] = []
+        putList.push({ PutRequest: { Item: initiatingRel } })
+        putList.push({ PutRequest: { Item: targetRel } })
+        await BATCH_MODIFY_DATA(putList)
         break
       case "accept":
         initiatingRel.status = 1
         targetRel.status = 1
+        var putList: { PutRequest: { Item: any; }; }[] = []
+        putList.push({ PutRequest: { Item: initiatingRel } })
+        putList.push({ PutRequest: { Item: targetRel } })
+        await BATCH_MODIFY_DATA(putList)
         break
       case "remove":
-        const initiatingRelDelete = {
-          PK: initiatingRelationship.PK,
-          SK: `RELATIONSHIP#${targetRelationship.PK}`
-        }
-        const targetRelDelete = {
-          PK: targetRelationship.PK,
-          SK: `RELATIONSHIP#${initiatingRelationship.PK}`
-        }
-        await DELETE_DATA(initiatingRelDelete)
-        await DELETE_DATA(targetRelDelete)
+        var deleteList: { DeleteRequest: { Key: any; }; }[] = []
+        deleteList.push({ DeleteRequest: { Key: { PK: initiatingRelationship.PK, SK: `RELATIONSHIP#${targetRelationship.PK}` } } })
+        deleteList.push({ DeleteRequest: { Key: { PK: targetRelationship.PK, SK: `RELATIONSHIP#${initiatingRelationship.PK}` } } })
+        await BATCH_MODIFY_DATA(deleteList)
         return
       case "block":
         initiatingRel.status = 2
         targetRel.status = 8
-        break
+        var putList: { PutRequest: { Item: any; }; }[] = []
+        putList.push({ PutRequest: { Item: initiatingRel } })
+        putList.push({ PutRequest: { Item: targetRel } })
+        await BATCH_MODIFY_DATA(putList)
+        return
       default:
         console.error("Invalid updateType")
         return
-    }
-
-    const command1 = new PutCommand({
-      TableName: tableName,
-      Item: initiatingRel,
-    });
-    const command2 = new PutCommand({
-      TableName: tableName,
-      Item: targetRel,
-    });
-
-    if (command1.input.TableName !== undefined && command2.input.TableName !== undefined) {
-      await client.send(command1)
-      await client.send(command2)
     }
   } catch (error: any) {
     console.error("Error: ", error)
@@ -187,16 +168,21 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
       case "create":
         initiatingTrade.status = 9
         targetTrade.status = 0
+        var putList: { PutRequest: { Item: any; }; }[] = []
+        putList.push({ PutRequest: { Item: initiatingTrade } })
+        putList.push({ PutRequest: { Item: targetTrade } })
+        await BATCH_MODIFY_DATA(putList)
         break
       case "accept":
         initiatingTrade.status = 1
         targetTrade.status = 1
+        var putList: { PutRequest: { Item: any; }; }[] = []
+        var deleteList: { DeleteRequest: { Key: any; }; }[] = []
 
-        var petPutList: { PutRequest: { Item: any; }; }[] = []
-        var petDeleteList: { DeleteRequest: { Key: any; }; }[] = []
-        var itemPutList: { PutRequest: { Item: any; }; }[] = []
-        var itemDeleteList: { DeleteRequest: { Key: any; }; }[] = []
-        var creditPutList: { PutRequest: { Item: any; }; }[] = []
+        // Add the original trades to the put lists with updated statuses first
+        putList.push({ PutRequest: { Item: initiatingTrade } })
+        putList.push({ PutRequest: { Item: targetTrade } })
+
         if (tradeContents[0].pets.length > 0) {
           // Format a PutRequest for the batch command
           // Set the PK and owner data correctly
@@ -205,7 +191,7 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
             // We must use the targetTrader's (AKA the trade creator to the accepting user) 
             // PK as the original PK because this is inside of a for loop
             // where the PK will get overwritten at the end of this push.
-            petDeleteList.push(
+            deleteList.push(
               {
                 DeleteRequest: {
                   Key: {
@@ -218,12 +204,8 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
             // Then, edit the item and add it to the batch put list.
             item.PK = initiatingTrader.PK
             item.owner = initiatingTrader.PK
-            petPutList.push({ PutRequest: { Item: item } })
+            putList.push({ PutRequest: { Item: item } })
           });
-          // Create new data
-          await BATCH_MODIFY_DATA(petPutList)
-          // Delete old data
-          await BATCH_MODIFY_DATA(petDeleteList)
         }
 
         if (tradeContents[1].items.length > 0) {
@@ -231,7 +213,7 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
           // Set the PK and owner data correctly
           tradeContents[1].items.forEach((item: any) => {
             // First, add the original item to the batch delete list.
-            itemDeleteList.push(
+            deleteList.push(
               {
                 DeleteRequest: {
                   Key: {
@@ -244,66 +226,54 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
             // Then, edit the item and add it to the batch put list.
             item.PK = initiatingTrader.PK
             item.owner = initiatingTrader.PK
-            itemPutList.push({ PutRequest: { Item: item } })
+            putList.push({ PutRequest: { Item: item } })
           });
-          // Create new data
-          await BATCH_MODIFY_DATA(itemPutList)
-          // Delete old data
-          await BATCH_MODIFY_DATA(itemDeleteList)
         }
 
         if (tradeContents[2].credits > 0) {
           // In this case, the TARGET is the one who STARTED the trade. They're LOSING credits.
-          var fullTargetTrader = await GET_BY_USERNAME(targetTrader.tradeUsername, "#METADATA")
-		  
+          var fullTargetTrader = await GET_BY_USERNAME(targetTrader.tradeUsername, "%23METADATA")
+
           // In this case, the INITIATOR is the one who's APPROVING the trade. They're GAINING credits.
           // I know, this is all very backwards and I'm confused but it works now.
           var updatedInitiatingTrader = initiatingTrader
 
           fullTargetTrader!.credits = fullTargetTrader!.credits - tradeContents[2].credits
           updatedInitiatingTrader.credits = updatedInitiatingTrader.credits + tradeContents[2].credits
-          console.log("updatedInitiatingTrader", updatedInitiatingTrader)
-          console.log("fullTargetTrader", fullTargetTrader)
-          creditPutList.push({ PutRequest: { Item: updatedInitiatingTrader } })
-          creditPutList.push({ PutRequest: { Item: fullTargetTrader } })
-          await BATCH_MODIFY_DATA(creditPutList)
+          putList.push({ PutRequest: { Item: updatedInitiatingTrader } })
+          putList.push({ PutRequest: { Item: fullTargetTrader } })
+
+          // Update everything that was added to both lists.
+          await BATCH_MODIFY_DATA(putList)
+          await BATCH_MODIFY_DATA(deleteList)
         }
         break
       case "reject":
         initiatingTrade.status = 2
         targetTrade.status = 2
+        var putList: { PutRequest: { Item: any; }; }[] = []
+        putList.push({ PutRequest: { Item: initiatingTrade } })
+        putList.push({ PutRequest: { Item: targetTrade } })
+        await BATCH_MODIFY_DATA(putList)
         break
       case "close":
         initiatingTrade.status = 8
         targetTrade.status = 8
+        var putList: { PutRequest: { Item: any; }; }[] = []
+        putList.push({ PutRequest: { Item: initiatingTrade } })
+        putList.push({ PutRequest: { Item: targetTrade } })
+        await BATCH_MODIFY_DATA(putList)
         break
       case "remove":
-        const initiatingTradeDelete = {
-          PK: initiatingTrader.PK,
-          SK: `TRADE#${targetTrader.PK}`
-        }
-        const targetTradeDelete = {
-          PK: targetTrader.PK,
-          SK: `TRADE#${initiatingTrader.PK}`
-        }
-        await DELETE_DATA(initiatingTradeDelete)
-        await DELETE_DATA(targetTradeDelete)
+        var deleteList: { DeleteRequest: { Key: any; }; }[] = []
+        deleteList.push({ DeleteRequest: { Key: { PK: initiatingTrader.PK, SK: `TRADE#${targetTrader.PK}` } } })
+        deleteList.push({ DeleteRequest: { Key: { PK: targetTrader.PK, SK: `TRADE#${initiatingTrader.PK}` } } })
+        await BATCH_MODIFY_DATA(deleteList)
         return
       default:
         console.error("Invalid updateType")
         return
     }
-
-    const command1 = new PutCommand({
-      TableName: tableName,
-      Item: initiatingTrade,
-    });
-    const command2 = new PutCommand({
-      TableName: tableName,
-      Item: targetTrade,
-    });
-    await client.send(command1)
-    await client.send(command2)
   } catch (error: any) {
     console.error("Error: ", error)
   }
@@ -313,19 +283,22 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
 
 /**
  * Deletes an entry in the database
- * @param newData The new or updated data object
+ * @param deletedData The data to be deleted.
  * @returns 
  */
-export async function DELETE_DATA(newData: any) {
-  const command = {
-    TableName: tableName,
-    Key: {
-      PK: { S: newData.PK as string },
-      SK: { S: newData.SK as string }
-    },
-  };
-  const response = await client.send(new DeleteItemCommand(command));
-  return response
+export async function DELETE_DATA(deletedData: Object) {
+  try {
+    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`),
+      {
+        method: 'DELETE',
+        body: JSON.stringify(deletedData)
+      })
+      .then(async (response) => {
+        return response.json()
+      })
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 /**
@@ -335,21 +308,22 @@ export async function DELETE_DATA(newData: any) {
  * @returns 
  */
 export async function GET_BY_PK_SK(pk: string, sk: string) {
-  const command = new QueryCommand({
-    TableName: tableName,
-    KeyConditionExpression: "PK = :pkVal AND begins_with(SK, :skPrefix)",
-    ExpressionAttributeValues:
-    {
-      ":pkVal": pk,
-      ":skPrefix": sk
-    }
-  });
+  // The pound symbol needs to be encoded in order to get through the API Gateway...
+  // Then it's replaced again within the lambda function because that works somehow.
 
-  const response = await client.send(command);
-  if (response.Items?.length == 0) {
-    return null
-  } else {
-    return response.Items![0]
+  sk == "#METADATA" ? sk = "%23METADATA" : sk = sk
+  const encodedURI = encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?PK=${pk}&SK=${sk}`)
+  try {
+    if (pk == undefined) { throw new Error("PK undefined") }
+    return fetch(encodedURI,
+      {
+        method: 'GET',
+      })
+      .then(async (response) => {
+        return response.json()
+      })
+  } catch (error) {
+    console.error(error);
   }
 }
 
@@ -358,48 +332,50 @@ export async function GET_BY_PK_SK(pk: string, sk: string) {
  * @param un Primary Key (the username)
  * @returns 
  */
-export async function GET_BY_USERNAME(un: string, SK?: string) {
-  const command = new QueryCommand({
-    TableName: tableName,
-    IndexName: "Username",
-    KeyConditionExpression: "username = :unVal AND begins_with(SK, :skPrefix)",
-    ExpressionAttributeValues:
-    {
-      ":unVal": un,
-      ":skPrefix": SK || "",
-    }
-  });
-
-  const response = await client.send(command);
-  if (response.Items?.length == 0) {
-    return null
-  } else {
-    return response.Items![0]
+export async function GET_BY_USERNAME(un: string, sk?: string) {
+  try {
+    if (un == undefined) { throw new Error("Username undefined") }
+    return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?username=${un}&SK=${sk}`,
+      {
+        method: 'GET',
+      })
+      .then(async (response) => {
+        return response.json()
+      })
+  } catch (error) {
+    console.error(error);
   }
 }
 
 /**
  * Remember that the KeyConditionExpression is CASE SENSITIVE. Lowercase "PK"/"SK" will not work.
- * @param pk Primary Key (the userID)
- * @param sk Sort Key (the item type)
+ * @param username The relationshipUsername value for any relationship entry. 
+ * If User1 and User2 each have a relationship with User3, there will be 
+ * TWO results for a query with username=User3
+ * @param status The status for any relationship entry
+ * @param filter The username value for any relationship entry.
+ * If User1 and User2 each have a relationship with User3, there will be 
+ * ONE result for a query with username=User3&filter=User1. 
+ * This would be the relationship between User3 and User1.
  * @returns 
  */
-export async function LIST_BY_PK_SK(pk: string, sk: string) {
-  const command = new QueryCommand({
-    TableName: tableName,
-    KeyConditionExpression: "PK = :pkVal AND begins_with(SK, :skPrefix)",
-    ExpressionAttributeValues:
-    {
-      ":pkVal": pk,
-      ":skPrefix": sk
+export async function GET_RELATIONSHIP(username: string, status?: number | string, filter?: string) {
+  try {
+    if (username == undefined) {
+      throw new Error("Username undefined");
     }
-  });
-
-  const response = await client.send(command);
-  if (response.Items?.length == 0) {
-    return []
-  } else {
-    return response.Items
+    if (status == "" || status == undefined) {status = ""}
+    if (filter == "" || filter == undefined) {filter = ""}
+    // console.log("username, status, filter", username, status, filter)
+    return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?username=${username}&status=${status}&filter=${filter}`,
+      {
+        method: 'GET',
+      })
+      .then(async (response) => {
+        return response.json()
+      })
+  } catch (error) {
+    console.error(error);
   }
 }
 
@@ -410,22 +386,15 @@ export async function LIST_BY_PK_SK(pk: string, sk: string) {
  * @returns 
  */
 export async function LIST_SELLING_BY_PK(pk: string) {
-  const command = new QueryCommand({
-    TableName: tableName,
-    KeyConditionExpression: "PK = :pkVal AND begins_with(SK, :skPrefix)",
-    ExpressionAttributeValues:
-    {
-      ":pkVal": pk,
-      ":skPrefix": "ITEM#",
-      ":sellingValue": true
-    },
-    FilterExpression: "selling = :sellingValue"
-  });
-
-  const response = await client.send(command);
-  if (response.Items?.length == 0) {
-    return []
-  } else {
-    return response.Items
+  try {
+    return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?PK=${pk}&selling`),
+      {
+        method: 'GET',
+      })
+      .then(async (response) => {
+        return response.json()
+      })
+  } catch (error) {
+    console.error(error);
   }
 }

@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import router from "@/router";
 import { onMounted, ref, toRaw } from "vue";
 import { userStore } from "@/stores/user";
 import ItemModal from "./ItemModal.vue";
-import { copyData, createPresignedUrlWithClient, DELETE_S3 } from "@/components/tools/s3Actions";
+import { COPY_OBJECT, DELETE_OBJECT, GET_SIGNED_URL } from "@/components/tools/s3Actions";
 import { DELETE_DATA, GET_BY_PK_SK, PUT_DATA } from "./tools/ddbActions";
+import { useRouter } from "vue-router";
 const user = userStore();
 const itemModalRef = ref();
 
+const router = useRouter()
 const signedSrc = ref("null");
 const itemCreator = ref("Loading...");
 
@@ -34,7 +35,7 @@ async function buyFlow(i: any) {
 
       // Regardless of who it was bought from, it should be copied to the user's S3 bucket folder
       const newPath = `images/${user.getUser.PK}/item/${i.name}.png`
-      await copyData(i.url, newPath)
+      await COPY_OBJECT(i.url, newPath)
         .then(async (res) => {
           // Create the item with a clone.
           var boughtItem = structuredClone(toRaw(i))
@@ -66,16 +67,14 @@ async function buyFlow(i: any) {
   }
 }
 
-async function getFileUrl(fileName: any) {
-  try {
-    const result = await createPresignedUrlWithClient(fileName as string);
-    signedSrc.value = result;
-  } catch (error) {
-    console.error(error);
-    return null;
+async function getFileUrl() {
+  if (props.item.url !== undefined) {
+    await GET_SIGNED_URL(props.item.url)
+    .then((res) => {
+      signedSrc.value = res.body
+    })
   }
-
-  return;
+  return
 }
 
 async function handleDelete(i: any) {
@@ -83,7 +82,7 @@ async function handleDelete(i: any) {
   try {
     if (choice) {
       // Do delete logic
-      await DELETE_S3(i)
+      await DELETE_OBJECT(i)
       await DELETE_DATA(i)
         .then(() => {
           // Refresh
@@ -96,8 +95,8 @@ async function handleDelete(i: any) {
 }
 
 onMounted(async () => {
-  await getFileUrl(props.item.url);
-  const creatorMetadata = await toRaw(GET_BY_PK_SK(props.item.creator, "#METADATA"))
+  await getFileUrl()
+  const creatorMetadata = await GET_BY_PK_SK(props.item.creator, "#METADATA")
   itemCreator.value = creatorMetadata?.username
 });
 </script>

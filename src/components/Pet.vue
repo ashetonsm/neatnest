@@ -2,13 +2,13 @@
 import { onMounted, ref, toRaw } from "vue";
 import PetItemModal from "./PetItemModal.vue";
 import { userStore } from "@/stores/user";
-import router from "@/router";
-import { useRoute } from "vue-router";
-import { createPresignedUrlWithClient, DELETE_S3 } from "./tools/s3Actions";
-import { DELETE_DATA, GET_BY_PK_SK, GET_BY_USERNAME } from "./tools/ddbActions";
+import { useRoute, useRouter } from "vue-router";
+import { DELETE_OBJECT, GET_SIGNED_URL } from "./tools/s3Actions";
+import { DELETE_DATA, GET_BY_PK_SK } from "./tools/ddbActions";
 
 const route = useRoute();
-const signedSrc = ref("null");
+const router = useRouter();
+const signedSrc = ref();
 const petModalRef = ref();
 const petCreator = ref("Loading...");
 const user = userStore();
@@ -19,21 +19,18 @@ const props = defineProps<{
 }>();
 
 async function getFileUrl(fileName: any) {
-  try {
-    const result = await createPresignedUrlWithClient(fileName as string);
-    signedSrc.value = result;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-  return;
+  await GET_SIGNED_URL(fileName)
+  .then((res) => {
+    signedSrc.value = res.body
+  })
+  return
 }
 
 async function handleDelete(pet: any) {
   const choice = confirm(`Delete ${pet.name} forever? (This cannot be undone!)`);
   if (choice) {
     // Do delete logic
-    await DELETE_S3(pet)
+    await DELETE_OBJECT(pet)
     await DELETE_DATA(pet)
       .then(() => {
         // Refresh

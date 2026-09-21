@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import router from "@/router";
 import { userStore } from "../stores/user";
 import { useAuth0 } from "@auth0/auth0-vue";
 import { PUT_DATA } from "./tools/ddbActions";
 import { createNotification } from "./notifications/createNotification";
+import { onMounted, toRaw } from "vue";
+import { useRouter } from "vue-router";
 
+const router = useRouter()
 const uStore = userStore();
 const { user } = useAuth0();
+const auth0 = useAuth0();
 
-if (!uStore.getUser || uStore.getUser.username == undefined) {
-  await uStore.fetchUser(user.value?.sub as string, "#METADATA", user)
-    .then(async () => {
-    setCookie(uStore.getUser.PK, 1)
-    const newUserData = await setCreationCredits(new Date().getTime(), uStore.getUser.updatedAt)
-    await PUT_DATA(newUserData)
-    router.push({name: 'home'})
-  })
-}
+onMounted(async () => {
+  if (user.value !== undefined) {
+    await uStore.fetchUser(user.value.sub as string, "#METADATA", toRaw(user.value))
+      .then(async () => {
+        const updatedCreationData = await setCreationCredits(new Date().getTime(), uStore.getUser.updatedAt)
+        await PUT_DATA(updatedCreationData)
+          .then(() => {
+            router.push({ name: 'home' })
+          })
+      })
+  }
 
-function setCookie(cvalue: string, exdays: number) {
-  const d = new Date();
-  d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-  let expires = "expires=" + d.toUTCString();
-  document.cookie = "currentUser=" + cvalue + ";" + expires + ";path=/";
-}
+})
 
 async function setCreationCredits(currentDate: number, lastCreditRefresh: number) {
   // 1 day is 86400000 ms
@@ -32,7 +32,7 @@ async function setCreationCredits(currentDate: number, lastCreditRefresh: number
   const updatedUser = uStore.getUser
   if (dayDifference >= 15) {
     var update = false
-    
+
     if (updatedUser.itemsRemaining + 1 <= 3) {
       updatedUser.itemsRemaining++
       await createNotification(uStore.getUser, null, "addedItemCredit")

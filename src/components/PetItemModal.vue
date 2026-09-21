@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import router from "@/router";
 import { ref, toRaw } from "vue";
 import { userStore } from "@/stores/user";
-import { DELETE_S3 } from "./tools/s3Actions";
+import { DELETE_OBJECT } from "./tools/s3Actions";
 import { BATCH_MODIFY_DATA, DELETE_DATA, PUT_DATA } from "./tools/ddbActions";
+import { useRouter } from "vue-router";
 
+const router = useRouter()
 const user = userStore()
 const props = defineProps<{
   pet: any;
@@ -32,7 +33,7 @@ async function handleSubmit(item: any | null | undefined) {
       var confirmDeletion = confirm("This item will disappear after use. Continue?");
       if (confirmDeletion == true) {
         // Do delete logic
-        await DELETE_S3(item)
+        await DELETE_OBJECT(item)
         await DELETE_DATA(item)
       } else {
         return;

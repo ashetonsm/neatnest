@@ -5,7 +5,8 @@ import { RouterLink } from "vue-router";
 import Notification from "./notifications/Notification.vue";
 import { useAuth0 } from "@auth0/auth0-vue";
 
-const user = userStore();
+const auth0 = useAuth0()
+const store = userStore();
 const collapse = ref(true);
 var activePet: any = null
 const drawer = ref(false)
@@ -15,26 +16,24 @@ const notifGroup = ref(null)
 
 const { loginWithRedirect, logout: auth0Logout } = useAuth0();
 const logout = async () => {
-  document.cookie = "currentUser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; 
+  document.cookie = "currentUser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   await auth0Logout({ logoutParams: { returnTo: window.location.origin } })
 }
 
-const loggedOutLinks = ref<Array<{ title: string; to?: string, link: boolean, onClick?: any}>>([
+const loggedOutLinks = ref<Array<{ title: string; to?: string, link: boolean, onClick?: any }>>([
   { title: "Home", to: "/", link: true },
-  { title: "General Store", to: "/shop/1", link: true },
-  { title: "Inventory", to: "/inventory", link: true },
-  { title: "Pets", to: "/pets", link: true },
+  { title: "Games", to: "/games", link: true },
   { title: "About", to: "/about", link: true },
-  { title: "Login", onClick: () => {loginWithRedirect()}, link: true },
+  { title: "Login", onClick: () => { loginWithRedirect() }, link: true },
 ]);
 
 const loggedInLinks = ref<Array<{ title: string; to?: string, link: boolean, onClick?: any }>>([
-  { title: "Home", to: "/", link: true},
+  { title: "Home", to: "/", link: true },
   { title: "General Store", to: "/shop/1", link: true },
   { title: "Inventory", to: "/inventory", link: true },
   {
     title: "Profile",
-    to: ``, 
+    to: ``,
     link: true
   },
   { title: "Pets", to: "/pets", link: true },
@@ -45,7 +44,7 @@ const loggedInLinks = ref<Array<{ title: string; to?: string, link: boolean, onC
   { title: "Logout", onClick: logout, link: true },
 ]);
 
-function resize(e:any) {
+function resize(e: any) {
   if (e.target.screen.width > 840) {
     collapse.value = false
   } else {
@@ -65,19 +64,22 @@ watch(notifGroup, () => {
 onMounted(async () => {
   try {
     window.addEventListener("resize", resize);
-    user.$subscribe((mutation) => {
+    store.$subscribe(async (mutation) => {
       // Perform actions here when the state changes
-      
-      if (mutation.storeId == "user" && user.getUser?.username !== undefined) {
-        loggedInLinks.value[3].to = `/profile/${user.getUser?.username}`;
+
+      console.log(mutation.storeId)
+      if (mutation.storeId == "user" && store.getUser?.username !== undefined) {
+        loggedInLinks.value[3].to = `/profile/${store.getUser?.username}`;
         if (!activePet) {
-          var allPets = structuredClone(toRaw(user.getPets))
+          var allPets = [store.getPets]
           allPets.filter((pet: any) => {
             if (pet.status == 1) {
               activePet = pet
             }
           })
         }
+        // await store.fetchNotifications()
+
       }
     });
 
@@ -87,76 +89,53 @@ onMounted(async () => {
 });
 
 </script>
-  <template>
-      <v-app-bar color="primary">
-        <RouterLink class="mx-3" :to="{name: 'home'}">
-          <v-avatar image="@/assets/logo.svg"></v-avatar>
-        </RouterLink>
-        <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-        <v-badge location="top right" color="success" :model-value="user.getNotifications.length > 0 ? true : false" :content="user.getNotifications.length">
-          <v-avatar 
-          icon="mdi-bell" 
-          variant="text" 
-          :badge="{ color: 'red', location: 'bottom end', floating: true }"
-          class="cursor-pointer"
-          @click.stop="notifDrawer = !notifDrawer"></v-avatar>
-        </v-badge>
+<template>
+  <v-app-bar color="primary">
+    <RouterLink class="mx-3" :to="{ name: 'home' }">
+      <v-avatar image="@/assets/logo.svg"></v-avatar>
+    </RouterLink>
+    <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+    <v-badge location="top right" color="success" :model-value="store.getNotifications.length > 0 ? true : false"
+      :content="store.getNotifications.length">
+      <v-avatar icon="mdi-bell" variant="text" :badge="{ color: 'red', location: 'bottom end', floating: true }"
+        class="cursor-pointer" @click.stop="notifDrawer = !notifDrawer"></v-avatar>
+    </v-badge>
 
-        <v-toolbar-title>Neatnest</v-toolbar-title>
+    <v-toolbar-title>Neatnest</v-toolbar-title>
 
-        <!-- 
+    <!-- 
         Might be used later for site searching.
         <template v-if="$vuetify.display.mdAndUp">
           <v-btn icon="mdi-magnify" variant="text"></v-btn>
-        </template> 
-        -->
-
-        <template v-if="user.getUser?.username !== undefined">
-        
-        <v-toolbar-title>Hi, {{user.getUser?.username}}!</v-toolbar-title>
-
-          <div class="text-center">
-            <v-chip
-              class="ma-2"
-              variant="outlined"
-            >
-              Credits: {{ user.getCredits }}
-            </v-chip>
-            <v-chip
-              class="ma-2"
-              variant="outlined"
-            >
-              Active pet: {{activePet ? activePet.name : "None"}}
-            </v-chip>
-          </div>
         </template>
-      </v-app-bar>
+-->
 
-      <v-navigation-drawer
-        v-model="drawer"
-        :location="$vuetify.display.mobile ? 'bottom' : undefined"
-        temporary
-      >
-        <template v-if="user.getUser?.username !== undefined">
-          <v-list
-            :items="loggedInLinks"
-            :item-props="true"
-          ></v-list>
-        </template>
-        <template v-else>
-          <v-list
-            :items="loggedOutLinks"
-            :item-props="true"
-          ></v-list>
-        </template>
+    <template v-if="store.getUser?.username !== undefined">
 
-      </v-navigation-drawer>
+      <v-toolbar-title>Hi, {{ store.getUser?.username }}!</v-toolbar-title>
 
-      <v-navigation-drawer
-        v-model="notifDrawer"
-        :location="$vuetify.display.mobile ? 'top' : 'right'"
-        temporary
-      >
-      <Notification :notifications="user.getNotifications"/>
-    </v-navigation-drawer>
+      <div class="text-center">
+        <v-chip class="ma-2" variant="outlined">
+          Credits: {{ store.getCredits }}
+        </v-chip>
+        <v-chip class="ma-2" variant="outlined">
+          Active pet: {{ activePet ? activePet.name : "None" }}
+        </v-chip>
+      </div>
+    </template>
+  </v-app-bar>
+
+  <v-navigation-drawer v-model="drawer" :location="$vuetify.display.mobile ? 'bottom' : undefined" temporary>
+    <template v-if="auth0.isAuthenticated.value">
+      <v-list :items="loggedInLinks" :item-props="true"></v-list>
+    </template>
+    <template v-else>
+      <v-list :items="loggedOutLinks" :item-props="true"></v-list>
+    </template>
+
+  </v-navigation-drawer>
+
+  <v-navigation-drawer v-model="notifDrawer" :location="$vuetify.display.mobile ? 'top' : 'right'" temporary>
+    <Notification :notifications="store.getNotifications" />
+  </v-navigation-drawer>
 </template>
