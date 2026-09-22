@@ -10,6 +10,7 @@ import router from "@/router";
 import { createNotification } from "../notifications/createNotification";
 import FriendButtons from "./FriendButtons.vue";
 import FriendsList from "./FriendsList.vue";
+import ChangeProfile from "./ChangeProfile.vue";
 
 const route = useRoute();
 const store = userStore();
@@ -123,6 +124,8 @@ onMounted(async () => {
           <h2 class="text-h4 font-weight-black ma-4">
             Credits: {{ store.getCredits > 0 ? store.getCredits : 0 }}
           </h2>
+
+          <ChangeProfile/>
         </template>
       </v-col>
 
