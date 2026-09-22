@@ -20,7 +20,7 @@ async function getToken() {
             authorizationParams:
             {
                 redirect_uri: import.meta.env.VITE_AUTH0_CALLBACK_URL,
-                audience: 'https://nnneato.com/dev-api/'
+                audience: import.meta.env.VITE_AUDIENCE_URL
             }
         }
         const token = await getAccessTokenSilently(options);
