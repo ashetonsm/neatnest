@@ -3,26 +3,23 @@ import router from "@/router";
 import { userStore } from "@/stores/user";
 import { ref } from "vue";
 import { PUT_DATA } from "../tools/ddbActions";
-const user = userStore();
-const usernameForm = ref()
+const store = userStore();
+const emailForm = ref()
 const bioForm = ref()
-const username = ref(user.getUser!.username)
-const bio = ref(user.getUser!.bio)
+const email = ref("")
+const bio = ref(store.getUser!.bio)
 
 
-async function validateUsername() {
-    const { valid } = await usernameForm.value.validate()
+async function validateEmail() {
+    try {
+        const { valid } = await emailForm.value.validate()
 
-    if (valid) {
-        var updatedUser = user.getUser!;
-        try {
-            updatedUser.username = username.value.toLowerCase().replace(/\s/g, "_").replace(/\W+/g, "");
-            await PUT_DATA(updatedUser).then(async () => {
-                router.push(`/profile/${updatedUser.username}`)
-            });
-        } catch (error: any) {
-            console.error(error);
+        if (valid) {
+
+
         }
+    } catch (error: any) {
+        console.error(error);
     }
 }
 
@@ -30,7 +27,7 @@ async function validateBio() {
     const { valid } = await bioForm.value.validate()
 
     if (valid) {
-        var updatedUser = user.getUser!;
+        var updatedUser = store.getUser!;
         try {
             updatedUser.bio = bio.value;
             await PUT_DATA(updatedUser).then(async () => {
@@ -46,15 +43,15 @@ async function validateBio() {
 </script>
 
 <template>
-    <!-- Change your username -->
+    <!-- Change your email address -->
     <v-expansion-panels>
         <v-expansion-panel>
-            <v-expansion-panel-title><span>Change username</span></v-expansion-panel-title>
+            <v-expansion-panel-title><span>Change email</span></v-expansion-panel-title>
             <v-expansion-panel-text>
                 <v-form @submit.prevent ref="usernameForm">
-                    <v-text-field v-model="username" label="Username"
-                        :placeholder="user.getUser!.username"></v-text-field>
-                    <v-btn class="mt-2" text="Submit" type="submit" @click.prevent="validateUsername"></v-btn>
+                    <v-text-field v-model="email" label="Email"
+                        placeholder="email@email.com"></v-text-field>
+                    <v-btn class="mt-2" text="Submit" type="submit" @click.prevent="validateEmail"></v-btn>
                 </v-form>
             </v-expansion-panel-text>
         </v-expansion-panel>
@@ -66,7 +63,7 @@ async function validateBio() {
             <v-expansion-panel-title><span>Change description</span></v-expansion-panel-title>
             <v-expansion-panel-text>
                 <v-form @submit.prevent ref="bioForm">
-                    <v-text-field v-model="bio" label="Bio" :placeholder="user.getUser!.bio!"></v-text-field>
+                    <v-text-field v-model="bio" label="Bio" :placeholder="store.getUser!.bio!"></v-text-field>
                     <v-btn class="mt-2" text="Submit" type="submit" @click.prevent="validateBio"></v-btn>
                 </v-form>
             </v-expansion-panel-text>
