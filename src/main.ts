@@ -10,7 +10,7 @@ import { createAuth0 } from '@auth0/auth0-vue'
 import router from './router'
 
 const pinia = createPinia()
-const app = createApp(App)
+export const app = createApp(App)
 const vuetify = createVuetify({
     theme: {
         defaultTheme: "system",
