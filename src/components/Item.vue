@@ -5,17 +5,42 @@ import ItemModal from "./ItemModal.vue";
 import { COPY_OBJECT, DELETE_OBJECT, GET_SIGNED_URL } from "@/components/tools/s3Actions";
 import { DELETE_DATA, GET_BY_PK_SK, PUT_DATA } from "./tools/ddbActions";
 import { useRouter } from "vue-router";
+import { useAuth0 } from "@auth0/auth0-vue";
+const token = ref();
 const user = userStore();
 const itemModalRef = ref();
 
 const router = useRouter()
 const signedSrc = ref("null");
 const itemCreator = ref("Loading...");
+const { getAccessTokenSilently } = useAuth0();
+
 
 const props = defineProps<{
   item: any;
   currentUser: string;
 }>();
+
+onMounted(async () => {
+  token.value = await getToken()
+  console.log(token.value)
+})
+
+async function getToken() {
+  try {
+    const options = {
+      authorizationParams:
+      {
+        scope: 'openid profile email',
+        audience: import.meta.env.VITE_AUDIENCE_URL
+      }
+    };
+    return await getAccessTokenSilently(options);
+  } catch (error: any) {
+    console.error(error);
+  };
+};
+
 
 async function buyFlow(i: any) {
   const choice = confirm("Buy " + i.name + " for " + i.price + "?");
@@ -35,7 +60,7 @@ async function buyFlow(i: any) {
 
       // Regardless of who it was bought from, it should be copied to the user's S3 bucket folder
       const newPath = `images/${user.getUser.PK}/item/${i.name}.png`
-      await COPY_OBJECT(i.url, newPath)
+      await COPY_OBJECT(i.url, newPath, token.value)
         .then(async (res) => {
           // Create the item with a clone.
           var boughtItem = structuredClone(toRaw(i))
@@ -44,16 +69,16 @@ async function buyFlow(i: any) {
           boughtItem.owner = user.getUser.PK
           boughtItem.url = newPath
           boughtItem.selling = false
-    
+
           // Write it to the DB
           await PUT_DATA(boughtItem)
-    
+
           if (i.PK !== "GENERALSTORE") {
             // Delete the old item
             await DELETE_DATA(toRaw(i))
-            .then(() => {
-              router.go(0);
-            })
+              .then(() => {
+                router.go(0);
+              })
           } else {
             router.go(0);
           }
@@ -68,11 +93,11 @@ async function buyFlow(i: any) {
 }
 
 async function getFileUrl() {
-  if (props.item.url !== undefined) {
-    await GET_SIGNED_URL(props.item.url)
-    .then((res) => {
-      signedSrc.value = res.body
-    })
+  if (props.item.url !== undefined && token.value !== undefined) {
+    await GET_SIGNED_URL(props.item.url, token.value)
+      .then((res) => {
+        signedSrc.value = res.body
+      })
   }
   return
 }
@@ -82,7 +107,7 @@ async function handleDelete(i: any) {
   try {
     if (choice) {
       // Do delete logic
-      await DELETE_OBJECT(i)
+      await DELETE_OBJECT(i, token.value)
       await DELETE_DATA(i)
         .then(() => {
           // Refresh
@@ -109,16 +134,9 @@ onMounted(async () => {
 
   <v-card class="mx-auto" max-width="300px"
     :color="item.selling && $route.name == 'inventory' ? 'light-green-lighten-5' : 'none'">
-    <v-img 
-      ref="itemModalRef" 
-      :src="signedSrc" 
-      :alt="'an image of ' + item.name"
-      :class="(item.owner == 'NA' || item.owner != user.getUser.PK) ? 
-      'cursor-pointer' : 
-      'cursor-default'" 
-      class="cursor-pointer" 
-      min-width="150px"
-      max-width="300px"></v-img>
+    <v-img ref="itemModalRef" :src="signedSrc" :alt="'an image of ' + item.name" :class="(item.owner == 'NA' || item.owner != user.getUser.PK) ?
+      'cursor-pointer' :
+      'cursor-default'" class="cursor-pointer" min-width="150px" max-width="300px"></v-img>
 
     <v-card-title class="text-center">
       {{ item.name }}
@@ -131,39 +149,21 @@ onMounted(async () => {
     <template v-if="$route.path == `/shop/${user.getUser.username}` && item.owner == user.getUser.PK">
       <v-card-subtitle v-if="item.selling"> 🛒 </v-card-subtitle>
       <v-card-actions>
-        <v-btn
-          @click="handleDelete(item)"
-          :disabled="true"
-          text="Erase"
-          class="mx-auto"
-          variant="elevated"
-          color="error"
-        >This is your shop!</v-btn>
+        <v-btn @click="handleDelete(item)" :disabled="true" text="Erase" class="mx-auto" variant="elevated"
+          color="error">This is your shop!</v-btn>
       </v-card-actions>
     </template>
-    
+
     <!-- Viewing the currentUser's inventory -->
     <template v-if="$route.name == 'inventory' && item.owner == user.getUser.PK">
-      <v-card-subtitle v-if="item.selling"> 🛒 </v-card-subtitle>      
+      <v-card-subtitle v-if="item.selling"> 🛒 </v-card-subtitle>
       <v-card-actions>
-        <v-btn
-        @click="handleDelete(item)"
-        text="Erase"
-        class="mx-auto"
-        variant="elevated"
-        color="error"
-        ></v-btn>
+        <v-btn @click="handleDelete(item)" text="Erase" class="mx-auto" variant="elevated" color="error"></v-btn>
       </v-card-actions>
     </template>
     <template v-if="item.owner != user.getUser.PK">
       <v-card-actions>
-        <v-btn
-          @click="buyFlow(item)"
-          text="Buy"
-          class="mx-auto"
-          variant="elevated"
-          color="success"
-        ></v-btn>
+        <v-btn @click="buyFlow(item)" text="Buy" class="mx-auto" variant="elevated" color="success"></v-btn>
       </v-card-actions>
     </template>
   </v-card>
