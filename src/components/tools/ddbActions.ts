@@ -1,3 +1,6 @@
+var headers = new Headers()
+// headers.append("Authorization", authToken)
+
 /**
  * Creates or updates an entry in the database
  * @param newData The new or updated data object
@@ -7,6 +10,7 @@ export async function PUT_DATA(newData: Object) {
   try {
     return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`),
       {
+        headers: headers,
         method: 'PUT',
         body: JSON.stringify(newData)
       })
@@ -33,6 +37,7 @@ export async function BATCH_MODIFY_DATA(newData: Array<any>) {
   try {
     return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`),
       {
+        headers: headers,
         method: 'POST',
         body: JSON.stringify(newData)
       })
@@ -290,6 +295,7 @@ export async function DELETE_DATA(deletedData: Object) {
   try {
     return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`),
       {
+        headers: headers,
         method: 'DELETE',
         body: JSON.stringify(deletedData)
       })
@@ -317,6 +323,7 @@ export async function GET_BY_PK_SK(pk: string, sk: string) {
     if (pk == undefined) { throw new Error("PK undefined") }
     return fetch(encodedURI,
       {
+        headers: headers,
         method: 'GET',
       })
       .then(async (response) => {
@@ -337,6 +344,7 @@ export async function GET_BY_USERNAME(un: string, sk?: string) {
     if (un == undefined) { throw new Error("Username undefined") }
     return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?username=${un}&SK=${sk}`,
       {
+        headers: headers,
         method: 'GET',
       })
       .then(async (response) => {
@@ -364,8 +372,8 @@ export async function GET_RELATIONSHIP(username: string, status?: number | strin
     if (username == undefined) {
       throw new Error("Username undefined");
     }
-    if (status == "" || status == undefined) {status = ""}
-    if (filter == "" || filter == undefined) {filter = ""}
+    if (status == "" || status == undefined) { status = "" }
+    if (filter == "" || filter == undefined) { filter = "" }
     // console.log("username, status, filter", username, status, filter)
     return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?username=${username}&status=${status}&filter=${filter}`,
       {
@@ -389,6 +397,7 @@ export async function LIST_SELLING_BY_PK(pk: string) {
   try {
     return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?PK=${pk}&selling`),
       {
+        headers: headers,
         method: 'GET',
       })
       .then(async (response) => {

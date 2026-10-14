@@ -19,24 +19,24 @@ async function getToken() {
         const options = {
             authorizationParams:
             {
-                redirect_uri: import.meta.env.VITE_AUTH0_CALLBACK_URL,
+                scope: 'openid profile email',
                 audience: import.meta.env.VITE_AUDIENCE_URL
             }
         }
         const token = await getAccessTokenSilently(options);
         console.log(token)
-        return fetch(`https://nnneato.com/dev-api/api/v2/users/${store.getUser.PK}`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
-            .then(async (response) => {
-                console.log(await response.text())
-                return response
-            })
-            .then((res) => {
-                console.log(res)
-            })
+        // return fetch(`${import.meta.env.VITE_AUDIENCE_URL}/dev-api/api/v2/users/${store.getUser.PK}`, {
+        //     headers: {
+        //         Authorization: `Bearer ${token}`
+        //     }
+        // })
+        //     .then(async (response) => {
+        //         console.log(await response.text())
+        //         return response
+        //     })
+        //     .then((res) => {
+        //         console.log(res)
+        //     })
     } catch (error: any) {
         console.error(error);
     }
