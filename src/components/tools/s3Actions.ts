@@ -75,7 +75,6 @@ export const DELETE_OBJECT = async (itemKey: any, token: string) => {
       }
     }
 
-    // console.log(JSON.stringify(body))
     return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/s3`,
       {
         headers: headers,
@@ -98,7 +97,6 @@ export const GET_SIGNED_URL = async (key: string, token: string) => {
       "Data": { "Key": key }
     }
 
-    console.log("HEADERS:", headers)
     return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/s3`,
       {
         headers: headers,
