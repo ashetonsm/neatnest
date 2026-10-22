@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { onMounted, ref, toRaw } from "vue";
+
 import { userStore } from "@/stores/user";
 import ItemModal from "./ItemModal.vue";
 import { COPY_OBJECT, DELETE_OBJECT, GET_SIGNED_URL } from "@/components/tools/s3Actions";
 import { DELETE_DATA, GET_BY_PK_SK, PUT_DATA } from "./tools/ddbActions";
 import { useRouter } from "vue-router";
 import { useAuth0 } from "@auth0/auth0-vue";
+import { onMounted, ref, toRaw } from "vue";
 const token = ref();
 const user = userStore();
 const itemModalRef = ref();
-
 const router = useRouter()
 const signedSrc = ref("null");
 const itemCreator = ref("Loading...");
@@ -22,20 +22,20 @@ const props = defineProps<{
 }>();
 
 onMounted(async () => {
-  token.value = await getToken()
-  console.log(token.value)
+  await getToken()
+  await getFileUrl()
+  const creatorMetadata = await GET_BY_PK_SK(props.item.creator, "#METADATA")
+  creatorMetadata ? itemCreator.value = creatorMetadata.username : "No Creator"
 })
 
 async function getToken() {
   try {
-    const options = {
-      authorizationParams:
-      {
-        scope: 'openid profile email',
-        audience: import.meta.env.VITE_AUDIENCE_URL
-      }
-    };
-    return await getAccessTokenSilently(options);
+    await getAccessTokenSilently()
+      .then((res) => {
+        if (res) {
+          token.value = res
+        }
+      })
   } catch (error: any) {
     console.error(error);
   };
@@ -49,12 +49,12 @@ async function buyFlow(i: any) {
       // Subtract the amount. It doesn't matter if we clone this or not.
       var updatedUser = user.getUser
       updatedUser.credits -= i.price
-      await PUT_DATA(updatedUser)
+      await PUT_DATA(updatedUser, token.value)
       if (i.PK !== "GENERALSTORE") {
         var originalOwner = await GET_BY_PK_SK(i.PK, "#METADATA")
         if (originalOwner) {
           originalOwner.credits += i.price
-          await PUT_DATA(originalOwner)
+          await PUT_DATA(originalOwner, token.value)
         }
       }
 
@@ -71,11 +71,11 @@ async function buyFlow(i: any) {
           boughtItem.selling = false
 
           // Write it to the DB
-          await PUT_DATA(boughtItem)
+          await PUT_DATA(boughtItem, token.value)
 
           if (i.PK !== "GENERALSTORE") {
             // Delete the old item
-            await DELETE_DATA(toRaw(i))
+            await DELETE_DATA(toRaw(i), token.value)
               .then(() => {
                 router.go(0);
               })
@@ -108,7 +108,7 @@ async function handleDelete(i: any) {
     if (choice) {
       // Do delete logic
       await DELETE_OBJECT(i, token.value)
-      await DELETE_DATA(i)
+      await DELETE_DATA(i, token.value)
         .then(() => {
           // Refresh
           router.go(0);
@@ -118,12 +118,6 @@ async function handleDelete(i: any) {
     console.error(error)
   }
 }
-
-onMounted(async () => {
-  await getFileUrl()
-  const creatorMetadata = await GET_BY_PK_SK(props.item.creator, "#METADATA")
-  itemCreator.value = creatorMetadata?.username
-});
 </script>
 
 <template>

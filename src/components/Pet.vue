@@ -5,24 +5,28 @@ import { userStore } from "@/stores/user";
 import { useRoute, useRouter } from "vue-router";
 import { DELETE_OBJECT, GET_SIGNED_URL } from "./tools/s3Actions";
 import { DELETE_DATA, GET_BY_PK_SK } from "./tools/ddbActions";
-
+import { useAuth0 } from "@auth0/auth0-vue";
+const token = ref();
 const route = useRoute();
 const router = useRouter();
 const signedSrc = ref();
 const petModalRef = ref();
 const petCreator = ref("Loading...");
 const user = userStore();
+const { getAccessTokenSilently } = useAuth0();
 
 const props = defineProps<{
   pet: any;
   items: Array<any>;
 }>();
 
-async function getFileUrl(fileName: any) {
-  await GET_SIGNED_URL(fileName)
-  .then((res) => {
-    signedSrc.value = res.body
-  })
+async function getFileUrl() {
+  if (props.pet.url !== undefined && token.value !== undefined) {
+    await GET_SIGNED_URL(props.pet.url, token.value)
+      .then((res) => {
+        signedSrc.value = res.body
+      })
+  }
   return
 }
 
@@ -30,8 +34,8 @@ async function handleDelete(pet: any) {
   const choice = confirm(`Delete ${pet.name} forever? (This cannot be undone!)`);
   if (choice) {
     // Do delete logic
-    await DELETE_OBJECT(pet)
-    await DELETE_DATA(pet)
+    await DELETE_OBJECT(pet, token.value)
+    await DELETE_DATA(pet, token.value)
       .then(() => {
         // Refresh
         router.go(0);
@@ -41,8 +45,22 @@ async function handleDelete(pet: any) {
   }
 }
 
+async function getToken() {
+  try {
+    await getAccessTokenSilently()
+      .then((res) => {
+        if (res) {
+          token.value = res
+        }
+      })
+  } catch (error: any) {
+    console.error(error);
+  };
+};
+
 onMounted(async () => {
-  await getFileUrl(props.pet.url)
+  await getToken()
+  await getFileUrl()
   const creatorMetadata = await toRaw(GET_BY_PK_SK(props.pet.creator, "#METADATA"))
   petCreator.value = creatorMetadata?.username
 });
