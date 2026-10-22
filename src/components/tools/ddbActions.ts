@@ -1,13 +1,13 @@
 var headers = new Headers()
-// headers.append("Authorization", authToken)
 
 /**
  * Creates or updates an entry in the database
  * @param newData The new or updated data object
  * @returns 
  */
-export async function PUT_DATA(newData: Object) {
+export async function PUT_DATA(newData: Object, token: string) {
   try {
+    headers.append("Authorization", token)
     return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`),
       {
         headers: headers,
@@ -32,9 +32,10 @@ export async function PUT_DATA(newData: Object) {
  * @param newData The array of new data objects to be written or deleted
  * @returns 
  */
-export async function BATCH_MODIFY_DATA(newData: Array<any>) {
+export async function BATCH_MODIFY_DATA(newData: Array<any>, token: string) {
 
   try {
+    headers.append("Authorization", token)
     return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`),
       {
         headers: headers,
@@ -61,7 +62,7 @@ export async function BATCH_MODIFY_DATA(newData: Array<any>) {
  * @param newData The action being performed on the relationship
  * @returns 
  */
-export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRelationship: any, updateType: string) {
+export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRelationship: any, updateType: string, token: string) {
   var initiatingRel = {
     PK: initiatingRelationship.PK,
     SK: `RELATIONSHIP#${targetRelationship.PK}`,
@@ -85,6 +86,7 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
 
 
   try {
+    headers.append("Authorization", token)
     switch (updateType) {
       case "add":
         initiatingRel.status = 9
@@ -92,7 +94,7 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
         var putList: { PutRequest: { Item: any; }; }[] = []
         putList.push({ PutRequest: { Item: initiatingRel } })
         putList.push({ PutRequest: { Item: targetRel } })
-        await BATCH_MODIFY_DATA(putList)
+        await BATCH_MODIFY_DATA(putList, token)
         break
       case "accept":
         initiatingRel.status = 1
@@ -100,13 +102,13 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
         var putList: { PutRequest: { Item: any; }; }[] = []
         putList.push({ PutRequest: { Item: initiatingRel } })
         putList.push({ PutRequest: { Item: targetRel } })
-        await BATCH_MODIFY_DATA(putList)
+        await BATCH_MODIFY_DATA(putList, token)
         break
       case "remove":
         var deleteList: { DeleteRequest: { Key: any; }; }[] = []
         deleteList.push({ DeleteRequest: { Key: { PK: initiatingRelationship.PK, SK: `RELATIONSHIP#${targetRelationship.PK}` } } })
         deleteList.push({ DeleteRequest: { Key: { PK: targetRelationship.PK, SK: `RELATIONSHIP#${initiatingRelationship.PK}` } } })
-        await BATCH_MODIFY_DATA(deleteList)
+        await BATCH_MODIFY_DATA(deleteList, token)
         return
       case "block":
         initiatingRel.status = 2
@@ -114,7 +116,7 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
         var putList: { PutRequest: { Item: any; }; }[] = []
         putList.push({ PutRequest: { Item: initiatingRel } })
         putList.push({ PutRequest: { Item: targetRel } })
-        await BATCH_MODIFY_DATA(putList)
+        await BATCH_MODIFY_DATA(putList, token)
         return
       default:
         console.error("Invalid updateType")
@@ -144,7 +146,7 @@ export async function UPDATE_RELATIONSHIP(targetRelationship: any, initiatingRel
  * @param updateType The action being performed on the trade
  * @returns 
  */
-export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tradeContents: any, updateType: string) {
+export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tradeContents: any, updateType: string, token: string) {
   var initiatingTrade = {
     PK: initiatingTrader.PK,
     SK: `TRADE#${targetTrader.PK}`,
@@ -169,6 +171,7 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
   }
 
   try {
+    headers.append("Authorization", token)
     switch (updateType) {
       case "create":
         initiatingTrade.status = 9
@@ -176,7 +179,7 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
         var putList: { PutRequest: { Item: any; }; }[] = []
         putList.push({ PutRequest: { Item: initiatingTrade } })
         putList.push({ PutRequest: { Item: targetTrade } })
-        await BATCH_MODIFY_DATA(putList)
+        await BATCH_MODIFY_DATA(putList, token)
         break
       case "accept":
         initiatingTrade.status = 1
@@ -249,8 +252,8 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
           putList.push({ PutRequest: { Item: fullTargetTrader } })
 
           // Update everything that was added to both lists.
-          await BATCH_MODIFY_DATA(putList)
-          await BATCH_MODIFY_DATA(deleteList)
+          await BATCH_MODIFY_DATA(putList, token)
+          await BATCH_MODIFY_DATA(deleteList, token)
         }
         break
       case "reject":
@@ -259,7 +262,7 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
         var putList: { PutRequest: { Item: any; }; }[] = []
         putList.push({ PutRequest: { Item: initiatingTrade } })
         putList.push({ PutRequest: { Item: targetTrade } })
-        await BATCH_MODIFY_DATA(putList)
+        await BATCH_MODIFY_DATA(putList, token)
         break
       case "close":
         initiatingTrade.status = 8
@@ -267,13 +270,13 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
         var putList: { PutRequest: { Item: any; }; }[] = []
         putList.push({ PutRequest: { Item: initiatingTrade } })
         putList.push({ PutRequest: { Item: targetTrade } })
-        await BATCH_MODIFY_DATA(putList)
+        await BATCH_MODIFY_DATA(putList, token)
         break
       case "remove":
         var deleteList: { DeleteRequest: { Key: any; }; }[] = []
         deleteList.push({ DeleteRequest: { Key: { PK: initiatingTrader.PK, SK: `TRADE#${targetTrader.PK}` } } })
         deleteList.push({ DeleteRequest: { Key: { PK: targetTrader.PK, SK: `TRADE#${initiatingTrader.PK}` } } })
-        await BATCH_MODIFY_DATA(deleteList)
+        await BATCH_MODIFY_DATA(deleteList, token)
         return
       default:
         console.error("Invalid updateType")
@@ -291,8 +294,9 @@ export async function UPDATE_TRADE(targetTrader: any, initiatingTrader: any, tra
  * @param deletedData The data to be deleted.
  * @returns 
  */
-export async function DELETE_DATA(deletedData: Object) {
+export async function DELETE_DATA(deletedData: Object, token: string) {
   try {
+    headers.append("Authorization", token)
     return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb`),
       {
         headers: headers,
@@ -320,6 +324,7 @@ export async function GET_BY_PK_SK(pk: string, sk: string) {
   sk == "#METADATA" ? sk = "%23METADATA" : sk = sk
   const encodedURI = encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?PK=${pk}&SK=${sk}`)
   try {
+    // headers.append("Authorization", token)
     if (pk == undefined) { throw new Error("PK undefined") }
     return fetch(encodedURI,
       {
@@ -341,6 +346,7 @@ export async function GET_BY_PK_SK(pk: string, sk: string) {
  */
 export async function GET_BY_USERNAME(un: string, sk?: string) {
   try {
+    // headers.append("Authorization", token)
     if (un == undefined) { throw new Error("Username undefined") }
     return fetch(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?username=${un}&SK=${sk}`,
       {
@@ -369,6 +375,7 @@ export async function GET_BY_USERNAME(un: string, sk?: string) {
  */
 export async function GET_RELATIONSHIP(username: string, status?: number | string, filter?: string) {
   try {
+    // headers.append("Authorization", token)
     if (username == undefined) {
       throw new Error("Username undefined");
     }
@@ -393,8 +400,9 @@ export async function GET_RELATIONSHIP(username: string, status?: number | strin
  * @param sk Sort Key (the item type)
  * @returns 
  */
-export async function LIST_SELLING_BY_PK(pk: string) {
+export async function LIST_SELLING_BY_PK(pk: string, token: string) {
   try {
+    headers.append("Authorization", token)
     return fetch(encodeURI(`https://kxyac2ee4b.execute-api.us-east-2.amazonaws.com/v1/ddb?PK=${pk}&selling`),
       {
         headers: headers,
