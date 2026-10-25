@@ -41,7 +41,7 @@ const petRules = ref([
 ])
 
 async function getFriends() {
-  const data = await store.fetchRelationships(store.getUser.PK, 1)
+  const data = await store.fetchRelationships(store.getUser.username, 1)
   if (data.length) {
     return data
   } else {
@@ -69,7 +69,7 @@ async function getPets() {
 onMounted(async () => {
     const fetchedFriends = await getFriends()
     if (fetchedFriends.length) {
-        friends.value = fetchedFriends.filter((f: { status: number; }) => f.status == 1)
+        friends.value = fetchedFriends
     }
     if (store.getPets.length == 0) {
         pets.value = await getPets()
