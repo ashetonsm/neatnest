@@ -74,15 +74,11 @@ export const userStore = defineStore('user', {
                         }, this.getToken)
                         this.user = newUser
                         this.credits = 0
-                        // await this.fetchRelationships(PK)
-                        // await this.fetchNotifications()
                         return newUser
                     }
                 } else {
                     this.user = retrievedUser
                     this.credits = retrievedUser.credits
-                    // await this.fetchRelationships(PK)
-                    // await this.fetchNotifications()
                     return retrievedUser
                 }
             } catch (error: any) {
