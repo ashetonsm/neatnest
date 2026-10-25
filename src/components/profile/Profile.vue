@@ -36,13 +36,13 @@ async function updateFriend(action: string) {
   var relationshipObj = { PK: '', relationshipUsername: '' }
   relationshipObj.PK = profileUser.value.PK
   relationshipObj.relationshipUsername = profileUser.value.username
-  await UPDATE_RELATIONSHIP(relationshipObj, store.getUser, action)
+  await UPDATE_RELATIONSHIP(relationshipObj, store.getUser, action, store.getToken)
     .then(async () => {
       if (action == "add") {
-        await createNotification(store.getUser, profileUser.value, "friendNew")
+        await createNotification(store.getUser, profileUser.value, "friendNew", store.getToken)
       }
       if (action == "accept") {
-        await createNotification(store.getUser, profileUser.value, "friendAccept")
+        await createNotification(store.getUser, profileUser.value, "friendAccept", store.getToken)
       }
       if (action == "remove") {
       }

@@ -18,13 +18,13 @@ async function updateFriend(action: string) {
   var relationshipObj = { PK: '', relationshipUsername: '' }
   relationshipObj.PK = props.friend.PK
   relationshipObj.relationshipUsername = props.friend.username
-  await UPDATE_RELATIONSHIP(relationshipObj, user.getUser, action)
+  await UPDATE_RELATIONSHIP(relationshipObj, user.getUser, action, user.getToken)
     .then(async () => {
       if (action == "add") {
-        await createNotification(user.getUser, relationshipObj, "friendNew")
+        await createNotification(user.getUser, relationshipObj, "friendNew", user.getToken)
       }
       if (action == "accept") {
-        await createNotification(user.getUser, relationshipObj, "friendAccept")
+        await createNotification(user.getUser, relationshipObj, "friendAccept", user.getToken)
       }
       if (action == "remove") {
       }

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import {DELETE_DATA} from "@/components/tools/ddbActions";
-
+import { userStore } from "@/stores/user";
+const store = userStore()
 async function deleteNotification(notification: any) {
     try {
-        await DELETE_DATA(notification)
+        await DELETE_DATA(notification, store.getToken)
     } catch (error: any) {
         console.error("Something went wrong deleting the notif:", error)
     }

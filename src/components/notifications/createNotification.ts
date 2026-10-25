@@ -4,6 +4,7 @@ export async function createNotification(
   currentUser: any,
   interactingUser: any,
   notificationType: string,
+  token: string
 ) {
   try {
 
@@ -66,7 +67,7 @@ export async function createNotification(
       type: 'Notification',
       createdAt: new Date().getTime(),
       updatedAt: new Date().getTime(),
-    })
+    }, token)
   } catch (error: any) {
     console.error("Something went wrong creating a notification:", error)
   }

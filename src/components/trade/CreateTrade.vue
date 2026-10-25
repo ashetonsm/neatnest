@@ -92,9 +92,9 @@ async function createTrade() {
         friendObj.tradeUsername = selectedFriend.value.relationshipUsername
         // The recipient, the sender, the contents, the action
         if (friendObj.PK !== undefined && friendObj.tradeUsername !== undefined) {
-            await UPDATE_TRADE(friendObj, store.getUser, contents, 'create')
+            await UPDATE_TRADE(friendObj, store.getUser, contents, 'create', store.getToken)
               .then(async () => {
-                    await createNotification(store.getUser, friendObj, "tradeNew")
+                    await createNotification(store.getUser, friendObj, "tradeNew", store.getToken)
             })
                 .then(() => {
                     router.push({ name: 'trades' })

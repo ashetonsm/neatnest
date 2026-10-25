@@ -7,6 +7,7 @@ export async function createItem(
   imgPath: string,
   itemCat: string,
   userObj: any,
+  token: string
 ) {
   // Query for the canvas
   const canvas = document.querySelector('canvas')
@@ -14,7 +15,7 @@ export async function createItem(
   // Try uploading the image
   try {
     if (canvas) {
-      await UPLOAD_OBJECT(imgPath, canvas.toDataURL())
+      await UPLOAD_OBJECT(imgPath, canvas.toDataURL(), token)
         .then(async (res) => {
           if (res.statusCode == 200) {
             // Try creating a new Item
@@ -33,7 +34,7 @@ export async function createItem(
               type: 'Item',
               createdAt: new Date().getTime(),
               updatedAt: new Date().getTime(),
-            })
+            }, token)
               .then(async () => {
                 // Update the user by decreasing itemsRemaining by 1 if itemsRemaining > 0
                 var updatedUser = userObj
@@ -41,7 +42,7 @@ export async function createItem(
                 updatedUser.itemsRemaining = updatedUser.itemsRemaining - 1
                 // Update the updatedAt time for the User
                 updatedUser.updatedAt = new Date().getTime()
-                await PUT_DATA(updatedUser)
+                await PUT_DATA(updatedUser, token)
                   .then(() => {
                     router.push({ name: 'inventory' })
                     router.go(1)

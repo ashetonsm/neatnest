@@ -82,7 +82,7 @@ const computerPlayer = () => {
 const sendScore = async () => {
   var updatedUser = user.getUser
   updatedUser.credits = user.credits + 5
-  await PUT_DATA(updatedUser)
+  await PUT_DATA(updatedUser, user.getToken)
   .then(async () => {
     // Updates the credits in the nav bar by re-fetching
     await user.fetchUser(user.getUser.PK, '#METADATA')

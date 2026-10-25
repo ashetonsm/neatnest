@@ -7,6 +7,7 @@ export async function createPet(
   imgPath: string,
   species: string,
   userObj: any,
+  token: string
 ) {
   // Query for the canvas
   const canvas = document.querySelector('canvas')
@@ -14,7 +15,7 @@ export async function createPet(
   // Try uploading the image
   try {
     if (canvas) {
-      await UPLOAD_OBJECT(imgPath, canvas.toDataURL())
+      await UPLOAD_OBJECT(imgPath, canvas.toDataURL(), token)
         .then(async (res) => {
           if (res.statusCode == 200) {
             // Try creating a new Pet
@@ -32,7 +33,7 @@ export async function createPet(
               type: 'Pet',
               createdAt: new Date().getTime(),
               updatedAt: new Date().getTime(),
-            })
+            }, token)
               .then(async () => {
                 // Update the user by decreasing petsRemaining by 1 if petsRemaining > 0
                 var updatedUser = userObj
@@ -40,7 +41,7 @@ export async function createPet(
                 updatedUser.petsRemaining = updatedUser.petsRemaining - 1
                 // Update the updatedAt time for the User
                 updatedUser.updatedAt = new Date().getTime()
-                await PUT_DATA(updatedUser)
+                await PUT_DATA(updatedUser, token)
                   .then(() => {
                     router.push({ name: 'pets' })
                     router.go(1)

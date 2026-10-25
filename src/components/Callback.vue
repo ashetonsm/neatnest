@@ -9,14 +9,13 @@ import { useRouter } from "vue-router";
 const router = useRouter()
 const uStore = userStore();
 const { user } = useAuth0();
-const auth0 = useAuth0();
 
 onMounted(async () => {
   if (user.value !== undefined) {
     await uStore.fetchUser(user.value.sub as string, "#METADATA", toRaw(user.value))
       .then(async () => {
         const updatedCreationData = await setCreationCredits(new Date().getTime(), uStore.getUser.updatedAt)
-        await PUT_DATA(updatedCreationData)
+        await PUT_DATA(updatedCreationData, uStore.getToken)
           .then(() => {
             router.push({ name: 'home' })
           })
@@ -35,12 +34,12 @@ async function setCreationCredits(currentDate: number, lastCreditRefresh: number
 
     if (updatedUser.itemsRemaining + 1 <= 3) {
       updatedUser.itemsRemaining++
-      await createNotification(uStore.getUser, null, "addedItemCredit")
+      await createNotification(uStore.getUser, null, "addedItemCredit", uStore.getToken)
       update = true
     }
     if (updatedUser.petsRemaining + 1 <= 3) {
       updatedUser.petsRemaining++
-      await createNotification(uStore.getUser, null, "addedPetCredit")
+      await createNotification(uStore.getUser, null, "addedPetCredit", uStore.getToken)
       update = true
     }
     if (update == true) {
