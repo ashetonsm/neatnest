@@ -1,47 +1,14 @@
 <script setup lang="ts">
 import { userStore } from "@/stores/user";
 import { onMounted, ref } from "vue";
-import { useAuth0 } from "@auth0/auth0-vue";
 const store = userStore();
 const settingsForm = ref()
-const email = ref("")
-const bio = ref(store.getUser!.bio)
-
-const { getAccessTokenSilently } = useAuth0()
+const email = ref(store.getUser.email)
+const bio = ref(store.getUser.bio)
 
 
 onMounted(async () => {
-    const res = await getToken()
 })
-
-async function getToken() {
-    try {
-        const options = {
-            authorizationParams:
-            {
-                scope: 'openid profile email',
-                audience: import.meta.env.VITE_AUDIENCE_URL
-            }
-        }
-        const token = await getAccessTokenSilently(options);
-        console.log(token)
-        // return fetch(`${import.meta.env.VITE_AUDIENCE_URL}/dev-api/api/v2/users/${store.getUser.PK}`, {
-        //     headers: {
-        //         Authorization: `Bearer ${token}`
-        //     }
-        // })
-        //     .then(async (response) => {
-        //         console.log(await response.text())
-        //         return response
-        //     })
-        //     .then((res) => {
-        //         console.log(res)
-        //     })
-    } catch (error: any) {
-        console.error(error);
-    }
-};
-
 
 const emailRules = ref([
     (v: string) => (v !== "") || 'Email cannot be blank.',
@@ -70,7 +37,8 @@ async function validateChanges() {
 <template>
     <!-- Change your email address -->
     <v-expansion-panels>
-        <v-expansion-panel>
+        <!-- Temporarily disabled -->
+        <v-expansion-panel :disabled="true">
             <v-expansion-panel-title><span>Change User Settings</span></v-expansion-panel-title>
             <v-expansion-panel-text>
                 <v-form @submit.prevent ref="settingsForm">
