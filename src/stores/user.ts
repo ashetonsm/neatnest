@@ -1,9 +1,11 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import { GET_BY_PK_SK, GET_BY_USERNAME, GET_RELATIONSHIP, LIST_SELLING_BY_PK, PUT_DATA } from '@/components/tools/ddbActions';
+import { useAuth0 } from '@auth0/auth0-vue';
 
 export const userStore = defineStore('user', {
     state: () => ({
+        token: ref<any | null>(null),
         user: ref<any | null>(null),
         shop: ref<any | null>(null),
         pets: ref<Array<any>>([]),
@@ -14,6 +16,7 @@ export const userStore = defineStore('user', {
         friends: ref<Array<any>>([]),
     }),
     getters: {
+        getToken: (state: { token: any | null }) => state.token,
         getUser: (state: { user: any | null }) => state.user,
         getShop: (state: { shop: any | null }) => state.shop,
         getPets: (state: { pets: any }) => state.pets,
@@ -24,6 +27,25 @@ export const userStore = defineStore('user', {
         getFriends: (state: { friends: any }) => state.friends,
     },
     actions: {
+
+        /**
+         * Gets an access token.
+         */
+        async fetchToken() {
+            try {
+                const { getAccessTokenSilently } = useAuth0();
+
+                await getAccessTokenSilently()
+                    .then((res) => {
+                        if (res) {
+                            this.token = res
+                        }
+                    })
+            } catch (error: any) {
+                console.error(error);
+            };
+        },
+
         /**
          * Used in the Callback function after login. Should noot be used anywhere else.
          * @param PK The Primary Key of the user to fetch
@@ -33,6 +55,7 @@ export const userStore = defineStore('user', {
          */
         async fetchUser(PK: string, SK: string, inputUser?: any) {
             try {
+                await this.fetchToken()
                 // This is the PK value for any user
                 const retrievedUser = await GET_BY_PK_SK(inputUser.sub, SK)
                 if (!retrievedUser) {
@@ -48,7 +71,7 @@ export const userStore = defineStore('user', {
                             type: 'Metadata',
                             updatedAt: new Date().getTime(),    // Stores when creation credits were last added
                             lastLogin: new Date().getTime(),
-                        })
+                        }, this.getToken)
                         this.user = newUser
                         this.credits = 0
                         // await this.fetchRelationships(PK)
@@ -118,7 +141,7 @@ export const userStore = defineStore('user', {
         async fetchShop(shopkeeperUsername: string) {
             const shopkeeper = await GET_BY_USERNAME(shopkeeperUsername, "%23METADATA")
             const inventory = await LIST_SELLING_BY_PK(
-                shopkeeperUsername == "GENERALSTORE" ? "GENERALSTORE" : shopkeeper?.PK)
+                shopkeeperUsername == "GENERALSTORE" ? "GENERALSTORE" : shopkeeper?.PK, this.token)
             try {
                 return inventory || []
             } catch (error: any) {
