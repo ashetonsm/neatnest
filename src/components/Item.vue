@@ -5,15 +5,12 @@ import ItemModal from "./ItemModal.vue";
 import { COPY_OBJECT, DELETE_OBJECT, GET_SIGNED_URL } from "@/components/tools/s3Actions";
 import { DELETE_DATA, GET_BY_PK_SK, PUT_DATA } from "./tools/ddbActions";
 import { useRouter } from "vue-router";
-import { useAuth0 } from "@auth0/auth0-vue";
 import { onMounted, ref, toRaw } from "vue";
-const token = ref();
 const user = userStore();
 const itemModalRef = ref();
 const router = useRouter()
 const signedSrc = ref("null");
 const itemCreator = ref("Loading...");
-const { getAccessTokenSilently } = useAuth0();
 
 
 const props = defineProps<{
@@ -22,24 +19,10 @@ const props = defineProps<{
 }>();
 
 onMounted(async () => {
-  await getToken()
   await getFileUrl()
   const creatorMetadata = await GET_BY_PK_SK(props.item.creator, "#METADATA")
   creatorMetadata ? itemCreator.value = creatorMetadata.username : "No Creator"
 })
-
-async function getToken() {
-  try {
-    await getAccessTokenSilently()
-      .then((res) => {
-        if (res) {
-          token.value = res
-        }
-      })
-  } catch (error: any) {
-    console.error(error);
-  };
-};
 
 
 async function buyFlow(i: any) {
@@ -49,18 +32,18 @@ async function buyFlow(i: any) {
       // Subtract the amount. It doesn't matter if we clone this or not.
       var updatedUser = user.getUser
       updatedUser.credits -= i.price
-      await PUT_DATA(updatedUser, token.value)
+      await PUT_DATA(updatedUser, user.getToken)
       if (i.PK !== "GENERALSTORE") {
         var originalOwner = await GET_BY_PK_SK(i.PK, "#METADATA")
         if (originalOwner) {
           originalOwner.credits += i.price
-          await PUT_DATA(originalOwner, token.value)
+          await PUT_DATA(originalOwner, user.getToken)
         }
       }
 
       // Regardless of who it was bought from, it should be copied to the user's S3 bucket folder
       const newPath = `images/${user.getUser.PK}/item/${i.name}.png`
-      await COPY_OBJECT(i.url, newPath, token.value)
+      await COPY_OBJECT(i.url, newPath, user.getToken)
         .then(async (res) => {
           // Create the item with a clone.
           var boughtItem = structuredClone(toRaw(i))
@@ -71,11 +54,11 @@ async function buyFlow(i: any) {
           boughtItem.selling = false
 
           // Write it to the DB
-          await PUT_DATA(boughtItem, token.value)
+          await PUT_DATA(boughtItem, user.getToken)
 
           if (i.PK !== "GENERALSTORE") {
             // Delete the old item
-            await DELETE_DATA(toRaw(i), token.value)
+            await DELETE_DATA(toRaw(i), user.getToken)
               .then(() => {
                 router.go(0);
               })
@@ -93,8 +76,8 @@ async function buyFlow(i: any) {
 }
 
 async function getFileUrl() {
-  if (props.item.url !== undefined && token.value !== undefined) {
-    await GET_SIGNED_URL(props.item.url, token.value)
+  if (props.item.url !== undefined && user.getToken !== undefined) {
+    await GET_SIGNED_URL(props.item.url, user.getToken)
       .then((res) => {
         signedSrc.value = res.body
       })
@@ -107,8 +90,8 @@ async function handleDelete(i: any) {
   try {
     if (choice) {
       // Do delete logic
-      await DELETE_OBJECT(i, token.value)
-      await DELETE_DATA(i, token.value)
+      await DELETE_OBJECT(i, user.getToken)
+      await DELETE_DATA(i, user.getToken)
         .then(() => {
           // Refresh
           router.go(0);

@@ -5,15 +5,12 @@ import { userStore } from "@/stores/user";
 import { useRoute, useRouter } from "vue-router";
 import { DELETE_OBJECT, GET_SIGNED_URL } from "./tools/s3Actions";
 import { DELETE_DATA, GET_BY_PK_SK } from "./tools/ddbActions";
-import { useAuth0 } from "@auth0/auth0-vue";
-const token = ref();
 const route = useRoute();
 const router = useRouter();
 const signedSrc = ref();
 const petModalRef = ref();
 const petCreator = ref("Loading...");
 const user = userStore();
-const { getAccessTokenSilently } = useAuth0();
 
 const props = defineProps<{
   pet: any;
@@ -21,8 +18,8 @@ const props = defineProps<{
 }>();
 
 async function getFileUrl() {
-  if (props.pet.url !== undefined && token.value !== undefined) {
-    await GET_SIGNED_URL(props.pet.url, token.value)
+  if (props.pet.url !== undefined && user.getToken !== undefined) {
+    await GET_SIGNED_URL(props.pet.url, user.getToken)
       .then((res) => {
         signedSrc.value = res.body
       })
@@ -34,8 +31,8 @@ async function handleDelete(pet: any) {
   const choice = confirm(`Delete ${pet.name} forever? (This cannot be undone!)`);
   if (choice) {
     // Do delete logic
-    await DELETE_OBJECT(pet, token.value)
-    await DELETE_DATA(pet, token.value)
+    await DELETE_OBJECT(pet, user.getToken)
+    await DELETE_DATA(pet, user.getToken)
       .then(() => {
         // Refresh
         router.go(0);
@@ -45,21 +42,7 @@ async function handleDelete(pet: any) {
   }
 }
 
-async function getToken() {
-  try {
-    await getAccessTokenSilently()
-      .then((res) => {
-        if (res) {
-          token.value = res
-        }
-      })
-  } catch (error: any) {
-    console.error(error);
-  };
-};
-
 onMounted(async () => {
-  await getToken()
   await getFileUrl()
   const creatorMetadata = await toRaw(GET_BY_PK_SK(props.pet.creator, "#METADATA"))
   petCreator.value = creatorMetadata?.username
@@ -72,7 +55,7 @@ onMounted(async () => {
     :activator="petModalRef"
     max-width="500"
   >
-    <PetItemModal :pet="pet" :items="items" v-slot:default="{ isActive }" />
+    <PetItemModal :pet="pet" :items="items" v-slot:default="" />
   </v-dialog>
 
   <v-card class="mx-auto" max-width="300px"
