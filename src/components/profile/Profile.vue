@@ -115,7 +115,10 @@ onMounted(async () => {
         </v-btn>
 
         <template v-if="profile != store.getUser?.username">
-          <FriendButtons :updateFriend="updateFriend" :buttonStatus="targetFriend.value?.status"/>
+          <FriendButtons v-if="targetFriend && targetFriend.status !== undefined" 
+            :updateFriend="updateFriend" 
+            :buttonStatus="targetFriend.status"
+          />
         </template>
 
         <!-- Stuff to display for the logged in user -->
