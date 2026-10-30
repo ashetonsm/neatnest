@@ -9,7 +9,7 @@ const props = defineProps<{
 
 <template>
     <v-sheet border="md" class="pa-4 text-white mx-auto rounded" color="purple">
-        {{ props.friends.length + " with one friend object" }}
+        <!-- {{ props.friends.length + " with one friend object" }} -->
         <h2 class="text-h4 font-weight-black ma-4">{{ username }}'s Relationships:</h2>
 
         <!-- User has no friends -->
@@ -39,7 +39,7 @@ const props = defineProps<{
         <!-- User has an array -->
 
         <template v-else="props.friends.length !== 0 && props.friends.length !== 1">
-            {{ props.friends.length + " with friend array" }}
+            <!-- {{ props.friends.length + " with friend array" }} -->
             <!-- The route is the friends page. List everyone regardless of status -->
             <template v-if="$route.name == 'friends'">
                 <v-list v-for="friend in props.friends">
