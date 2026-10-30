@@ -182,7 +182,7 @@ onMounted(() => {
     </template>
 
     <template v-else>
-      {{ "(We are not friends.)" }}
+      <!-- {{ "(We are not friends.)" }} -->
       <v-btn 
       v-if="buttonValues.add" 
       @click="updateFriend('add')"
