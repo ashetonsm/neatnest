@@ -67,7 +67,6 @@ onMounted(async () => {
     store.$subscribe(async (mutation) => {
       // Perform actions here when the state changes
 
-      console.log(mutation.storeId)
       if (mutation.storeId == "user" && store.getUser?.username !== undefined) {
         loggedInLinks.value[3].to = `/profile/${store.getUser?.username}`;
         if (!activePet) {
@@ -78,11 +77,11 @@ onMounted(async () => {
             }
           })
         }
-        // await store.fetchNotifications()
-
       }
     });
-
+    if (store.getUser?.username !== undefined) {
+      await store.fetchNotifications()
+    }
   } catch (error: any) {
     console.error(error)
   }
