@@ -45,7 +45,7 @@ async function getFriends() {
   if (data.length) {
     return data
   } else {
-    return [data]
+    return []
   }
 }
 
@@ -54,7 +54,7 @@ async function getInventory() {
   if (data.length) {
     return data
   } else {
-    return [data]
+    return []
   }
 }
 async function getPets() {
@@ -62,15 +62,12 @@ async function getPets() {
   if (data.length) {
     return data
   } else {
-    return [data]
+    return []
   }
 }
 
 onMounted(async () => {
-    const fetchedFriends = await getFriends()
-    if (fetchedFriends.length) {
-        friends.value = fetchedFriends
-    }
+    friends.value = await getFriends()
     if (store.getPets.length == 0) {
         pets.value = await getPets()
     }
