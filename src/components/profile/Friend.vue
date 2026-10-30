@@ -4,14 +4,21 @@ import FriendButtons from "./FriendButtons.vue";
 import router from "@/router";
 import { createNotification } from "../notifications/createNotification";
 import { UPDATE_RELATIONSHIP } from "../tools/ddbActions";
+import { onMounted } from "vue";
+import { useRoute } from "vue-router";
+const currentRoute = useRoute()
 
 const props = defineProps<{
   friend: any;
   status: number;
 }>();
 
-const user = userStore();
+var friendsRouteStatus = props.status == 2 ? 8 :
+  props.status == 8 ? 2 :
+    props.status == 9 ? 0 :
+      props.status == 0 ? 9 : 99
 
+const user = userStore();
 
 /** Used to block and accept friends */
 async function updateFriend(action: string) {
@@ -53,5 +60,5 @@ async function updateFriend(action: string) {
   <v-list-item v-else :key="'relation: ' + props.friend.username" :title="props.friend.username"
     :to="'/profile/' + props.friend.username">
   </v-list-item>
-  <FriendButtons v-if="$route.name == 'friends'" :updateFriend="updateFriend" :buttonStatus="props.status" />
+  <FriendButtons v-if="$route.name == 'friends'" :updateFriend="updateFriend" :buttonStatus="friendsRouteStatus" />
 </template>
