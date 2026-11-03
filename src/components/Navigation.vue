@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { userStore } from "@/stores/user";
-import { onMounted, ref, toRaw, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 import Notification from "./notifications/Notification.vue";
 import { useAuth0 } from "@auth0/auth0-vue";
@@ -13,10 +13,9 @@ const drawer = ref(false)
 const group = ref(null)
 const notifDrawer = ref(false)
 const notifGroup = ref(null)
-
 const { loginWithRedirect, logout: auth0Logout } = useAuth0();
+var fetchNotifs = true
 const logout = async () => {
-  document.cookie = "currentUser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   await auth0Logout({ logoutParams: { returnTo: window.location.origin } })
 }
 
@@ -77,11 +76,12 @@ onMounted(async () => {
             }
           })
         }
+        if (store.getUser?.username !== undefined && fetchNotifs == true) {
+          await store.fetchNotifications()
+          fetchNotifs = false
+        }
       }
     });
-    if (store.getUser?.username !== undefined) {
-      await store.fetchNotifications()
-    }
   } catch (error: any) {
     console.error(error)
   }
