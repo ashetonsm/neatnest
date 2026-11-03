@@ -16,7 +16,8 @@ const props = defineProps<{
 var friendsRouteStatus = props.status == 2 ? 8 :
   props.status == 8 ? 2 :
     props.status == 9 ? 0 :
-      props.status == 0 ? 9 : 99
+      props.status == 0 ? 9 :
+        props.status == 1 ? 1 : 99
 
 const user = userStore();
 
@@ -46,11 +47,12 @@ async function updateFriend(action: string) {
 </script>
 
 <template>
-  <v-badge inline v-if="$route.name == 'friends'" location="top right" color="primary" :content="props.status == 0 ? 'Waiting on You' :
-    props.status == 1 ? 'Friends' :
-      props.status == 2 ? 'Blocked' :
-        props.status == 8 ? 'You are Blocked' :
-          props.status == 9 ? 'Awaiting Reply' : 'ERROR'
+  <v-badge inline v-if="$route.name == 'friends'" location="top right" color="primary" 
+    :content="friendsRouteStatus == 0 ? 'Waiting on You' :
+      friendsRouteStatus == 1 ? 'Friends' :
+        friendsRouteStatus == 2 ? 'Blocked' :
+          friendsRouteStatus == 8 ? 'You are Blocked' :
+            friendsRouteStatus == 9 ? 'Awaiting Reply' : 'ERROR'
     ">
     <v-list-item :key="'relation: ' + props.friend.username" :title="props.friend.username"
       :to="'/profile/' + props.friend.username">
