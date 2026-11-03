@@ -30,6 +30,22 @@ const props = defineProps<{
             ></v-alert>
         </v-list-item>
     </v-list>
+    <!-- There is a single notification object -->
+    <v-list
+        v-else-if="!props.notifications.length"
+    >
+            <v-alert
+                :key="props.notifications.id"
+                :title="props.notifications.title"
+                :text="props.notifications.content"
+                type="info"
+                class="ma-4"
+                @click:close="deleteNotification(props.notifications)"
+                closable
+            >
+                <v-btn :to=props.notifications.url>View</v-btn>
+            </v-alert>
+    </v-list>
 
     <v-list 
         v-else
