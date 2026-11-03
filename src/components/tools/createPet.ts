@@ -22,7 +22,7 @@ export async function createPet(
             await PUT_DATA({
               PK: userObj.PK,
               SK: `PET#${species}#${name}`,
-              creator: userObj.PK,
+              creator: userObj.username,
               name: name,
               owner: userObj.PK,
               health: 100,

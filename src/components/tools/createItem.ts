@@ -22,7 +22,7 @@ export async function createItem(
             await PUT_DATA({
               PK: userObj.PK,
               SK: `ITEM#${itemCat}#${name}`,
-              creator: userObj.PK,
+              creator: userObj.username,
               name: name,
               owner: userObj.PK,
               health: 99,

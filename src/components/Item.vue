@@ -20,8 +20,7 @@ const props = defineProps<{
 
 onMounted(async () => {
   await getFileUrl()
-  const creatorMetadata = await GET_BY_PK_SK(props.item.creator, "#METADATA")
-  creatorMetadata ? itemCreator.value = creatorMetadata.username : "No Creator"
+  itemCreator.value = props.item.creator
 })
 
 
