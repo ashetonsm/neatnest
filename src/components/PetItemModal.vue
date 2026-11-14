@@ -33,13 +33,13 @@ async function handleSubmit(item: any | null | undefined) {
       var confirmDeletion = confirm("This item will disappear after use. Continue?");
       if (confirmDeletion == true) {
         // Do delete logic
-        await DELETE_OBJECT(item)
-        await DELETE_DATA(item)
+        await DELETE_OBJECT(item, user.getToken)
+        await DELETE_DATA(item, user.getToken)
       } else {
         return;
       }
     } else {
-      await PUT_DATA(updatedItem);
+      await PUT_DATA(updatedItem, user.getToken);
     }
 
     // Update the pet
@@ -56,7 +56,7 @@ async function handleSubmit(item: any | null | undefined) {
         updatedPet.hunger--;
       }
     }
-    await PUT_DATA(updatedPet);
+    await PUT_DATA(updatedPet, user.getToken);
     router.go(0);
   } catch (error: any) {
     console.error("Error: ", error);
@@ -77,7 +77,7 @@ async function handleStatus(newStatus : number) {
         }
         petPutList.push({ PutRequest: { Item: changedPet } });
         })
-      await BATCH_MODIFY_DATA(petPutList)
+      await BATCH_MODIFY_DATA(petPutList, user.getToken)
         .then(async (res) => {
           await user.fetchPets(user.getUser.PK)
           router.go(0);

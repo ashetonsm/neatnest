@@ -41,11 +41,11 @@ const petRules = ref([
 ])
 
 async function getFriends() {
-  const data = await store.fetchRelationships(store.getUser.PK, 1)
+  const data = await store.fetchRelationships(store.getUser.username, 1)
   if (data.length) {
     return data
   } else {
-    return [data]
+    return []
   }
 }
 
@@ -54,7 +54,7 @@ async function getInventory() {
   if (data.length) {
     return data
   } else {
-    return [data]
+    return []
   }
 }
 async function getPets() {
@@ -62,15 +62,12 @@ async function getPets() {
   if (data.length) {
     return data
   } else {
-    return [data]
+    return []
   }
 }
 
 onMounted(async () => {
-    const fetchedFriends = await getFriends()
-    if (fetchedFriends.length) {
-        friends.value = fetchedFriends.filter((f: { status: number; }) => f.status == 1)
-    }
+    friends.value = await getFriends()
     if (store.getPets.length == 0) {
         pets.value = await getPets()
     }
@@ -92,9 +89,9 @@ async function createTrade() {
         friendObj.tradeUsername = selectedFriend.value.relationshipUsername
         // The recipient, the sender, the contents, the action
         if (friendObj.PK !== undefined && friendObj.tradeUsername !== undefined) {
-            await UPDATE_TRADE(friendObj, store.getUser, contents, 'create')
+            await UPDATE_TRADE(friendObj, store.getUser, contents, 'create', store.getToken)
               .then(async () => {
-                    await createNotification(store.getUser, friendObj, "tradeNew")
+                    await createNotification(store.getUser, friendObj, "tradeNew", store.getToken)
             })
                 .then(() => {
                     router.push({ name: 'trades' })

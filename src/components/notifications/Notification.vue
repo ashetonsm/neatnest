@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import {DELETE_DATA} from "@/components/tools/ddbActions";
-
+import { userStore } from "@/stores/user";
+const store = userStore()
 async function deleteNotification(notification: any) {
     try {
-        await DELETE_DATA(notification)
+        await DELETE_DATA(notification, store.getToken)
     } catch (error: any) {
         console.error("Something went wrong deleting the notif:", error)
     }
@@ -28,6 +29,22 @@ const props = defineProps<{
             class="ma-4"
             ></v-alert>
         </v-list-item>
+    </v-list>
+    <!-- There is a single notification object -->
+    <v-list
+        v-else-if="!props.notifications.length"
+    >
+            <v-alert
+                :key="props.notifications.id"
+                :title="props.notifications.title"
+                :text="props.notifications.content"
+                type="info"
+                class="ma-4"
+                @click:close="deleteNotification(props.notifications)"
+                closable
+            >
+                <v-btn :to=props.notifications.url>View</v-btn>
+            </v-alert>
     </v-list>
 
     <v-list 

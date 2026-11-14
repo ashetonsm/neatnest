@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import NewsPost from './news/NewsPost.vue';
+
 const posts = ref()
 
-onMounted(() => {
+onMounted(async () => {
   getNewsPosts()
 })
 

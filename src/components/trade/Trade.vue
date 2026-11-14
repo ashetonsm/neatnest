@@ -27,14 +27,14 @@ async function handleTrade(action: string) {
   traderObj.PK = (props.trade.SK).match(/(?<=#)\S+/)[0]
   traderObj.tradeUsername = props.trade.tradeUsername
 
-  await UPDATE_TRADE(traderObj, user.getUser, toRaw(props.trade.tradeContents), action)
+  await UPDATE_TRADE(traderObj, user.getUser, toRaw(props.trade.tradeContents), action, user.getToken)
   .then(async () => {
     switch (action) {
       case "accept":
-        await createNotification(user.getUser, traderObj, "tradeAccept")
+        await createNotification(user.getUser, traderObj, "tradeAccept", user.getToken)
         break;
       case "reject":
-        await createNotification(user.getUser, traderObj, "tradeReject")
+        await createNotification(user.getUser, traderObj, "tradeReject", user.getToken)
         break;
       case "remove":
         break;

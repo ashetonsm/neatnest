@@ -2,6 +2,7 @@
 import router from "@/router";
 import { PUT_DATA } from "./tools/ddbActions";
 import { ref } from "vue";
+import { userStore } from "@/stores/user";
 
 const props = defineProps<{
   item: any;
@@ -9,6 +10,7 @@ const props = defineProps<{
 
 const price = ref(props.item.price)
 const itemForm = ref()
+const store = userStore()
 
 
 async function toggleSell(i: any, action: string) {
@@ -28,7 +30,7 @@ async function toggleSell(i: any, action: string) {
         break;
     }
 
-    await PUT_DATA(updatedItem)
+    await PUT_DATA(updatedItem, store.getToken)
       .then(() => {
         router.go(0);
       });
@@ -42,7 +44,7 @@ async function setPrice() {
   try {
     updatedItem.price = price
 
-    await PUT_DATA(updatedItem)
+    await PUT_DATA(updatedItem, store.getToken)
       .then(() => {
         router.go(0);
       });

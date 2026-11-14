@@ -1,75 +1,59 @@
 <script setup lang="ts">
-import router from "@/router";
 import { userStore } from "@/stores/user";
-import { ref } from "vue";
-import { PUT_DATA } from "../tools/ddbActions";
-const user = userStore();
-const usernameForm = ref()
-const bioForm = ref()
-const username = ref(user.getUser!.username)
-const bio = ref(user.getUser!.bio)
+import { onMounted, ref } from "vue";
+const store = userStore();
+const settingsForm = ref()
+const email = ref(store.getUser.email)
+const bio = ref(store.getUser.bio)
 
 
-async function validateUsername() {
-    const { valid } = await usernameForm.value.validate()
+onMounted(async () => {
+})
 
-    if (valid) {
-        var updatedUser = user.getUser!;
-        try {
-            updatedUser.username = username.value.toLowerCase().replace(/\s/g, "_").replace(/\W+/g, "");
-            await PUT_DATA(updatedUser).then(async () => {
-                router.push(`/profile/${updatedUser.username}`)
-            });
-        } catch (error: any) {
-            console.error(error);
+const emailRules = ref([
+    (v: string) => (v !== "") || 'Email cannot be blank.',
+    (v: string) => (/.+@.+\..+/.test(v)) || 'Invalid email.'
+])
+
+const bioRules = ref([
+    (v: string) => (v !== "") || 'Bio cannot be blank.'
+])
+
+async function validateChanges() {
+    try {
+        const { valid } = await settingsForm.value.validate()
+
+        if (valid) {
         }
-    }
-}
+        console.log("settingsForm.value:", valid, settingsForm.value)
 
-async function validateBio() {
-    const { valid } = await bioForm.value.validate()
-
-    if (valid) {
-        var updatedUser = user.getUser!;
-        try {
-            updatedUser.bio = bio.value;
-            await PUT_DATA(updatedUser).then(async () => {
-                router.push(`/profile/${updatedUser.username}`)
-                router.go(0);
-            });
-        } catch (error: any) {
-            console.error(error);
-        }
+    } catch (error: any) {
+        console.error(error);
     }
 }
 
 </script>
 
 <template>
-    <!-- Change your username -->
+    <!-- Change your email address -->
     <v-expansion-panels>
-        <v-expansion-panel>
-            <v-expansion-panel-title><span>Change username</span></v-expansion-panel-title>
+        <!-- Temporarily disabled -->
+        <v-expansion-panel :disabled="true">
+            <v-expansion-panel-title><span>Change User Settings</span></v-expansion-panel-title>
             <v-expansion-panel-text>
-                <v-form @submit.prevent ref="usernameForm">
-                    <v-text-field v-model="username" label="Username"
-                        :placeholder="user.getUser!.username"></v-text-field>
-                    <v-btn class="mt-2" text="Submit" type="submit" @click.prevent="validateUsername"></v-btn>
+                <v-form @submit.prevent ref="settingsForm">
+                    <v-text-field v-model="email" label="Email" placeholder="email@email.com"
+                        :rules="emailRules"></v-text-field>
+                    <v-btn class="mt-2" text="Submit" type="submit" @click.prevent="validateChanges"></v-btn>
+
+                    <!-- Change your description -->
+                    <v-text-field v-model="bio" label="Bio" :placeholder="store.getUser!.bio!"
+                        :rules="bioRules"></v-text-field>
+                    <v-btn class="mt-2" text="Submit" type="submit" @click.prevent="validateChanges"></v-btn>
+
                 </v-form>
             </v-expansion-panel-text>
         </v-expansion-panel>
     </v-expansion-panels>
 
-    <!-- Change your description -->
-    <v-expansion-panels>
-        <v-expansion-panel>
-            <v-expansion-panel-title><span>Change description</span></v-expansion-panel-title>
-            <v-expansion-panel-text>
-                <v-form @submit.prevent ref="bioForm">
-                    <v-text-field v-model="bio" label="Bio" :placeholder="user.getUser!.bio!"></v-text-field>
-                    <v-btn class="mt-2" text="Submit" type="submit" @click.prevent="validateBio"></v-btn>
-                </v-form>
-            </v-expansion-panel-text>
-        </v-expansion-panel>
-    </v-expansion-panels>
 </template>

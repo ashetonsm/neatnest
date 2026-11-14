@@ -4,27 +4,35 @@ import FriendButtons from "./FriendButtons.vue";
 import router from "@/router";
 import { createNotification } from "../notifications/createNotification";
 import { UPDATE_RELATIONSHIP } from "../tools/ddbActions";
+import { onMounted } from "vue";
+import { useRoute } from "vue-router";
+const currentRoute = useRoute()
 
 const props = defineProps<{
   friend: any;
   status: number;
 }>();
 
-const user = userStore();
+var friendsRouteStatus = props.status == 2 ? 8 :
+  props.status == 8 ? 2 :
+    props.status == 9 ? 0 :
+      props.status == 0 ? 9 :
+        props.status == 1 ? 1 : 99
 
+const user = userStore();
 
 /** Used to block and accept friends */
 async function updateFriend(action: string) {
   var relationshipObj = { PK: '', relationshipUsername: '' }
   relationshipObj.PK = props.friend.PK
   relationshipObj.relationshipUsername = props.friend.username
-  await UPDATE_RELATIONSHIP(relationshipObj, user.getUser, action)
+  await UPDATE_RELATIONSHIP(relationshipObj, user.getUser, action, user.getToken)
     .then(async () => {
       if (action == "add") {
-        await createNotification(user.getUser, relationshipObj, "friendNew")
+        await createNotification(user.getUser, relationshipObj, "friendNew", user.getToken)
       }
       if (action == "accept") {
-        await createNotification(user.getUser, relationshipObj, "friendAccept")
+        await createNotification(user.getUser, relationshipObj, "friendAccept", user.getToken)
       }
       if (action == "remove") {
       }
@@ -39,11 +47,12 @@ async function updateFriend(action: string) {
 </script>
 
 <template>
-  <v-badge inline v-if="$route.name == 'friends'" location="top right" color="primary" :content="props.status == 0 ? 'Waiting on You' :
-    props.status == 1 ? 'Friends' :
-      props.status == 2 ? 'Blocked' :
-        props.status == 8 ? 'You are Blocked' :
-          props.status == 9 ? 'Awaiting Reply' : 'ERROR'
+  <v-badge inline v-if="$route.name == 'friends'" location="top right" color="primary" 
+    :content="friendsRouteStatus == 0 ? 'Waiting on You' :
+      friendsRouteStatus == 1 ? 'Friends' :
+        friendsRouteStatus == 2 ? 'Blocked' :
+          friendsRouteStatus == 8 ? 'You are Blocked' :
+            friendsRouteStatus == 9 ? 'Awaiting Reply' : 'ERROR'
     ">
     <v-list-item :key="'relation: ' + props.friend.username" :title="props.friend.username"
       :to="'/profile/' + props.friend.username">
@@ -53,5 +62,5 @@ async function updateFriend(action: string) {
   <v-list-item v-else :key="'relation: ' + props.friend.username" :title="props.friend.username"
     :to="'/profile/' + props.friend.username">
   </v-list-item>
-  <FriendButtons v-if="$route.name == 'friends'" :updateFriend="updateFriend" :buttonStatus="props.status" />
+  <FriendButtons v-if="$route.name == 'friends'" :updateFriend="updateFriend" :buttonStatus="friendsRouteStatus" />
 </template>
