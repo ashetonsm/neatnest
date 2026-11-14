@@ -26,7 +26,7 @@ async function handleSubmit() {
         return;
       } else {
         if (name.value && selectedItemType.value) {
-          createItem(name.value, path, selectedItemType.value, user.getUser);
+          createItem(name.value, path, selectedItemType.value, user.getUser, user.getToken);
         } else {
           alert("Please use half-width alphanumeric characters (A-Z, 0-9).")
           return
@@ -39,7 +39,7 @@ async function handleSubmit() {
         return;
       } else {
         if (name.value && speciesName.value) {
-          createPet(name.value, path, speciesName.value, user.getUser);
+          createPet(name.value, path, speciesName.value, user.getUser, user.getToken);
         } else {
           alert("Please use half-width alphanumeric characters (A-Z, 0-9).")
           return

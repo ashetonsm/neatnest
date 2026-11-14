@@ -2,13 +2,12 @@
 import { onMounted, ref, toRaw } from "vue";
 import PetItemModal from "./PetItemModal.vue";
 import { userStore } from "@/stores/user";
-import router from "@/router";
-import { useRoute } from "vue-router";
-import { createPresignedUrlWithClient, DELETE_S3 } from "./tools/s3Actions";
-import { DELETE_DATA, GET_BY_PK_SK, GET_BY_USERNAME } from "./tools/ddbActions";
-
+import { useRoute, useRouter } from "vue-router";
+import { DELETE_OBJECT, GET_SIGNED_URL } from "./tools/s3Actions";
+import { DELETE_DATA, GET_BY_PK_SK } from "./tools/ddbActions";
 const route = useRoute();
-const signedSrc = ref("null");
+const router = useRouter();
+const signedSrc = ref();
 const petModalRef = ref();
 const petCreator = ref("Loading...");
 const user = userStore();
@@ -18,23 +17,22 @@ const props = defineProps<{
   items: Array<any>;
 }>();
 
-async function getFileUrl(fileName: any) {
-  try {
-    const result = await createPresignedUrlWithClient(fileName as string);
-    signedSrc.value = result;
-  } catch (error) {
-    console.error(error);
-    return null;
+async function getFileUrl() {
+  if (props.pet.url !== undefined && user.getToken !== undefined) {
+    await GET_SIGNED_URL(props.pet.url, user.getToken)
+      .then((res) => {
+        signedSrc.value = res.body
+      })
   }
-  return;
+  return
 }
 
 async function handleDelete(pet: any) {
   const choice = confirm(`Delete ${pet.name} forever? (This cannot be undone!)`);
   if (choice) {
     // Do delete logic
-    await DELETE_S3(pet)
-    await DELETE_DATA(pet)
+    await DELETE_OBJECT(pet, user.getToken)
+    await DELETE_DATA(pet, user.getToken)
       .then(() => {
         // Refresh
         router.go(0);
@@ -45,9 +43,8 @@ async function handleDelete(pet: any) {
 }
 
 onMounted(async () => {
-  await getFileUrl(props.pet.url)
-  const creatorMetadata = await toRaw(GET_BY_PK_SK(props.pet.creator, "#METADATA"))
-  petCreator.value = creatorMetadata?.username
+  await getFileUrl()
+  petCreator.value = props.pet.creator
 });
 </script>
 
@@ -57,7 +54,7 @@ onMounted(async () => {
     :activator="petModalRef"
     max-width="500"
   >
-    <PetItemModal :pet="pet" :items="items" v-slot:default="{ isActive }" />
+    <PetItemModal :pet="pet" :items="items" v-slot:default="" />
   </v-dialog>
 
   <v-card class="mx-auto" max-width="300px"

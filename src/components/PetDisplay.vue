@@ -2,25 +2,43 @@
 import Pet from "./Pet.vue";
 import { onMounted, ref } from "vue";
 import { userStore } from "@/stores/user";
-const user = userStore();
-
+import { useAuth0 } from "@auth0/auth0-vue";
+import { useRouter } from "vue-router";
+const store = userStore();
+const router = useRouter()
 const fetchedPets = ref<Array<any>>([]);
 const fetchedItems = ref<Array<any>>([]);
-var canCreate = true;
+var canCreate = false;
+const {user} = useAuth0()
 
 async function setCreation() {
-  if (user.getUser?.petsRemaining! > 0) {
+  if (store.getUser?.petsRemaining! > 0) {
     canCreate = true;
+  }
+}
+
+async function getInventory() {
+  const data = await store.fetchInventory(store.getUser.PK)
+  if (data.length) {
+    return data
+  } else {
+    return [data]
+  }
+}
+async function getPets() {
+  const data = await store.fetchPets(store.getUser.PK)
+  if (data.length) {
+    return data
+  } else {
+    return [data]
   }
 }
 
 onMounted(async () => {
   try {
     await setCreation();
-    await user.fetchPets(user.getUser.PK)
-    await user.fetchInventory()
-    fetchedPets.value = user.getPets;
-    fetchedItems.value = user.getInventory;
+    fetchedItems.value = await getInventory()
+    fetchedPets.value = await getPets()
   } catch (error: any) {
     console.error(error)
   }

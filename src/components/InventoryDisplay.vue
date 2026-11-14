@@ -5,10 +5,9 @@ import { userStore } from "@/stores/user";
 
 // These should be items where the owner is the logged in user
 const user = userStore();
-
 // create a reactive reference to Item[]
-const fetchedItems: any = ref<Array<any>>([]);
-var canCreate = true;
+var fetchedItems = ref<Array<any>>([]);
+var canCreate = false;
 
 async function setCreation() {
   if (user.getUser?.itemsRemaining! > 0) {
@@ -16,10 +15,22 @@ async function setCreation() {
   }
 }
 
+async function getInventory() {
+  const data = await user.fetchInventory(user.getUser.PK)
+  if (data.length) {
+    return data
+  } else {
+    return [data]
+  }
+}
+
 onMounted(async () => {
-  await setCreation();
-  await user.fetchInventory()
-  fetchedItems.value = user.getInventory;
+  try {
+    await setCreation()
+    fetchedItems.value = await getInventory()
+  } catch (error: any) {
+    console.error(error)
+  }
 });
 </script>
 
@@ -49,7 +60,7 @@ onMounted(async () => {
           >Launch Canvas
         </v-btn>
 
-        <v-btn color="secondary" :to="'/shop/'+ user.getUser.username" class="mb-4">Your Shop</v-btn>
+        <v-btn color="secondary" :to="'/shop/'+ user.getUser?.username" class="mb-4">Your Shop</v-btn>
 
         <v-row class="ga-4">
           <Item

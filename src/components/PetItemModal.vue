@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import router from "@/router";
 import { ref, toRaw } from "vue";
 import { userStore } from "@/stores/user";
-import { DELETE_S3 } from "./tools/s3Actions";
+import { DELETE_OBJECT } from "./tools/s3Actions";
 import { BATCH_MODIFY_DATA, DELETE_DATA, PUT_DATA } from "./tools/ddbActions";
+import { useRouter } from "vue-router";
 
+const router = useRouter()
 const user = userStore()
 const props = defineProps<{
   pet: any;
@@ -32,13 +33,13 @@ async function handleSubmit(item: any | null | undefined) {
       var confirmDeletion = confirm("This item will disappear after use. Continue?");
       if (confirmDeletion == true) {
         // Do delete logic
-        await DELETE_S3(item)
-        await DELETE_DATA(item)
+        await DELETE_OBJECT(item, user.getToken)
+        await DELETE_DATA(item, user.getToken)
       } else {
         return;
       }
     } else {
-      await PUT_DATA(updatedItem);
+      await PUT_DATA(updatedItem, user.getToken);
     }
 
     // Update the pet
@@ -55,7 +56,7 @@ async function handleSubmit(item: any | null | undefined) {
         updatedPet.hunger--;
       }
     }
-    await PUT_DATA(updatedPet);
+    await PUT_DATA(updatedPet, user.getToken);
     router.go(0);
   } catch (error: any) {
     console.error("Error: ", error);
@@ -76,7 +77,7 @@ async function handleStatus(newStatus : number) {
         }
         petPutList.push({ PutRequest: { Item: changedPet } });
         })
-      await BATCH_MODIFY_DATA(petPutList)
+      await BATCH_MODIFY_DATA(petPutList, user.getToken)
         .then(async (res) => {
           await user.fetchPets(user.getUser.PK)
           router.go(0);
